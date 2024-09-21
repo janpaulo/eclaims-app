@@ -1,0 +1,63 @@
+.head {
+  background-color: #095c75;
+  color: white;
+  padding: 24px 24px !important;
+}
+
+.dialogWrapper {
+  position: center;
+}
+
+.secondary {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  background: #1e8cad !important;
+  height: 27px !important;
+  width: 29px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.secondary:hover {
+  background-color: red !important;
+}
+
+.button {
+  float: right;
+}
+
+.button button {
+  margin: 0 5px;
+}
+
+.delete {
+  border-radius: 20px !important;
+}
+
+.buttonCancel {
+  border-radius: 20px !important;
+}
+
+.delete:hover {
+  border-color: #f43636 !important;
+  color: #f43636 !important;
+  background-color: #f5005747 !important;
+}
+
+.text {
+  color: white;
+}
+
+.toolbar {
+  display: flex;
+  height: 20px;
+}
+
+.toolbarLabel {
+  flex-grow: 1;
+}
+
+.deleteBody {
+  margin: 10px 0 25px 0;
+}

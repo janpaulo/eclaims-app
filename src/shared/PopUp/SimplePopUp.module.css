@@ -1,0 +1,45 @@
+.button {
+    float: right;
+    background-color: #095c75;
+  }
+  
+  .dialog-wrapper {
+    position: center;
+  }
+  
+  .header {
+    background-color: #095c75;
+    color: #fff;
+    padding-right: 0;
+  }
+  
+  .secondary {
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+    background: #095c75 !important;
+    height: 27px !important;
+    width: 29px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  .secondary:hover {
+    background-color: red !important;
+  }
+  
+  .detailList {
+    display: flex;
+    margin: 5px;
+    text-transform: capitalize;
+    align-items: center;
+  }
+  
+  .detailList :first-child{
+    width: 200px !important;
+  }
+  
+  .textFields {
+    margin: 12px 0 !important;
+  }
+  
