@@ -4,7 +4,7 @@ import NavItems from './shared/NavItem';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
-import Dashboard from './../src/pages/home/dashboard';
+import Dashboard from './../src/pages/home/dasboard';
 
 import MainRegistration from '../src/pages/eclaims/mainForms'
 import EsoaRegistration from '../src/pages/esoa/mainForms'
