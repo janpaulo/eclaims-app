@@ -18,7 +18,7 @@ import InputLabel from "@mui/material/InputLabel";
 // import MenuItem from "@mui/material/MenuItem";
 // import Select from "@mui/material/Select";
 
-import FormGroup from "@mui/material/FormGroup";
+// import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Switch from "@mui/material/Switch";
@@ -75,7 +75,7 @@ class forms2 extends React.Component {
     const { handleCheckboxChangeRadiotherapyCOBALT } = this.props;
     const { handleCheckboxChangeDebridement } = this.props;
     const { handleCheckboxChangeRadiotherapyIMRT } = this.props;
-    const { selectedClaimsTypes } = this.props;
+    // const { selectedClaimsTypes } = this.props;
 
     // const { value } = this.state;
     // console.log(this.props.itemcf.pReferralIHCPAccreCode);
@@ -89,7 +89,7 @@ class forms2 extends React.Component {
                 {/* First row */}
                 <Grid item xs={4}>
                   <b>Claims Type</b>
-                  {options.slice(0, 2).map((option) => (
+                  {options.slice(0, 1).map((option) => (
                     <div key={option.value}>
                       <Checkbox
                         id={option.value}
@@ -104,7 +104,7 @@ class forms2 extends React.Component {
                   ))}
                 </Grid>
                 {/* Second row */}
-                <Grid item xs={4}>
+                {/* <Grid item xs={4}>
                   <b>Claims Cases</b>
                   <FormGroup>
                     <FormControlLabel
@@ -164,9 +164,9 @@ class forms2 extends React.Component {
                       label="Others"
                     />
                   </FormGroup>
-                </Grid>
+                </Grid> */}
                 {/* Third row */}
-                <Grid item xs={4}>
+                {/* <Grid item xs={4}>
                   <b>Tag if applicable</b>
                   <FormGroup>
                     <FormControlLabel
@@ -183,7 +183,7 @@ class forms2 extends React.Component {
                       name=""
                     />
                   </FormGroup>
-                </Grid>
+                </Grid> */}
               </Grid>
             </CardContent>
             <CardActions>
@@ -209,7 +209,7 @@ class forms2 extends React.Component {
               <TextField
                 id="outlined-multiline-flexible"
                 fullWidth
-                value={this.props.itemCf.pReferredIHCPAccreCode}
+                value={process.env.REACT_APP_HOSPITALACRRENO}
                 name="pReferredIHCPAccreCode"
                 size="small"
                 onChange={this.props.onchange}
@@ -1112,23 +1112,23 @@ class forms2 extends React.Component {
                 )}
             </Grid>
           </Grid>
-          <br />
-          <Typography>
-            <b>b. For Z-Benefits Package </b>
+          {/* <br /> */}
+          {/* <Typography> */}
+            {/* <b>b. For Z-Benefits Package </b> */}
             {/* <FormControlLabel
               control={
                 <Checkbox
                   name="specialCon"
                   // checked={this.props.isSpecialCon}
-                  // onClick={(e) => this.props.handleClickCheckBox(e)}
+                  onClick={(e) => this.props.handleClickCheckBox(e)}
                 />
               }
               label="Check all if applicable"
             /> */}
-          </Typography>
-          <br />
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
+          {/* </Typography> */}
+          {/* <br /> */}
+          {/* <Grid container spacing={2}> */}
+            {/* <Grid item xs={6}>
               <TextField
                 id="outlined-multiline-flexible"
                 label="Z-Benefits Package Group:"
@@ -1155,7 +1155,7 @@ class forms2 extends React.Component {
                 size="small"
                 onChange={this.props.onchange}
               />
-            </Grid>
+            </Grid> */}
 
             {/* comment Pre-Authorization Type: */}
             {/* <Grid item xs={3}>
@@ -1195,7 +1195,7 @@ class forms2 extends React.Component {
                 Electronic
               </Typography>
             </Grid> */}
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <TextField
                 id="outlined-multiline-flexible"
                 label="Pre-Authorization Date:"
@@ -1222,8 +1222,8 @@ class forms2 extends React.Component {
                 size="small"
                 onChange={this.props.onchange}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid> */}
+            {/* <Grid item xs={12}>
               <TextField
                 id="outlined-multiline-flexible"
                 label="For Additional Data"
@@ -1236,8 +1236,8 @@ class forms2 extends React.Component {
                 size="small"
                 onChange={this.props.onchange}
               />
-            </Grid>
-          </Grid>
+            </Grid> */}
+          {/* </Grid> */}
           <br />
           <Typography>
             <b>
@@ -2161,7 +2161,7 @@ class forms2 extends React.Component {
 
           <Certification />
 
-          <URLUploader />
+          <URLUploader handleDocURLChange={this.props.handleDocURLChange}/>
 
           <Grid
             container

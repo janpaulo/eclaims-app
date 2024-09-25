@@ -7,7 +7,9 @@ import Grid from "@mui/material/Grid";
 // import { parseString } from "xml2js";
 // import Xml2js from "xml2js";
 import { Button } from "@mui/material";
-// import moment from "moment";
+import moment from "moment";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 
 class memberValidation extends Component {
   constructor(props) {
@@ -22,18 +24,24 @@ class memberValidation extends Component {
 
   handleSubmit = () => {
     const item = this.state.searchText;
-    item.pUserName = process.env.REACT_APP_USERNAME;
-    item.pUserPassword = "";
-    item.pHospitalCode = process.env.REACT_APP_HOSPITALCODE;
-
+    item.birthdate = moment(new Date(item.birthdate)).format("MM-DD-YYYY")
+    // item.pUserName = process.env.REACT_APP_USERNAME;
+    // item.pUserPassword = "";
+    // item.pHospitalCode = process.env.REACT_APP_HOSPITALCODE;
     axios({
       method: "POST",
-      // url:' http://localhost:3000/soapPhic/memberSearch',
-      url:  process.env.REACT_APP_API_CLAIMS+"soapPhic/memberSearch",
-      data: (item), 
-      headers: { 'Content-Type': 'application/json' }
+      url: process.env.REACT_APP_NEW_PHIC_URL+'/GetMemberPIN',
+      // url:  process.env.REACT_APP_API_CLAIMS+"soapPhic/memberSearch",
+      data: (item),  
+      headers: { 
+        'accreno': process.env.REACT_APP_HOSPITALACRRENO, 
+        'softwarecertid': process.env.REACT_APP_USERNAME, 
+        'Content-Type': 'text/plain'
+      },
     }).then(resp => {
       this.props.updateDataItem(resp.data, true, item);
+    }).catch(response =>{
+      this.props.updateDataItem(response.response.data, false, item);
     })
 
   };
@@ -51,7 +59,10 @@ class memberValidation extends Component {
     const { searchText } = this.state;
     return (
       <div>
-        <h5>Make sure member details are correct before proceeding</h5>
+
+      <Card sx={{ minWidth: 275 }}>
+            <CardContent>
+            <h5>Make sure member details are correct before proceeding</h5>
         <Grid container spacing={2}>
           <Grid item xs={3}>
             <TextField
@@ -111,8 +122,8 @@ class memberValidation extends Component {
               type="date"
               InputLabelProps={{ shrink: true, required: true }}
               fullWidth
-              value={searchText.bday}
-              name="bday"
+              value={searchText.birthdate}
+              name="birthdate"
               size="small"
               onChange={(e) => this.handleInputChange(e)}
             />
@@ -123,6 +134,9 @@ class memberValidation extends Component {
             </Button>
           </Grid>
         </Grid>
+            </CardContent>
+          </Card>
+       
       </div>
     );
   }

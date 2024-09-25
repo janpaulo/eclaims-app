@@ -22,7 +22,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { Link } from "react-router-dom";
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import AddToQueueOutlinedIcon from '@mui/icons-material/AddToQueueOutlined';
-// import ClosedCaptionDisabledRoundedIcon from '@mui/icons-material/ClosedCaptionDisabledRounded';
+import ClosedCaptionDisabledRoundedIcon from '@mui/icons-material/ClosedCaptionDisabledRounded';
 // import SubtitlesRoundedIcon from '@mui/icons-material/SubtitlesRounded';
 // import EnhancedEncryptionIcon from '@mui/icons-material/EnhancedEncryption';
 //icons
@@ -101,6 +101,7 @@ const items = [
   {name: "Dashboard", icon: <HomeTwoToneIcon/>, path: '',}, 
   {name: "eSOA", icon: <AddToQueueOutlinedIcon/>, path: 'esoa_table_list',},
   {name: "claims", icon: <VaccinesIcon/>, path: 'claims',},
+  {name: "User registration", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'users',},
   // {name: "ICD Codes", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'icd_codes',},
   // {name: "RVS Code", icon: <SubtitlesRoundedIcon/>, path: 'rvs_codes',},
   // {name: "encryptor", icon: <EnhancedEncryptionIcon/>, path: 'encryptor',},
@@ -155,7 +156,7 @@ function  NavItem() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-           APP NAME
+           {process.env.REACT_APP_NANE}
           </Typography>
         </Toolbar>
       </AppBar>

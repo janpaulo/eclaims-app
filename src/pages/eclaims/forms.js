@@ -167,10 +167,10 @@ class forms extends React.Component {
                 InputLabelProps={{ shrink: true, required: true }}
                 fullWidth
                 value={
-                  searchText.bday === undefined
+                  searchText.birthdate === undefined
                     ? this.props.itemCf.pMemberBirthDate
                     : (this.props.itemCf.pMemberBirthDate = moment(
-                        new Date(searchText.bday)
+                        new Date(searchText.birthdate)
                       ).format("YYYY-MM-DD"))
                 }
                 name="pMemberBirthDate"
@@ -633,8 +633,8 @@ class forms extends React.Component {
                   >
                     {employerData !== null && employerData.length > 0 ? (
                       employerData.map((option, index) => (
-                        <MenuItem key={index} value={option.epmlist.pPEN}>
-                          {option.epmlist.pPEN} - {option.epmlist.pEmployerName}
+                        <MenuItem key={index} value={option.philhealthno}>
+                          {option.philhealthno} - {option.name}
                         </MenuItem>
                       ))
                     ) : (
@@ -656,9 +656,10 @@ class forms extends React.Component {
                   // multiline
                   // maxRows={4}
                   fullWidth
-                  value={selectedObject !== null ? this.props.itemCf.pEmployerName = selectedObject.epmlist.pEmployerName:this.props.itemCf.pEmployerName }
+                  value={selectedObject !== null ? this.props.itemCf.pEmployerName = selectedObject.name : this.props.itemCf.pEmployerName }
                   name="pEmployerName"
                   size="small"
+                InputLabelProps={{ shrink: true, required: true }}
                   onChange={this.props.onchange}
                 />
               </Grid>
@@ -671,8 +672,9 @@ class forms extends React.Component {
                   fullWidth
                   name="pAddress"
                   // value={this.props.itemCf.pAddress}
-                  value={selectedObject !== null ? this.props.itemCf.pAddress = selectedObject.epmlist.pEmployerAddress : this.props.itemCf.pEmployerName }
+                  value={selectedObject !== null ? this.props.itemCf.pAddress = selectedObject.address : this.props.itemCf.pAddress }
                   size="small"
+                InputLabelProps={{ shrink: true, required: true }}
                   onChange={this.props.onchange}
                 />
               </Grid>
