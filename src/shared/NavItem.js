@@ -102,7 +102,7 @@ const items = [
   {name: "eSOA", icon: <AddToQueueOutlinedIcon/>, path: 'esoa_table_list',},
   {name: "claims", icon: <VaccinesIcon/>, path: 'claims',},
   {name: "User registration", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'users',},
-  // {name: "ICD Codes", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'icd_codes',},
+  {name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'hospitals',},
   // {name: "RVS Code", icon: <SubtitlesRoundedIcon/>, path: 'rvs_codes',},
   // {name: "encryptor", icon: <EnhancedEncryptionIcon/>, path: 'encryptor',},
   // {name: "test", icon: <VaccinesIcon/>, path: 'test',},

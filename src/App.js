@@ -14,7 +14,8 @@ import ClaimTableList from '../src/pages/eclaims/tableList'
 import XMLEncryptor from '../src/pages/esoa/samplecryptors'
 import ICDCodes from '../src/pages/icd_rsc_codes/icdCodes'
 import RVSCodes from '../src/pages/icd_rsc_codes/rvsCodes'
-import SignUpForm from '../src/pages/users/signUpForm'
+import SignUpForm from '../src/pages/users/UserRegistration'
+import {Main} from '../src/pages/hospitals/Main'
 // import Itembills from '../src/pages/esoa/Itembills'
 
 import Login from '../src/pages/login/Login';
@@ -49,6 +50,7 @@ function App() {
                   <Route exact path="/icd_codes"  element={ <ICDCodes/> } />
                   <Route exact path="/rvs_codes"  element={ <RVSCodes/> } />
                   <Route exact path="/users"  element={ <SignUpForm/> } />
+                  <Route exact path="/hospitals"  element={ <Main/> } />
                   {/* <Route exact path="/test"  element={ <Itembills/> } /> */}
                   {/* <Route exact path="/employees"  element={ <Employees/> } />
                   <Route exact path="/files" element={ <Files/> }  />

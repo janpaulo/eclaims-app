@@ -1,13 +1,13 @@
 import React from "react";
 import { 
   Container, Typography, Box, Paper, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  TextField, Select, MenuItem, Pagination, Chip, InputAdornment
+  Chip
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import GroupsIcon from "@mui/icons-material/Groups"; // Used for "Total Claims"
 import GroupAddIcon from "@mui/icons-material/GroupAdd"; // Used for "Total Pending Claims"
 import DesktopMacIcon from "@mui/icons-material/DesktopMac"; // Used for "Total Claimed"
 
+import SharedAppBar from "../../shared/SharedAppBar";
 const claimsData = [
   { hospital: "Hospital One", accNo: "12345678", total: 20, pending: 10, success: 10, status: "Active" },
   { hospital: "Hospital Two", accNo: "23456789", total: 15, pending: 5, success: 10, status: "Inactive" },
@@ -19,9 +19,9 @@ const Dashboard = () => {
   return (
     <Container maxWidth="lg">
       {/* Header */}
-      <Typography variant="h5" sx={{ mt: 3, fontWeight: "bold" }}>
+      {/* <Typography variant="h5" sx={{ mt: 3, fontWeight: "bold" }}>
         Hello JUAN 👋
-      </Typography>
+      </Typography> */}
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ my: 3 }}>
@@ -43,7 +43,7 @@ const Dashboard = () => {
       </Grid>
 
       {/* Search & Sort */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      {/* <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>All Claims</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <TextField 
@@ -63,9 +63,14 @@ const Dashboard = () => {
             <MenuItem value="Oldest">Oldest</MenuItem>
           </Select>
         </Box>
-      </Box>
+      </Box> */}
 
       {/* Claims Table */}
+      <SharedAppBar
+              titleName="All Claims"
+              //    titleName={this.state.title}
+              //    esoaLink="/esoa_registration"
+            />
       <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
         <Table>
           <TableHead sx={{ bgcolor: "#f5f5f5" }}>
