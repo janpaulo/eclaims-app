@@ -32,37 +32,45 @@ export default function Login() {
       email: data.get("email"),
       password: data.get("password"),
     };
-
-    axios({
-      method: "POST",
-      url: process.env.REACT_APP_API_CLAIMS+"login",
-      data: userData,
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((resp) => {
-        localStorage.setItem("item", JSON.stringify(resp.data));
-        setAlertSeverity('success');
-        setAlertMessage('Successfully logged in!');
-        setAlertOpen(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status === 401) {
-            setAlertMessage('Invalid credentials. Please try again.');
-          } else {
-            setAlertMessage(`An error occurred: ${error.response.data.message}`);
-          }
-        } else if (error.request) {
-          setAlertMessage('No response from server. Please try again later.');
-        } else {
-          setAlertMessage(`Error: ${error.message}`);
-        }
-        setAlertSeverity('error');
-        setAlertOpen(true);
-      });
+    localStorage.setItem("item",{
+      "id": 1,
+      "email": "john@mail.com",
+      "password": "changeme",
+      "name": "Jhon",
+      "role": "customer",
+      "avatar": "https://api.lorem.space/image/face?w=640&h=480&r=867"
+    });
+    // axios({
+    //   method: "POST",
+    //   url: process.env.REACT_APP_API_CLAIMS+"login",
+    //   data: userData,
+    //   headers: { "Content-Type": "application/json" },
+    // })
+    //   .then((resp) => {
+    //     localStorage.setItem("item", JSON.stringify(resp.data));
+    //     // localStorage.setItem("item", JSON.stringify(resp.data));
+    //     setAlertSeverity('success');
+    //     setAlertMessage('Successfully logged in!');
+    //     setAlertOpen(true);
+    //     setTimeout(() => {
+    //       window.location.reload();
+    //     }, 1000);
+    //   })
+    //   .catch((error) => {
+    //     if (error.response) {
+    //       if (error.response.status === 401) {
+    //         setAlertMessage('Invalid credentials. Please try again.');
+    //       } else {
+    //         setAlertMessage(`An error occurred: ${error.response.data.message}`);
+    //       }
+    //     } else if (error.request) {
+    //       setAlertMessage('No response from server. Please try again later.');
+    //     } else {
+    //       setAlertMessage(`Error: ${error.message}`);
+    //     }
+    //     setAlertSeverity('error');
+    //     setAlertOpen(true);
+    //   });
   };
 
   return (
