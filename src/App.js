@@ -14,7 +14,7 @@ import ClaimTableList from '../src/pages/eclaims/tableList'
 import XMLEncryptor from '../src/pages/esoa/samplecryptors'
 import ICDCodes from '../src/pages/icd_rsc_codes/icdCodes'
 import RVSCodes from '../src/pages/icd_rsc_codes/rvsCodes'
-import SignUpForm from '../src/pages/users/UserRegistration'
+import SignUpForm from '../src/pages/users/signUpForm'
 import {Main} from '../src/pages/hospitals/Main'
 // import Itembills from '../src/pages/esoa/Itembills'
 
