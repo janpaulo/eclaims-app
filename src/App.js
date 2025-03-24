@@ -29,6 +29,8 @@ import {
 function App() {
     // Retrieve the object from storage
     var get_user = localStorage.getItem('item');
+    var parseUser = JSON.parse(get_user)
+    console.log(JSON.parse(get_user))
   return (
     <>
     {get_user != null ? 
@@ -50,7 +52,7 @@ function App() {
                   <Route exact path="/icd_codes"  element={ <ICDCodes/> } />
                   <Route exact path="/rvs_codes"  element={ <RVSCodes/> } />
                   <Route exact path="/users"  element={ <SignUpForm/> } />
-                  <Route exact path="/hospitals"  element={ <Main/> } />
+                  <Route exact path="/hospitals"  element={ <Main authUser={parseUser}/> } />
                   {/* <Route exact path="/test"  element={ <Itembills/> } /> */}
                   {/* <Route exact path="/employees"  element={ <Employees/> } />
                   <Route exact path="/files" element={ <Files/> }  />
