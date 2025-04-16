@@ -11,7 +11,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "@mui/material";
 
-export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick,item }) {
+export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick,item,isAdd=true }) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -29,10 +29,12 @@ export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick
             {titleName}
           </Typography>
 
-          {isModal ? (
+          {
+          isAdd?(
+          isModal ? (
             <div>
               <IconButton color="inherit" aria-label="menu"
-                onClick={() => handleClick(item,true, titleName)}
+                onClick={() => handleClick()}
                 >
                 <AddCircleOutlineOutlinedIcon fontSize="large" />
               </IconButton>
@@ -55,7 +57,9 @@ export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick
                 {" "}
               </IconButton>
             </Link>
-          )}
+          )
+        ):""
+        }
 
           {/* <Button color="inherit">Add</Button> */}
         </Toolbar>
