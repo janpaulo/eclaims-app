@@ -30,7 +30,7 @@ function App() {
     // Retrieve the object from storage
     var get_user = localStorage.getItem('item');
     var parseUser = JSON.parse(get_user)
-    console.log(JSON.parse(get_user))
+    // console.log(JSON.parse(get_user))
   return (
     <>
     {get_user != null ? 
@@ -43,21 +43,16 @@ function App() {
             <Container maxWidth="xl" style={{marginTop: '70px'}}>
               
                 <Routes>
-                  <Route exact path="/"  element={ <Dashboard/> } />
-                  <Route exact path="/claims_registration"  element={ <MainRegistration/> } />
-                  <Route exact path="/claims"  element={ <ClaimTableList/> } />
-                  <Route exact path="/esoa_table_list"  element={ <EsoatableList/> } />
-                  <Route exact path="/esoa_registration"  element={ <EsoaRegistration/> } />
+                  <Route exact path="/"  element={ <Dashboard authDetails={parseUser}/> } />
+                  <Route exact path="/claims_registration"  element={ <MainRegistration authUser={parseUser}/> } />
+                  <Route exact path="/claims"  element={ <ClaimTableList authUser={parseUser}/> } />
+                  <Route exact path="/esoa_table_list"  element={ <EsoatableList authUser={parseUser}/> } />
+                  <Route exact path="/esoa_registration"  element={ <EsoaRegistration authUser={parseUser}/> } />
                   <Route exact path="/encryptor"  element={ <XMLEncryptor/> } />
                   <Route exact path="/icd_codes"  element={ <ICDCodes/> } />
                   <Route exact path="/rvs_codes"  element={ <RVSCodes/> } />
-                  <Route exact path="/users"  element={ <SignUpForm/> } />
+                  <Route exact path="/users"  element={ <SignUpForm /> } />
                   <Route exact path="/hospitals"  element={ <Main authUser={parseUser}/> } />
-                  {/* <Route exact path="/test"  element={ <Itembills/> } /> */}
-                  {/* <Route exact path="/employees"  element={ <Employees/> } />
-                  <Route exact path="/files" element={ <Files/> }  />
-                  <Route exact path="/leaves" element={ <Leaves/> }  />
-                  <Route exact path="/konsulta" element={ <Konsulta/> }  /> */}
                 </Routes>
 
               </Container>
