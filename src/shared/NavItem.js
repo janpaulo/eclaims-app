@@ -17,18 +17,15 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
-// import InboxIcon from '@mui/icons-material/MoveToInbox';
-// import MailIcon from '@mui/icons-material/Mail';
 import { Link } from "react-router-dom";
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import AddToQueueOutlinedIcon from '@mui/icons-material/AddToQueueOutlined';
 import ClosedCaptionDisabledRoundedIcon from '@mui/icons-material/ClosedCaptionDisabledRounded';
-// import SubtitlesRoundedIcon from '@mui/icons-material/SubtitlesRounded';
-// import EnhancedEncryptionIcon from '@mui/icons-material/EnhancedEncryption';
-//icons
-
 import HomeTwoToneIcon from '@mui/icons-material/HomeTwoTone';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 const drawerWidth = 240;
 
@@ -56,9 +53,8 @@ const closedMixin = (theme) => ({
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'flex-end',
+  justifyContent: 'space-between',
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
 
@@ -98,11 +94,18 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 const items = [
-  {name: "Dashboard", icon: <HomeTwoToneIcon/>, path: '',}, 
-  {name: "eSOA", icon: <AddToQueueOutlinedIcon/>, path: 'esoa_table_list',},
-  {name: "claims", icon: <VaccinesIcon/>, path: 'claims',},
-  {name: "User Management", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'users',},
-  {name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon/>, path: 'hospitals',},
+  { name: "Dashboard", icon: <HomeTwoToneIcon />, path: "" },
+  { name: "eSOA", icon: <AddToQueueOutlinedIcon />, path: "esoa_table_list" },
+  { name: "claims", icon: <VaccinesIcon />, path: "claims" },
+  { name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon />, path: "hospitals" },
+  {
+    name: "User Management",
+    icon: <ClosedCaptionDisabledRoundedIcon />,
+    children: [
+      { name: "Users", path: "users" },
+      { name: "Roles", path: "roles" },
+    ],
+  },
   // {name: "RVS Code", icon: <SubtitlesRoundedIcon/>, path: 'rvs_codes',},
   // {name: "encryptor", icon: <EnhancedEncryptionIcon/>, path: 'encryptor',},
   // {name: "test", icon: <VaccinesIcon/>, path: 'test',},
@@ -112,10 +115,10 @@ const items = [
   // {name: "Leave", icon: <SaveAsTwoToneIcon/>, path: 'leaves',element: <Leaves/>},
 ];
 
-function  NavItem() {
-  
+function NavItem() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [openSubMenus, setOpenSubMenus] = React.useState({});
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -125,17 +128,20 @@ function  NavItem() {
     setOpen(false);
   };
 
+  const handleSubMenuToggle = (name) => {
+    setOpenSubMenus((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     localStorage.clear();
-        // Retrieve the object from storage
-        var get_user = localStorage.getItem('item');
-        if(get_user == null ){
-            window.location.reload()
-        }else{
-            return false;
-        }
-        
+    const get_user = localStorage.getItem('item');
+    if (get_user == null) {
+      window.location.reload();
+    }
   };
 
   return (
@@ -156,7 +162,7 @@ function  NavItem() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-           {process.env.REACT_APP_NANE}
+            {process.env.REACT_APP_NANE}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -169,92 +175,66 @@ function  NavItem() {
         </DrawerHeader>
         <Divider />
         <List>
-        {items.map((text, index) => (
-                    
-        <ListItem key={index} component={Link} to={"/" + text.path} disablePadding >  
-
-                    <ListItemButton
-                        sx={{
-                        minHeight: 48,
-                        justifyContent: open ? 'initial' : 'center',
-                        px: 2.5,
-                        }}
-                    >
-                        <ListItemIcon
-                        sx={{
-                            minWidth: 0,
-                            mr: open ? 3 : 'auto',
-                            justifyContent: 'center',
-                        }}
-                        >
-                        <Tooltip title={text.name}  placement="right">
-                            {text.icon}
+          {items.map((item, index) => (
+            <React.Fragment key={index}>
+              {!item.children ? (
+                <ListItem component={Link} to={`/${item.path}`} disablePadding>
+                  <ListItemButton sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5 }}>
+                    <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                      <Tooltip title={item.name} placement="right">
+                        {item.icon}
                       </Tooltip>
-                        </ListItemIcon>
-                        
-                        <ListItemText primary={text.name} sx={{ opacity: open ? 1 : 0 }}/>
-                       </ListItemButton>
-                    </ListItem>
-                ))}
+                    </ListItemIcon>
+                    <ListItemText  primary={item.name} sx={{ opacity: open ? 1 : 0 }} />
+                  </ListItemButton>
+                </ListItem>
+              ) : (
+                <>
+                  <ListItemButton
+                    onClick={() => handleSubMenuToggle(item.name)}
+                    sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                      <Tooltip title={item.name} placement="right">
+                        {item.icon}
+                      </Tooltip>
+                    </ListItemIcon>
+                    <ListItemText primary={item.name} sx={{ opacity: open ? 1 : 0 }} />
+                    {open && (openSubMenus[item.name] ? <ExpandLess /> : <ExpandMore />)}
+                  </ListItemButton>
+                  <Collapse in={openSubMenus[item.name]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {item.children.map((sub, subIndex) => (
+                        <ListItem key={subIndex} component={Link} to={`/${sub.path}`} disablePadding>
+                          <ListItemButton sx={{ pl: open ? 4 : 2 }}>
+                            <ListItemText style={{marginLeft: '30px'}} primary={sub.name} sx={{ opacity: open ? 1 : 0 }} />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Collapse>
+                </>
+              )}
+            </React.Fragment>
+          ))}
         </List>
         <Divider />
-        {/* <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
         <List>
-        <ListItem  disablePadding sx={{ display: 'block' }}>
+          <ListItem disablePadding sx={{ display: 'block' }}>
             <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-              
-              onClick={(event) => {
-                handleSubmit(event);
-              }}
+              sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+              onClick={(event) => handleSubmit(event)}
             >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                <Tooltip title="Logout"  placement="right">
-                  <LogoutRoundedIcon/>
+              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <Tooltip title="Logout" placement="right">
+                  <LogoutRoundedIcon />
                 </Tooltip>
               </ListItemIcon>
               <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
             </ListItemButton>
           </ListItem>
-        
         </List>
       </Drawer>
-
-
-
     </Box>
   );
 }
