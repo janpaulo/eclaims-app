@@ -102,7 +102,7 @@ const items = [
     name: "User Management",
     icon: <ClosedCaptionDisabledRoundedIcon />,
     children: [
-      { name: "Users", path: "users" },
+      { name: "Users", path: "hospital-users-accounts" },
       { name: "Roles", path: "roles" },
     ],
   },
