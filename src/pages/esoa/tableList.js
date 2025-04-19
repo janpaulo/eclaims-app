@@ -9,45 +9,59 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import SharedAppBar from "../../shared/SharedAppBar";
 // import CryptoJS from "crypto-js";
-import axios from "axios";
 import moment from "moment";
 import PositionedSnackbar from './../../shared/alerts/PositionedSnackbar'
+import api from "../../api";
 // import { Button } from "@mui/material";
 // import Xml2js from "xml2js";
 
 class tableList extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       title: "ESOA",
       item: {},
       items: [],
       value: 0,
       error: null,
+      authUser: props.authUser || {}, // now it's fine
     };
-    // this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
     this.handleGetEsoa();
   }
 
-  handleGetEsoa = (e) => {
-    axios({
-      method: "GET",
-      url: process.env.REACT_APP_API_CLAIMS+"esoas",
-      headers: { "Content-Type": "application/json" },
-      // headers: {'X-API-ACCESS-TOKEN': localStorage.getItem('api_key')}
-    })
-      .then((resp) => {
-        this.setState({ items: resp.data.result });
-        // console.log(resp.data.response);
-      })
-      .catch((error) => {
-        // Handle error
-        this.setState({ error: error.message, items: [] });
+  handleGetEsoa = async () => {
+  
+    try {
+      const response = await api.get(`esoas/${this.state.authUser.hci_no}`, {
+        headers: {
+          Authorization: `Bearer ${this.state.authUser.access_token}`,
+        },
       });
+  
+      // Check if result exists and has items
+      if (response.status === 200 && response.data?.esoa?.length > 0) {
+        this.setState({ items: response.data.esoa, error: null });
+      } else {
+        this.setState({ items: [], error: "No records found." });
+        // console.warn("No claims found.");
+      }
+    } catch (err) {
+      // let errorMessage = "An error occurred while fetching Esoas.";
+  
+      // if (err.response && err.response.status === 404) {
+      //   errorMessage = "No Esoas found for this HCI.";
+      // } else if (err.message) {
+      //   errorMessage = err.message;
+      // }
+  
+      this.setState({ items: []});
+      // console.error("Error fetching claims:", errorMessage);
+    }
   };
+
 
   
 

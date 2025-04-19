@@ -19,7 +19,7 @@ export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
   const [accreditationNum, setAccreditationNum] = useState(hospitalToEdit?.accreditation_num || "");
   const [cypherKey, setCypherKey] = useState(hospitalToEdit?.cypher_key || "");
   const [isActive, setIsActive] = useState(hospitalToEdit?.is_active || "active");
-  const [createdBy, setCreatedBy] = useState(authUser?.userId || "");
+  const [createdBy] = useState(authUser?.userId || "");
 
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
