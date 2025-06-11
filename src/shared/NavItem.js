@@ -97,7 +97,8 @@ const items = [
   { name: "Dashboard", icon: <HomeTwoToneIcon />, path: "" },
   { name: "eSOA", icon: <AddToQueueOutlinedIcon />, path: "esoa_table_list" },
   { name: "claims", icon: <VaccinesIcon />, path: "claims" },
-  { name: "CF4", icon: <VaccinesIcon />, path: "cf4" },
+  { name: "CForm 3", icon: <VaccinesIcon />, path: "cf3" },
+  { name: "CForm 4", icon: <VaccinesIcon />, path: "cf4" },
   { name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon />, path: "hospitals" },
   {
     name: "User Management",
