@@ -17,6 +17,8 @@ import RVSCodes from '../src/pages/icd_rsc_codes/rvsCodes'
 import HopitalRoleAccount from '../src/pages/users/HopitalRoleAccount'
 import {Roles} from '../src/pages/users/Roles'
 import {Main} from '../src/pages/hospitals/Main'
+import {CF4Main} from './pages/cf4Forms/CF4Main'
+import PhicClaimForm4 from './pages/cf4Forms/PhicClaimForm4'
 // import Itembills from '../src/pages/esoa/Itembills'
 
 import Login from '../src/pages/login/Login';
@@ -55,6 +57,8 @@ function App() {
                   <Route exact path="/hospital-users-accounts"  element={ <HopitalRoleAccount /> } />
                   <Route exact path="/hospitals"  element={ <Main authUser={parseUser}/> } />
                   <Route exact path="/Roles"  element={ <Roles authUser={parseUser}/> } />
+                  <Route exact path="/cf4"  element={ <CF4Main authUser={parseUser}/> } />
+                  <Route exact path="/cf4_forms"  element={ <PhicClaimForm4 authUser={parseUser}/> } />
                 </Routes>
 
               </Container>
