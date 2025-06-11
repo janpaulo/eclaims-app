@@ -13,17 +13,17 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
-import AlertTitle from '@mui/material/AlertTitle';
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
-import ImageBG from '../../images/image1.jpg'
+import AlertTitle from "@mui/material/AlertTitle";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import ImageBG from "../../images/image1.jpg";
 
 const defaultTheme = createTheme();
 
 export default function Login() {
   const [alertOpen, setAlertOpen] = React.useState(false);
-  const [alertMessage, setAlertMessage] = React.useState('');
-  const [alertSeverity, setAlertSeverity] = React.useState('error');
+  const [alertMessage, setAlertMessage] = React.useState("");
+  const [alertSeverity, setAlertSeverity] = React.useState("error");
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -32,51 +32,54 @@ export default function Login() {
       email: data.get("email"),
       password: data.get("password"),
     };
-    // localStorage.setItem("item",{
-    //   "id": 1,
-    //   "email": "john@mail.com",
-    //   "password": "changeme",
-    //   "name": "Jhon",
-    //   "role": "customer",
-    //   "avatar": "https://api.lorem.space/image/face?w=640&h=480&r=867"
-    // });
-    axios({
-      method: "POST",
-      url: process.env.REACT_APP_API_CLAIMS+"login",
-      data: userData,
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((resp) => {
-        localStorage.setItem("item", JSON.stringify(resp.data));
-        // localStorage.setItem("item", JSON.stringify(resp.data));
-        setAlertSeverity('success');
-        setAlertMessage('Successfully logged in!');
-        setAlertOpen(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status === 401) {
-            setAlertMessage('Invalid credentials. Please try again.');
-          } else {
-            setAlertMessage(`An error occurred: ${error.response.data.message}`);
-          }
-        } else if (error.request) {
-          setAlertMessage('No response from server. Please try again later.');
-        } else {
-          setAlertMessage(`Error: ${error.message}`);
-        }
-        setAlertSeverity('error');
-        setAlertOpen(true);
-      });
+    const item = {
+      id: 1,
+      email: "john@mail.com",
+      password: "changeme",
+      name: "Jhon",
+      role: "customer",
+      avatar: "https://api.lorem.space/image/face?w=640&h=480&r=867",
+    };
+
+    localStorage.setItem("item", JSON.stringify(item));
+    window.location.reload()
+    // axios({
+    //   method: "POST",
+    //   url: process.env.REACT_APP_API_CLAIMS+"login",
+    //   data: userData,
+    //   headers: { "Content-Type": "application/json" },
+    // })
+    //   .then((resp) => {
+    //     localStorage.setItem("item", JSON.stringify(resp.data));
+    //     // localStorage.setItem("item", JSON.stringify(resp.data));
+    //     setAlertSeverity('success');
+    //     setAlertMessage('Successfully logged in!');
+    //     setAlertOpen(true);
+    //     setTimeout(() => {
+    //       window.location.reload();
+    //     }, 1000);
+    //   })
+    //   .catch((error) => {
+    //     if (error.response) {
+    //       if (error.response.status === 401) {
+    //         setAlertMessage('Invalid credentials. Please try again.');
+    //       } else {
+    //         setAlertMessage(`An error occurred: ${error.response.data.message}`);
+    //       }
+    //     } else if (error.request) {
+    //       setAlertMessage('No response from server. Please try again later.');
+    //     } else {
+    //       setAlertMessage(`Error: ${error.message}`);
+    //     }
+    //     setAlertSeverity('error');
+    //     setAlertOpen(true);
+    //   });
   };
 
   return (
     <>
       <ThemeProvider theme={defaultTheme}>
-        <Grid container component="main" sx={{ height: '100vh' }}>
+        <Grid container component="main" sx={{ height: "100vh" }}>
           <CssBaseline />
           <Grid
             item
@@ -84,36 +87,51 @@ export default function Login() {
             sm={4}
             md={7}
             sx={{
-              backgroundImage: `url(${ImageBG})`,  
+              backgroundImage: `url(${ImageBG})`,
               // backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
-              backgroundRepeat: 'no-repeat',
+              backgroundRepeat: "no-repeat",
               backgroundColor: (t) =>
-                t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+                t.palette.mode === "light"
+                  ? t.palette.grey[50]
+                  : t.palette.grey[900],
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
           />
-          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square
+          <Grid
+            item
+            xs={12}
+            sm={8}
+            md={5}
+            component={Paper}
+            elevation={6}
+            square
             container
             direction="column"
             justifyContent="center"
-            alignItems="center">
+            alignItems="center"
+          >
             <Box
               sx={{
                 my: 8,
                 mx: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+              <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
                 <LockOutlinedIcon />
               </Avatar>
               <Typography component="h1" variant="h5">
                 Sign in
               </Typography>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmit}
+                sx={{ mt: 1 }}
+              >
                 <TextField
                   margin="normal"
                   required
@@ -173,7 +191,9 @@ export default function Login() {
       >
         {alertOpen && (
           <Alert severity={alertSeverity} onClose={() => setAlertOpen(false)}>
-            <AlertTitle>{alertSeverity === 'success' ? 'Success' : 'Error'}</AlertTitle>
+            <AlertTitle>
+              {alertSeverity === "success" ? "Success" : "Error"}
+            </AlertTitle>
             {alertMessage}
           </Alert>
         )}

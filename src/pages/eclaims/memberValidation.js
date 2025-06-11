@@ -28,21 +28,24 @@ class memberValidation extends Component {
     // item.pUserName = process.env.REACT_APP_USERNAME;
     // item.pUserPassword = "";
     // item.pHospitalCode = process.env.REACT_APP_HOSPITALCODE;
-    axios({
-      method: "POST",
-      url: process.env.REACT_APP_NEW_PHIC_URL+'/GetMemberPIN',
-      // url:  process.env.REACT_APP_API_CLAIMS+"soapPhic/memberSearch",
-      data: (item),  
-      headers: { 
-        'accreno': process.env.REACT_APP_HOSPITALACRRENO, 
-        'softwarecertid': process.env.REACT_APP_USERNAME, 
-        'Content-Type': 'text/plain'
-      },
-    }).then(resp => {
-      this.props.updateDataItem(resp.data, true, item);
-    }).catch(response =>{
-      this.props.updateDataItem(response.response.data, false, item);
-    })
+
+      this.props.updateDataItem({}, true, item);
+
+    // axios({
+    //   method: "POST",
+    //   url: process.env.REACT_APP_NEW_PHIC_URL+'/GetMemberPIN',
+    //   // url:  process.env.REACT_APP_API_CLAIMS+"soapPhic/memberSearch",
+    //   data: (item),  
+    //   headers: { 
+    //     'accreno': process.env.REACT_APP_HOSPITALACRRENO, 
+    //     'softwarecertid': process.env.REACT_APP_USERNAME, 
+    //     'Content-Type': 'text/plain'
+    //   },
+    // }).then(resp => {
+    //   this.props.updateDataItem(resp.data, true, item);
+    // }).catch(response =>{
+    //   this.props.updateDataItem(response.response.data, false, item);
+    // })
 
   };
 

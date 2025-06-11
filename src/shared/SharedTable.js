@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Table
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const SharedTable = ({ columns, data, onEdit, onDelete, page, setPage, rowsPerPage, setRowsPerPage }) => {
+const SharedTable = ({ columns=[], data=[], onEdit, onDelete, page, setPage, rowsPerPage, setRowsPerPage }) => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };

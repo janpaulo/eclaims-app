@@ -750,7 +750,7 @@ class mainForms extends React.Component {
       newData = ''
     }
     this.setState({ memberData: newData });
-    this.setState({ ismemPin: data.success });
+    this.setState({ ismemPin: true });
     this.setState({ searchText: dataItem });
 
     // console.log(dataItem)

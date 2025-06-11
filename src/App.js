@@ -17,6 +17,7 @@ import RVSCodes from '../src/pages/icd_rsc_codes/rvsCodes'
 import HopitalRoleAccount from '../src/pages/users/HopitalRoleAccount'
 import {Roles} from '../src/pages/users/Roles'
 import {Main} from '../src/pages/hospitals/Main'
+import {CF4Main} from './pages/cf4/CF4Main'
 // import Itembills from '../src/pages/esoa/Itembills'
 
 import Login from '../src/pages/login/Login';
@@ -55,6 +56,7 @@ function App() {
                   <Route exact path="/hospital-users-accounts"  element={ <HopitalRoleAccount /> } />
                   <Route exact path="/hospitals"  element={ <Main authUser={parseUser}/> } />
                   <Route exact path="/Roles"  element={ <Roles authUser={parseUser}/> } />
+                  <Route exact path="/cf4"  element={ <CF4Main authUser={parseUser}/> } />
                 </Routes>
 
               </Container>
