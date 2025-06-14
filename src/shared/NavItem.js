@@ -26,6 +26,9 @@ import VaccinesIcon from '@mui/icons-material/Vaccines';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import MedicalInformationOutlinedIcon from '@mui/icons-material/MedicalInformationOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import SummarizeOutlinedIcon from '@mui/icons-material/SummarizeOutlined';
 
 const drawerWidth = 240;
 
@@ -97,8 +100,9 @@ const items = [
   { name: "Dashboard", icon: <HomeTwoToneIcon />, path: "" },
   { name: "eSOA", icon: <AddToQueueOutlinedIcon />, path: "esoa_table_list" },
   { name: "claims", icon: <VaccinesIcon />, path: "claims" },
-  { name: "CForm 3", icon: <VaccinesIcon />, path: "cf3" },
-  { name: "CForm 4", icon: <VaccinesIcon />, path: "cf4" },
+  { name: "Claim Signature Form", icon: <MedicalInformationOutlinedIcon />, path: "claim-signature-form" },
+  { name: "CForm 3", icon: <ListAltOutlinedIcon />, path: "cf3" },
+  { name: "CForm 4", icon: <SummarizeOutlinedIcon />, path: "cf4" },
   { name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon />, path: "hospitals" },
   {
     name: "User Management",
