@@ -83,11 +83,6 @@ const CF2Form = forwardRef((props, ref) => {
       <PartII_Confinement form={data} handleChange={handleChange} setForm={setData}/>
       <PartIII_Certification data={data} onChange={handleChange}  />
       <PartIV_HCICert data={data} onChange={handleChange} />
-      <Box sx={{ textAlign: "right", mt: 2 }}>
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit CF2
-        </Button>
-      </Box>
     </Box>
   );
 });

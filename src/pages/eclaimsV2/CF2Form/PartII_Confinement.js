@@ -61,7 +61,7 @@ export default function PartII_PatientConfinement({ form, handleChange,setForm }
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="h6">
+        <Typography >
           Part II – Patient Confinement Information
         </Typography>
       </AccordionSummary>

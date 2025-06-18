@@ -143,7 +143,6 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
             </TableRow>
           </TableBody>
         </Table>
-
         {isLoading && <LinearProgress />}
 
         {itemSearch.length > 0 && (
@@ -156,9 +155,8 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">ICD Code</TableCell>
+                      <TableCell align="center">ICD/RVS Code</TableCell>
                       <TableCell align="center">Description</TableCell>
-                      <TableCell align="center">RVS Code</TableCell>
                       <TableCell align="center">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -167,7 +165,7 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
                       <TableRow key={i}>
                         <TableCell align="center">{val.pitemCode}</TableCell>
                         <TableCell align="center">{val.pitemDescription}</TableCell>
-                        <TableCell align="center">{val.rvscode || ''}</TableCell>
+                        {/* <TableCell align="center">{val.rvscode || ''}</TableCell> */}
                         <TableCell align="center">
                           <Button variant="contained" color="primary" onClick={() => addToTable(val)}>
                             Add
@@ -187,10 +185,10 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell align="center"><b>ICD Code</b></TableCell>
-                  <TableCell align="center"><b>RVS Code</b></TableCell>
-                  <TableCell align="center"><b>Description</b></TableCell>
-                  <TableCell align="center"><b>PROCEDURE</b></TableCell>
+                <TableCell align="center"><b>Diagnosis</b></TableCell>
+                  <TableCell align="center"><b>ICD/RVS Code</b></TableCell>
+                  <TableCell align="center"><b>Related Procedure/s (if there’s any)</b></TableCell>
+                  {/* <TableCell align="center"><b>RVS Code</b></TableCell> */}
                   <TableCell align="center"><b>DATE OF PROCEDURE</b></TableCell>
                   <TableCell align="center"><b>LEFT</b></TableCell>
                   <TableCell align="center"><b>RIGHT</b></TableCell>
@@ -201,9 +199,8 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
               <TableBody>
                 {tableData.map((data, index) => (
                   <TableRow key={index}>
-                    <TableCell align="center">{data.pitemCode}</TableCell>
-                    <TableCell align="center">{data.rvscode || ''}</TableCell>
                     <TableCell align="center">{data.pitemDescription}</TableCell>
+                    <TableCell align="center">{data.pitemCode}</TableCell>
                     <TableCell align="center">
                       <TextField
                         fullWidth
@@ -213,6 +210,7 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
                         onChange={(e) => handleChangeTabledata(e, index)}
                       />
                     </TableCell>
+                    {/* <TableCell align="center">{data.rvscode || ''}</TableCell> */}
                     <TableCell align="center">
                       <TextField
                         fullWidth
