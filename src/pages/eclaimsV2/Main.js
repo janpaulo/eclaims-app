@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import ClaimForm1 from './ClaimForm1';
 import ClaimForm2 from './CF2Form/CF2Form';
+import ClaimFormValidation from "./ClaimFormValidation"
 
 function Main() {
   const [tab, setTab] = useState(0);
@@ -41,6 +42,9 @@ function Main() {
     <>
       <CssBaseline />
       <Container maxWidth="lg" sx={{ my: 4 }}>
+
+        <ClaimFormValidation />
+
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
             <Tab label="CF1" />
