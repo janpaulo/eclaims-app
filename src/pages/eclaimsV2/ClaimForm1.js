@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+} from "react";
 import {
   TextField,
   RadioGroup,
@@ -11,21 +16,18 @@ import {
   FormGroup,
   Divider,
 } from "@mui/material";
+import moment from "moment";
+
 
 import EmployerValidation from "./EmployerValidation";
 
-
-const ClaimForm1 = forwardRef((props, ref) => {
-    const [formData, setFormData] = useState({
-      // all fields here...
-    });
-  
+const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
   const [form, setForm] = useState({
     pinMember: "",
-    memberLastName: "",
-    firstName: "",
-    nameExt: "",
-    middleName: "",
+    lastname: "",
+    firstname: "",
+    nameext: "",
+    middlename: "",
     dobMember: "",
     address: "",
     sexMember: "",
@@ -55,21 +57,41 @@ const ClaimForm1 = forwardRef((props, ref) => {
     empSignDate: "",
   });
 
-  // Validation logic
-  const validateForm = () => {
-    // Replace with real validation
-    const isValid = formData.name && formData.birthdate; // example
-    return !!isValid;
-  };
+  // Prefill form when data is available
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      console.log(prefillData);
+  
+      const rawDOB = prefillData.memberBasicInformation?.dateOfBirth || "";
+      const formattedDOB = rawDOB
+        ? moment(rawDOB).format("YYYY-MM-DD")
+        : "";
+  
+      setForm({
+        pinMember: prefillData.memberPIN || "",
+        lastname: prefillData.memberBasicInformation?.lastname || "",
+        firstname: prefillData.memberBasicInformation?.firstname || "",
+        middlename: prefillData.memberBasicInformation?.middlename || "",
+        nameext: prefillData.memberBasicInformation?.nameExtension || "",
+        dobMember: formattedDOB,
+        sexMember: prefillData.memberBasicInformation?.sex|| "",
+        address: prefillData.memberAddress?.address || "",
+        mobile: prefillData.memberContactInfo?.mobileNo || "",
+        email: prefillData.memberContactInfo?.email || "",
+      });
+    }
+  }, [prefillData]);
 
-  const handleSubmit = () => {
-    console.log("Submitting CF1 form data:", formData);
-  };
-
-  // Expose to parent
+  // Expose methods to parent (Main.js)
   useImperativeHandle(ref, () => ({
-    validateForm,
-    handleSubmit
+    validateForm: () => {
+      // Add your validation logic here
+      return !!(form.pinMember && form.firstName && form.dobMember);
+    },
+    handleSubmit: () => {
+      // Submit logic (e.g., API call)
+      console.log("Submitting CF1:", form);
+    },
   }));
 
   const handleChange = (e) => {
@@ -81,7 +103,7 @@ const ClaimForm1 = forwardRef((props, ref) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={useImperativeHandle}>
       <Typography variant="h6">Part I – Member Information</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
@@ -136,9 +158,9 @@ const ClaimForm1 = forwardRef((props, ref) => {
             value={form.sexMember}
             onChange={handleChange}
           >
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
+            <FormControlLabel value="M" control={<Radio />} label="Male" />
             <FormControlLabel
-              value="female"
+              value="F"
               control={<Radio />}
               label="Female"
             />
@@ -309,7 +331,7 @@ const ClaimForm1 = forwardRef((props, ref) => {
           </Divider>
         </Grid>
         <Grid item xs={12} md={12}>
-          <EmployerValidation />
+          <EmployerValidation authUser={authUser }/>
         </Grid>
       </Grid>
     </form>

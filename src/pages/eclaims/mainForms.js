@@ -59,11 +59,11 @@ class mainForms extends React.Component {
       selectedEmployerOption: "",
       searchEmployer: { pPen: "", employerName: "" },
       searchText: {
-        lastname: "SAMPLELNAME",
-        firstname: "TESTFNAME",
-        middlename: "",
+        lastname: "EVRSFT LN ELEVEN",
+        firstname: "EVRSFT FN ELEVEN",
+        middlename: "EVRSFT MN ELEVEN",
         suffix: "",
-        birthdate: moment(new Date("01-01-1992")).format("YYYY-MM-DD"), //"11-18-1953",
+        birthdate: moment(new Date("01-12-1974")).format("YYYY-MM-DD"), //"11-18-1953",
 
         // lastname: "",
         // firstname: "",
@@ -245,7 +245,7 @@ class mainForms extends React.Component {
       checkedDatesRadiotherapyCOBALT: [],
       checkedDatesDebridement: [],
       checkedDatesRadiotherapyIMRT: [],
-      
+
       documentUrls: [],
       // Array to store checked dates
     };
@@ -431,108 +431,108 @@ class mainForms extends React.Component {
     // console.log(this.state.essentialNewbornCare);
 
     const DIAGNOSIS = this.state.diagnosCodeData.map((item) => {
-      
       if (item.pRVSCode !== null && item.pRVSCode !== "") {
         return {
           DISCHARGE: [
             {
               ICDCODE: "",
               pICDCode: item.pICDCode,
-              
+
               // attr: {
               //   pICDCode: item.pICDCode,
               // }
-             
             },
-            { 
+            {
               RVSCODES: "",
               pRelatedProcedure: item.pRelatedProcedure,
               pRVSCode: item.pRVSCode,
               pProcedureDate: item.pProcedureDate,
-              pLaterality: item.pLaterality
-            //   attr: {
-            //   pRelatedProcedure: item.pRelatedProcedure,
-            //   pRVSCode: item.pRVSCode,
-            //   pProcedureDate: item.pProcedureDate,
-            //   pLaterality: item.pLaterality,
-            // }
-            ,}
-          ], attr: {pDischargeDiagnosis: item.pDischargeDiagnosis}
+              pLaterality: item.pLaterality,
+              //   attr: {
+              //   pRelatedProcedure: item.pRelatedProcedure,
+              //   pRVSCode: item.pRVSCode,
+              //   pProcedureDate: item.pProcedureDate,
+              //   pLaterality: item.pLaterality,
+              // }
+            },
+          ],
+          attr: { pDischargeDiagnosis: item.pDischargeDiagnosis },
         };
       } else {
         return {
           DISCHARGE: [
             {
-              ICDCODE:"",pICDCode: item.pICDCode,
+              ICDCODE: "",
+              pICDCode: item.pICDCode,
               // attr: {
               //   pICDCode: item.pICDCode,
               // },
             },
-          ], attr: {pDischargeDiagnosis: item.pDischargeDiagnosis}
+          ],
+          attr: { pDischargeDiagnosis: item.pDischargeDiagnosis },
         };
       }
     });
 
     const DOCUMENTS = this.state.documentUrls.map((value, index) => {
-      return { "DOCUMENT": '', attr: value };
+      return { DOCUMENT: "", attr: value };
     });
 
-
-    var eclaims = {}
-    eclaims.cf1 = this.state.itemcf1
+    var eclaims = {};
+    eclaims.cf1 = this.state.itemcf1;
     eclaims.cf2 = [
-      {diagnosis: DIAGNOSIS  },
+      { diagnosis: DIAGNOSIS },
       { specials: [{ a: 1 }] },
-      { professionals: [{ a: "s" }] }
-    ]
-    eclaims.all_case_rate = { case_rate: ""}
-    eclaims.particulars = { case_rate: ""}
-    eclaims.claim = this.state.claim
-    eclaims.eclaim = this.state.eCLAIMS
-    eclaims.transmital = this.state.eTRANSMITTAL
-    eclaims.documents = this.state.documentUrls
+      { professionals: [{ a: "s" }] },
+    ];
+    eclaims.all_case_rate = { case_rate: "" };
+    eclaims.particulars = { case_rate: "" };
+    eclaims.claim = this.state.claim;
+    eclaims.eclaim = this.state.eCLAIMS;
+    eclaims.transmital = this.state.eTRANSMITTAL;
+    eclaims.documents = this.state.documentUrls;
+    console.log(eclaims);
+    // console.log( {
+    //   eCLAIMS: {
+    //     eTRANSMITTAL: {
+    //       CLAIM: [
+    //         { CF1:  this.state.itemcf1 },
+    //         { CF2: [
+    //             {// DIAGNOSIS ITEM IS ON THE STATE
+    //               DIAGNOSIS,
+    //               attr: { pAdmissionDiagnosis: 2 },
+    //             },
 
-    console.log( {
-      eCLAIMS: {
-        eTRANSMITTAL: {
-          CLAIM: [
-            { CF1:  this.state.itemcf1 },
-            { CF2: [
-                {// DIAGNOSIS ITEM IS ON THE STATE
-                  DIAGNOSIS,
-                  attr: { pAdmissionDiagnosis: 2 },
-                },
+    //             { SPECIAL: [{ a: 1 }] },
+    //             {
+    //               PROFESSIONALS: [{ a: "s", attr: { pICDCode: "K31.9" } }],
+    //             },
+    //             {
+    //               CONSUMPTION: [
+    //                 { BENEFITS: "s", attr: { pTotalHCIFees: "sa" } },
+    //               ],
+    //               attr: { pEnoughBenefits: "Y" },
+    //             },
+    //           ],
+    //           attr: this.state.itemcf2,
+    //         },
 
-                { SPECIAL: [{ a: 1 }] },
-                {
-                  PROFESSIONALS: [{ a: "s", attr: { pICDCode: "K31.9" } }],
-                },
-                {
-                  CONSUMPTION: [
-                    { BENEFITS: "s", attr: { pTotalHCIFees: "sa" } },
-                  ],
-                  attr: { pEnoughBenefits: "Y" },
-                },
-              ],
-              attr: this.state.itemcf2,
-            },
+    //         {
+    //           ALLCASERATE: { CASERATE: "", attr: { pCaseRateCode: "" } },
+    //         },
 
-            {
-              ALLCASERATE: { CASERATE: "", attr: { pCaseRateCode: "" } },
-            },
+    //         { PARTICULARS: { DRGMED: "", attr: { pCaseRateCode: "" } } },
 
-            { PARTICULARS: { DRGMED: "", attr: { pCaseRateCode: "" } } },
+    //         { RECEIPTS: { RECEIPT: "", attr: { pCaseRateCode: "" } } },
 
-            { RECEIPTS: { RECEIPT: "", attr: { pCaseRateCode: "" } } },
-
-            { DOCUMENTS  },
-          ],
-          attr: this.state.claim,
-        },
-        attr: this.state.eTRANSMITTAL,
-      },
-      attr: this.state.eCLAIMS,
-    })
+    //         { DOCUMENTS  },
+    //       ],
+    //       attr: this.state.claim,
+    //     },
+    //     attr: this.state.eTRANSMITTAL,
+    //   },
+    //   attr: this.state.eCLAIMS,
+    // })
 
     // console.log(
     //   JsonToXml(
@@ -734,20 +734,19 @@ class mainForms extends React.Component {
     this.setState({ diagnosCodeData: updatedData });
   };
 
-  
   // for documents urls
   handleDocURLChange = (updatedData) => {
-    console.log(updatedData)
+    console.log(updatedData);
     this.setState({ documentUrls: updatedData });
   };
 
   // Callback function to update memberData state
   updateMemberData = (data, isTrue, dataItem) => {
-    var newData = ''
-    if(data.success){
-      newData = data.result
-    }else{
-      newData = ''
+    var newData = "";
+    if (data.success) {
+      newData = data.result;
+    } else {
+      newData = "";
     }
     this.setState({ memberData: newData });
     this.setState({ ismemPin: data.success });
@@ -807,7 +806,11 @@ class mainForms extends React.Component {
 
     return (
       <>
-        <Typography variant="h5" component="h5" style={{padding: "15px 20px 0 16px"}}>
+        <Typography
+          variant="h5"
+          component="h5"
+          style={{ padding: "15px 20px 0 16px" }}
+        >
           {this.state.title}
           {this.state.item.Label1}
         </Typography>
@@ -819,163 +822,174 @@ class mainForms extends React.Component {
               searchText={this.state.searchText}
               updateDataItem={this.updateMemberData}
             />
+          ) : this.state.ismemPin === false ? (
+            "No  Data Found!"
           ) : (
-            this.state.ismemPin === false ? "No  Data Found!" : ""
+            ""
           )}
 
           {this.state.ismemPin ? (
-            <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                 <Tabs position="fixed"
-                        value={this.state.value}
-                        onChange={this.handleChange}
-                        indicatorColor="secondary"
-                        aria-label="basic tabs example"
-                    >
-                        {/* <Tabs value={this.state.value} onChange={this.handleChange} indicatorColor="secondary" aria-label="simple tabs example"> */}
-                        <Tab
-                        label={
-                            <div>
-                            <span>
-                                <b>CF1</b>
-                            </span>
-                            </div>
-                        }
-                        {...a11yProps(0)}
-                        />
-                        <Tab
-                        label={
-                            <div>
-                            <span>
-                                <b>CF2</b>
-                            </span>
-                            </div>
-                        }
-                        {...a11yProps(0)}
-                        />
-                    </Tabs>
-                <Box sx={{ p: 2, overflowY: 'auto', flexGrow: 1 }}>
-                    <CustomTabPanel value={this.state.value} index={0}>
-                        <Forms
-                        handleClick={this.handleSubmit}
-                        onchange={this.handleInputChange}
-                        handleSelectChangeMember={this.handleSelectChangeMember}
-                        itemCf={this.state.itemcf1}
-                        memberDataPin={this.state.memberData.pin}
-                        searchText={this.state.searchText}
-                        employerData={this.state.employerData}
-                        searchEmployer={this.state.searchEmployer}
-                        selectedObject={this.state.selectedObject}
-                        selectedOption={this.state.selectedEmployerOption}
-                        updateEmployerData={this.updateEmployerData}
-                        handleChangeSelectEmp={this.handleChangeSelectEmp}
-                        />
-                    </CustomTabPanel>
-                    <CustomTabPanel value={this.state.value} index={1}>
-                        <Forms2
-                        isTransfered={this.state.isTransfered}
-                        specialConsideration={this.state.specialConsideration}
-                        isSpecialCon={this.state.specialCon}
-                        dateAdmitedCount={dateAdmitedCounts}
-                        startDayAdmited={startDayAdmits}
-                        startMonthAdmited={month}
-                        startYearAdmited={year}
-                        patienCon={this.state.patienCon}
-                        claimsType={this.state.claimsType}
-                        // itemcf={this.state.itemcf2}
-                        itemCf={this.state.itemcf2}
-                        handleClick={this.handleSubmit}
-                        handleToggle={this.handleToggleIsTrasfered}
-                        handleClickCheckBox={this.handleClickCheckBox}
-                        handleDate={this.handleDate}
-                        onchange={this.handleInputChanges}
-                        handleClickCheckBoxSpeConsideration={
-                            this.handleClickCheckBoxSpeConsideration
-                        }
-                        handleClickCheckBoxPatientCon={
-                            this.handleClickCheckBoxPatientCon
-                        }
-                        handleSendSelection={this.handleSendSelection}
-                        handleCheckboxChange={this.handleCheckboxChange}
-                        handleCheckboxChangeAccomondation={
-                            this.handleCheckboxChangeAccomondation
-                        }
-                        handleTimeChange={this.handleTimeChange}
-                        handleDocURLChange={this.handleDocURLChange}
-                        handleCheckboxChangeTBtype={this.handleCheckboxChangeTBtype}
-                        handleCheckboxChanges={this.handleCheckboxChanges}
-                        options3={this.state.options3}
-                        checkedDates={this.state.checkedDates}
-                        pTBType={this.state.pTBType}
-                        checkedDatesHemodialysis={this.state.checkedDatesHemodialysis}
-                        checkedDatesBloodTransfusion={
-                            this.state.checkedDatesBloodTransfusion
-                        }
-                        checkedDatesPeritoneal={this.state.checkedDatesPeritoneal}
-                        checkedDatesBrachytherapy={
-                            this.state.checkedDatesBrachytherapy
-                        }
-                        checkedDatesRadiotherapyLINAC={
-                            this.state.checkedDatesRadiotherapyLINAC
-                        }
-                        checkedDatesChemotherapy={this.state.checkedDatesChemotherapy}
-                        checkedDatesRadiotherapyCOBALT={
-                            this.state.checkedDatesRadiotherapyCOBALT
-                        }
-                        checkedDatesDebridement={this.state.checkedDatesDebridement}
-                        checkedDatesRadiotherapyIMRT={
-                            this.state.checkedDatesRadiotherapyIMRT
-                        }
-                        handleCheckboxChangeHemodialysis={
-                            this.handleCheckboxChangeHemodialysis
-                        }
-                        handleCheckboxChangeBloodTransfusion={
-                            this.handleCheckboxChangeBloodTransfusion
-                        }
-                        handleCheckboxChangePeritoneal={
-                            this.handleCheckboxChangePeritoneal
-                        }
-                        handleCheckboxChangeBrachytherapy={
-                            this.handleCheckboxChangeBrachytherapy
-                        }
-                        handleCheckboxChangeRadiotherapyLINAC={
-                            this.handleCheckboxChangeRadiotherapyLINAC
-                        }
-                        handleCheckboxChangeChemotherapy={
-                            this.handleCheckboxChangeChemotherapy
-                        }
-                        handleCheckboxChangeRadiotherapyCOBALT={
-                            this.handleCheckboxChangeRadiotherapyCOBALT
-                        }
-                        handleCheckboxChangeDebridement={
-                            this.handleCheckboxChangeDebridement
-                        }
-                        handleCheckboxChangeRadiotherapyIMRT={
-                            this.handleCheckboxChangeRadiotherapyIMRT
-                        }
-                        handleClickCheckBoxClaimsType={
-                            this.handleClickCheckBoxClaimsType
-                        }
-                        handleCheckboxChangeNewBorn={this.handleCheckboxChangeNewBorn}
-                        selectedClaimsTypes={this.state.selectedClaimsTypes}
-                        patientDisposition={this.state.patientDisposition}
-                        essentialNewbornCare={this.state.essentialNewbornCare}
-                        claim={this.state.claim}
-                        handleInputChangeclaim={this.handleInputChangeclaim}
-                        print={this.print}
-                        options={this.state.options}
-                        options2={this.state.options2}
-                        selectedOption={this.state.selectedOption}
-                        selectedTypeOfAccomodation={
-                            this.state.selectedTypeOfAccomodation
-                        }
-                        diagnosCodeData={this.state.diagnosCodeData}
-                        handleDataChange={this.handleDataChange}
-                        />
-                    </CustomTabPanel>
-                </Box>
+            <Box
+              sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+            >
+              <Tabs
+                position="fixed"
+                value={this.state.value}
+                onChange={this.handleChange}
+                indicatorColor="secondary"
+                aria-label="basic tabs example"
+              >
+                {/* <Tabs value={this.state.value} onChange={this.handleChange} indicatorColor="secondary" aria-label="simple tabs example"> */}
+                <Tab
+                  label={
+                    <div>
+                      <span>
+                        <b>CF1</b>
+                      </span>
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  label={
+                    <div>
+                      <span>
+                        <b>CF2</b>
+                      </span>
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+              </Tabs>
+              <Box sx={{ p: 2, overflowY: "auto", flexGrow: 1 }}>
+                <CustomTabPanel value={this.state.value} index={0}>
+                  <Forms
+                    handleClick={this.handleSubmit}
+                    onchange={this.handleInputChange}
+                    handleSelectChangeMember={this.handleSelectChangeMember}
+                    itemCf={this.state.itemcf1}
+                    memberDataPin={this.state.memberData.pin}
+                    searchText={this.state.searchText}
+                    employerData={this.state.employerData}
+                    searchEmployer={this.state.searchEmployer}
+                    selectedObject={this.state.selectedObject}
+                    selectedOption={this.state.selectedEmployerOption}
+                    updateEmployerData={this.updateEmployerData}
+                    handleChangeSelectEmp={this.handleChangeSelectEmp}
+                  />
+                </CustomTabPanel>
+                <CustomTabPanel value={this.state.value} index={1}>
+                  <Forms2
+                    isTransfered={this.state.isTransfered}
+                    specialConsideration={this.state.specialConsideration}
+                    isSpecialCon={this.state.specialCon}
+                    dateAdmitedCount={dateAdmitedCounts}
+                    startDayAdmited={startDayAdmits}
+                    startMonthAdmited={month}
+                    startYearAdmited={year}
+                    patienCon={this.state.patienCon}
+                    claimsType={this.state.claimsType}
+                    // itemcf={this.state.itemcf2}
+                    itemCf={this.state.itemcf2}
+                    handleClick={this.handleSubmit}
+                    handleToggle={this.handleToggleIsTrasfered}
+                    handleClickCheckBox={this.handleClickCheckBox}
+                    handleDate={this.handleDate}
+                    onchange={this.handleInputChanges}
+                    handleClickCheckBoxSpeConsideration={
+                      this.handleClickCheckBoxSpeConsideration
+                    }
+                    handleClickCheckBoxPatientCon={
+                      this.handleClickCheckBoxPatientCon
+                    }
+                    handleSendSelection={this.handleSendSelection}
+                    handleCheckboxChange={this.handleCheckboxChange}
+                    handleCheckboxChangeAccomondation={
+                      this.handleCheckboxChangeAccomondation
+                    }
+                    handleTimeChange={this.handleTimeChange}
+                    handleDocURLChange={this.handleDocURLChange}
+                    handleCheckboxChangeTBtype={this.handleCheckboxChangeTBtype}
+                    handleCheckboxChanges={this.handleCheckboxChanges}
+                    options3={this.state.options3}
+                    checkedDates={this.state.checkedDates}
+                    pTBType={this.state.pTBType}
+                    checkedDatesHemodialysis={
+                      this.state.checkedDatesHemodialysis
+                    }
+                    checkedDatesBloodTransfusion={
+                      this.state.checkedDatesBloodTransfusion
+                    }
+                    checkedDatesPeritoneal={this.state.checkedDatesPeritoneal}
+                    checkedDatesBrachytherapy={
+                      this.state.checkedDatesBrachytherapy
+                    }
+                    checkedDatesRadiotherapyLINAC={
+                      this.state.checkedDatesRadiotherapyLINAC
+                    }
+                    checkedDatesChemotherapy={
+                      this.state.checkedDatesChemotherapy
+                    }
+                    checkedDatesRadiotherapyCOBALT={
+                      this.state.checkedDatesRadiotherapyCOBALT
+                    }
+                    checkedDatesDebridement={this.state.checkedDatesDebridement}
+                    checkedDatesRadiotherapyIMRT={
+                      this.state.checkedDatesRadiotherapyIMRT
+                    }
+                    handleCheckboxChangeHemodialysis={
+                      this.handleCheckboxChangeHemodialysis
+                    }
+                    handleCheckboxChangeBloodTransfusion={
+                      this.handleCheckboxChangeBloodTransfusion
+                    }
+                    handleCheckboxChangePeritoneal={
+                      this.handleCheckboxChangePeritoneal
+                    }
+                    handleCheckboxChangeBrachytherapy={
+                      this.handleCheckboxChangeBrachytherapy
+                    }
+                    handleCheckboxChangeRadiotherapyLINAC={
+                      this.handleCheckboxChangeRadiotherapyLINAC
+                    }
+                    handleCheckboxChangeChemotherapy={
+                      this.handleCheckboxChangeChemotherapy
+                    }
+                    handleCheckboxChangeRadiotherapyCOBALT={
+                      this.handleCheckboxChangeRadiotherapyCOBALT
+                    }
+                    handleCheckboxChangeDebridement={
+                      this.handleCheckboxChangeDebridement
+                    }
+                    handleCheckboxChangeRadiotherapyIMRT={
+                      this.handleCheckboxChangeRadiotherapyIMRT
+                    }
+                    handleClickCheckBoxClaimsType={
+                      this.handleClickCheckBoxClaimsType
+                    }
+                    handleCheckboxChangeNewBorn={
+                      this.handleCheckboxChangeNewBorn
+                    }
+                    selectedClaimsTypes={this.state.selectedClaimsTypes}
+                    patientDisposition={this.state.patientDisposition}
+                    essentialNewbornCare={this.state.essentialNewbornCare}
+                    claim={this.state.claim}
+                    handleInputChangeclaim={this.handleInputChangeclaim}
+                    print={this.print}
+                    options={this.state.options}
+                    options2={this.state.options2}
+                    selectedOption={this.state.selectedOption}
+                    selectedTypeOfAccomodation={
+                      this.state.selectedTypeOfAccomodation
+                    }
+                    diagnosCodeData={this.state.diagnosCodeData}
+                    handleDataChange={this.handleDataChange}
+                  />
+                </CustomTabPanel>
+              </Box>
             </Box>
           ) : (
-           ''
+            ""
           )}
 
           <SimplePopUp

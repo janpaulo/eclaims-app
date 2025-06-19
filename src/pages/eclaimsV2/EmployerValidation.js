@@ -21,7 +21,7 @@ import xml2js from "xml2js";
 const CIPHER_KEY_LEN = 32;
 const passphrase = "PHilheaLthDuMmyciPHerKeyS";
 
-const EmployerValidation = ({ searchEmployer, updateEmployerData }) => {
+const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) => {
   const [loading, setLoading] = useState(false);
   const [isData, setIsData] = useState(false);
   const [searchText, setSearchText] = useState(searchEmployer || {});
@@ -38,20 +38,21 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData }) => {
     setIsData(false);
     setLoading(true);
     setResults(null);
-
     const item = {
-      ...searchText,
-      pUserName: process.env.REACT_APP_USERNAME,
-      pUserPassword: "",
-      pHospitalCode: process.env.REACT_APP_HOSPITALCODE,
+      philhealthno: searchText.pPen || "",
+      employername:searchText.employerName || "",
     };
 
     axios
       .post(`${process.env.REACT_APP_NEW_PHIC_URL}/SearchEmployer`, item, {
-        headers: { "Content-Type": "text/plain" },
+        headers: {
+          accreno: authUser.hospital.accreditation_num,
+          softwarecertid: authUser.hospital.username_code,
+          "Content-Type": "text/plain",
+        },
       })
       .then((resp) => {
-        setResults(resp.data)
+        setResults(resp.data);
       })
       .catch((error) => {
         setLoading(false);
@@ -59,7 +60,6 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData }) => {
         console.error("Error:", error);
       });
   };
-
 
   return (
     <div>

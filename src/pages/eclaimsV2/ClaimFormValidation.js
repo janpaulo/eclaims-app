@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Grid,
@@ -7,9 +7,16 @@ import {
   Paper,
   Button,
   Snackbar,
-  Alert
-} from '@mui/material';
-import axios from 'axios';
+  Alert,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
+  FormControl,
+  Divider
+} from "@mui/material";
+import axios from "axios";
+import moment from "moment";
 
 const initialData = {
   hospitalCode: "300806",
@@ -22,10 +29,10 @@ const initialData = {
     maidenname: "",
     suffix: "",
     sex: "M",
-    dateOfBirth: "01-12-1974"
+    dateOfBirth: moment(new Date("01-12-1974")).format("YYYY-MM-DD"), //"11-18-1953", "01-12-1974",
   },
   patientIs: "M",
-  admissionDate: "08-15-2024",
+  admissionDate: moment(new Date("08-15-2024")).format("YYYY-MM-DD"), // "08-15-2024",
   patientPIN: "190270634013",
   patientBasicInformation: {
     lastname: "EVRSFT LN ELEVEN",
@@ -34,21 +41,25 @@ const initialData = {
     maidenname: "",
     suffix: "",
     sex: "M",
-    dateOfBirth: "01-12-1974"
+    dateOfBirth: moment(new Date("01-12-1974")).format("YYYY-MM-DD"), //"11-18-1953", "01-12-1974",
   },
   membershipType: "S",
   pEN: "",
   employerName: "",
-  isFinal: "1"
+  isFinal: "1",
 };
 
-const ClaimFormValidation = () => {
+const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultData}) => {
   const [formData, setFormData] = useState(initialData);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleChange = (path, value) => {
-    const keys = path.split('.');
-    setFormData(prev => {
+    const keys = path.split(".");
+    setFormData((prev) => {
       const updated = { ...prev };
       let nested = updated;
       for (let i = 0; i < keys.length - 1; i++) {
@@ -61,20 +72,60 @@ const ClaimFormValidation = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('/isClaimsEligible', formData);
-      setSnackbar({ open: true, message: 'Submitted successfully!', severity: 'success' });
-      console.log('Response:', response.data);
+      const formatDate = (date) =>
+        date ? moment(date).format("MM-DD-YYYY") : "";
+
+      const formattedForm = {
+        ...formData,
+        memberBasicInformation: {
+          ...formData.memberBasicInformation,
+          dateOfBirth: formatDate(formData.memberBasicInformation?.dateOfBirth),
+        },
+        patientBasicInformation: {
+          ...formData.patientBasicInformation,
+          dateOfBirth: formatDate(
+            formData.patientBasicInformation?.dateOfBirth
+          ),
+        },
+        admissionDate: formatDate(formData.admissionDate),
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/IsClaimEligible`,
+        formattedForm,
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.username_code,
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+
+      setSnackbar({
+        open: true,
+        message:
+          "Member is eligible refference no." +
+          response.data.result.referenceno,
+        severity: "success",
+      });
+      console.log(response.data.result.referenceno)
+      setIsPbef(response.data.result.isok === "YES");
+      setPbefResultData(response.data.result)
+      setPbefData(formData);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Submission failed. Please try again.', severity: 'error' });
-      console.error('Error:', error);
+      const errorMessage =
+        error.response?.data?.message || "Submission failed. Please try again.";
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
+      console.error("Error:", error);
     }
   };
 
   return (
     <Paper sx={{ p: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        Claim Form
-      </Typography>
 
       <Box mb={3}>
         <Typography variant="subtitle1">General Info</Typography>
@@ -84,16 +135,26 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Hospital Code"
               value={formData.hospitalCode}
-              onChange={e => handleChange('hospitalCode', e.target.value)}
+              onChange={(e) => handleChange("hospitalCode", e.target.value)}
             />
           </Grid>
           <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="For OPD Hemodialysis Claim"
-              value={formData.isForOPDHemodialysisClaim}
-              onChange={e => handleChange('isForOPDHemodialysisClaim', e.target.value)}
-            />
+            <FormControl component="fieldset" fullWidth>
+              <FormLabel component="legend">
+                For OPD Hemodialysis Claim
+              </FormLabel>
+              <RadioGroup
+                row
+                name="isForOPDHemodialysisClaim"
+                value={formData.isForOPDHemodialysisClaim}
+                onChange={(e) =>
+                  handleChange("isForOPDHemodialysisClaim", e.target.value)
+                }
+              >
+                <FormControlLabel value="Y" control={<Radio />} label="Yes" />
+                <FormControlLabel value="N" control={<Radio />} label="No" />
+              </RadioGroup>
+            </FormControl>
           </Grid>
         </Grid>
       </Box>
@@ -101,20 +162,23 @@ const ClaimFormValidation = () => {
       <Box mb={3}>
         <Typography variant="subtitle1">Member Information</Typography>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid item xs={7}>
             <TextField
               fullWidth
               label="Member PIN"
               value={formData.memberPIN}
-              onChange={e => handleChange('memberPIN', e.target.value)}
+              onChange={(e) => handleChange("memberPIN", e.target.value)}
             />
           </Grid>
+          <Grid item xs={5}></Grid>
           <Grid item xs={4}>
             <TextField
               fullWidth
               label="Last Name"
               value={formData.memberBasicInformation.lastname}
-              onChange={e => handleChange('memberBasicInformation.lastname', e.target.value)}
+              onChange={(e) =>
+                handleChange("memberBasicInformation.lastname", e.target.value)
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -122,7 +186,9 @@ const ClaimFormValidation = () => {
               fullWidth
               label="First Name"
               value={formData.memberBasicInformation.firstname}
-              onChange={e => handleChange('memberBasicInformation.firstname', e.target.value)}
+              onChange={(e) =>
+                handleChange("memberBasicInformation.firstname", e.target.value)
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -130,7 +196,12 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Middle Name"
               value={formData.memberBasicInformation.middlename}
-              onChange={e => handleChange('memberBasicInformation.middlename', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "memberBasicInformation.middlename",
+                  e.target.value
+                )
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -138,7 +209,12 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Maiden Name"
               value={formData.memberBasicInformation.maidenname}
-              onChange={e => handleChange('memberBasicInformation.maidenname', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "memberBasicInformation.maidenname",
+                  e.target.value
+                )
+              }
             />
           </Grid>
           <Grid item xs={2}>
@@ -146,23 +222,43 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Suffix"
               value={formData.memberBasicInformation.suffix}
-              onChange={e => handleChange('memberBasicInformation.suffix', e.target.value)}
+              onChange={(e) =>
+                handleChange("memberBasicInformation.suffix", e.target.value)
+              }
             />
           </Grid>
-          <Grid item xs={1}>
-            <TextField
-              fullWidth
-              label="Sex"
-              value={formData.memberBasicInformation.sex}
-              onChange={e => handleChange('memberBasicInformation.sex', e.target.value)}
-            />
+          <Grid item xs={3}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">Sex</FormLabel>
+              <RadioGroup
+                row
+                name="patientBasicInformation.sex"
+                value={formData.memberBasicInformation.sex}
+                onChange={(e) =>
+                  handleChange("memberBasicInformation.sex", e.target.value)
+                }
+              >
+                <FormControlLabel value="M" control={<Radio />} label="Male" />
+                <FormControlLabel
+                  value="F"
+                  control={<Radio />}
+                  label="Female"
+                />
+              </RadioGroup>
+            </FormControl>
           </Grid>
           <Grid item xs={3}>
             <TextField
               fullWidth
+              type="date"
               label="Birth Date"
               value={formData.memberBasicInformation.dateOfBirth}
-              onChange={e => handleChange('memberBasicInformation.dateOfBirth', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "memberBasicInformation.dateOfBirth",
+                  e.target.value
+                )
+              }
             />
           </Grid>
         </Grid>
@@ -176,7 +272,7 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Patient Is"
               value={formData.patientIs}
-              onChange={e => handleChange('patientIs', e.target.value)}
+              onChange={(e) => handleChange("patientIs", e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
@@ -184,15 +280,16 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Patient PIN"
               value={formData.patientPIN}
-              onChange={e => handleChange('patientPIN', e.target.value)}
+              onChange={(e) => handleChange("patientPIN", e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
             <TextField
               fullWidth
+              type="date"
               label="Admission Date"
               value={formData.admissionDate}
-              onChange={e => handleChange('admissionDate', e.target.value)}
+              onChange={(e) => handleChange("admissionDate", e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
@@ -200,7 +297,9 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Last Name"
               value={formData.patientBasicInformation.lastname}
-              onChange={e => handleChange('patientBasicInformation.lastname', e.target.value)}
+              onChange={(e) =>
+                handleChange("patientBasicInformation.lastname", e.target.value)
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -208,7 +307,12 @@ const ClaimFormValidation = () => {
               fullWidth
               label="First Name"
               value={formData.patientBasicInformation.firstname}
-              onChange={e => handleChange('patientBasicInformation.firstname', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "patientBasicInformation.firstname",
+                  e.target.value
+                )
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -216,7 +320,12 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Middle Name"
               value={formData.patientBasicInformation.middlename}
-              onChange={e => handleChange('patientBasicInformation.middlename', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "patientBasicInformation.middlename",
+                  e.target.value
+                )
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -224,7 +333,12 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Maiden Name"
               value={formData.patientBasicInformation.maidenname}
-              onChange={e => handleChange('patientBasicInformation.maidenname', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "patientBasicInformation.maidenname",
+                  e.target.value
+                )
+              }
             />
           </Grid>
           <Grid item xs={2}>
@@ -232,23 +346,43 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Suffix"
               value={formData.patientBasicInformation.suffix}
-              onChange={e => handleChange('patientBasicInformation.suffix', e.target.value)}
+              onChange={(e) =>
+                handleChange("patientBasicInformation.suffix", e.target.value)
+              }
             />
           </Grid>
-          <Grid item xs={1}>
-            <TextField
-              fullWidth
-              label="Sex"
-              value={formData.patientBasicInformation.sex}
-              onChange={e => handleChange('patientBasicInformation.sex', e.target.value)}
-            />
+          <Grid item xs={3}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">Sex</FormLabel>
+              <RadioGroup
+                row
+                name="patientBasicInformation.sex"
+                value={formData.patientBasicInformation.sex}
+                onChange={(e) =>
+                  handleChange("patientBasicInformation.sex", e.target.value)
+                }
+              >
+                <FormControlLabel value="M" control={<Radio />} label="Male" />
+                <FormControlLabel
+                  value="F"
+                  control={<Radio />}
+                  label="Female"
+                />
+              </RadioGroup>
+            </FormControl>
           </Grid>
           <Grid item xs={3}>
             <TextField
               fullWidth
+              type="date"
               label="Birth Date"
               value={formData.patientBasicInformation.dateOfBirth}
-              onChange={e => handleChange('patientBasicInformation.dateOfBirth', e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "patientBasicInformation.dateOfBirth",
+                  e.target.value
+                )
+              }
             />
           </Grid>
         </Grid>
@@ -262,7 +396,7 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Membership Type"
               value={formData.membershipType}
-              onChange={e => handleChange('membershipType', e.target.value)}
+              onChange={(e) => handleChange("membershipType", e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
@@ -270,7 +404,7 @@ const ClaimFormValidation = () => {
               fullWidth
               label="PEN"
               value={formData.pEN}
-              onChange={e => handleChange('pEN', e.target.value)}
+              onChange={(e) => handleChange("pEN", e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
@@ -278,7 +412,7 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Employer Name"
               value={formData.employerName}
-              onChange={e => handleChange('employerName', e.target.value)}
+              onChange={(e) => handleChange("employerName", e.target.value)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -286,7 +420,7 @@ const ClaimFormValidation = () => {
               fullWidth
               label="Final"
               value={formData.isFinal}
-              onChange={e => handleChange('isFinal', e.target.value)}
+              onChange={(e) => handleChange("isFinal", e.target.value)}
             />
           </Grid>
         </Grid>
@@ -302,12 +436,12 @@ const ClaimFormValidation = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbar.message}
         </Alert>
