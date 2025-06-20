@@ -24,6 +24,8 @@ import CF3Form from './pages/cf3Forms/CF3Form'
 import {CSFormMain} from './pages/csForms/CSFormMain'
 import CSForm from './pages/csForms/CSForm'
 import MainCf1 from './pages/eclaimsV2/Main'
+import MainEsoa from './pages/esoaV2/Main'
+
 // import Itembills from '../src/pages/esoa/Itembills'
 
 import Login from '../src/pages/login/Login';
@@ -69,6 +71,7 @@ function App() {
                   <Route exact path="/claim-signature-form"  element={ <CSFormMain authUser={parseUser}/> } />
                   <Route exact path="/csignature_forms"  element={ <CSForm authUser={parseUser}/> } />
                   <Route exact path="/cf1"  element={ <MainCf1 authUser={parseUser}/> } />
+                  <Route exact path="/esoa"  element={ <MainEsoa authUser={parseUser}/> } />
                   
                 </Routes>
 
