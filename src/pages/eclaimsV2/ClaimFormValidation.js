@@ -267,14 +267,31 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
       <Box mb={3}>
         <Typography variant="subtitle1">Patient Information</Typography>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+
+        <Grid item xs={4}>
+            <FormControl component="fieldset" fullWidth>
+              <FormLabel component="legend">
+                  Patient
+              </FormLabel>
+              <RadioGroup
+                row
+                name="patientIs"
+                value={formData.patientIs}
+                onChange={(e) => handleChange("patientIs", e.target.value)}
+              >
+                <FormControlLabel value="M" control={<Radio />} label="Member" />
+                <FormControlLabel value="D" control={<Radio />} label="Dependent" />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          {/* <Grid item xs={4}>
             <TextField
               fullWidth
               label="Patient Is"
               value={formData.patientIs}
               onChange={(e) => handleChange("patientIs", e.target.value)}
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={4}>
             <TextField
               fullWidth
@@ -415,14 +432,15 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
               onChange={(e) => handleChange("employerName", e.target.value)}
             />
           </Grid>
-          <Grid item xs={2}>
+          {/* <Grid item xs={2}> */}
             <TextField
               fullWidth
+              sx={{ display: "none" }}
               label="Final"
               value={formData.isFinal}
               onChange={(e) => handleChange("isFinal", e.target.value)}
             />
-          </Grid>
+          {/* </Grid> */}
         </Grid>
       </Box>
 

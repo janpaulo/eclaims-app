@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Typography,
@@ -6,21 +6,20 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
-  Divider,
 } from "@mui/material";
 
 const SpecialConsiderations = ({
-  formData,
+  formData = {}, // fallback default to avoid undefined error
   setFormData,
   dateAdmitted,
   dateDischarged,
 }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    });
   };
 
   const generateDateRange = (start, end) => {
@@ -41,20 +40,20 @@ const SpecialConsiderations = ({
     const rangeDates = checked
       ? generateDateRange(dateAdmitted, dateDischarged)
       : [];
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: checked,
       [`${name}_dates`]: checked ? rangeDates : [],
-    }));
+    });
   };
 
   const handleDateChange = (e, label, index) => {
     const updatedDates = [...(formData[`${label}_dates`] || [])];
     updatedDates[index] = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [`${label}_dates`]: updatedDates,
-    }));
+    });
   };
 
   const renderDateCheckboxes = (label) => {
@@ -74,10 +73,10 @@ const SpecialConsiderations = ({
                     const updated = e.target.checked
                       ? [...selected, date]
                       : selected.filter((d) => d !== date);
-                    setFormData((prev) => ({
-                      ...prev,
+                    setFormData({
+                      ...formData,
                       [`${label}_selectedDates`]: updated,
-                    }));
+                    });
                   }}
                 />
               }
@@ -91,15 +90,14 @@ const SpecialConsiderations = ({
 
   return (
     <Box p={2}>
-      <Typography  gutterBottom>
-        8. Special Considerations:
-      </Typography>
+      <Typography gutterBottom>8. Special Considerations:</Typography>
 
-      <Typography variant="body1">
+      <Typography variant="body1" gutterBottom>
         a. For the following repetitive procedures, check box that applies and
-        enumerate the procedure/sessions dates [mm-dd-yyyy]. For chemotherapy,
+        enumerate the procedure/sessions dates [yyyy-mm-dd]. For chemotherapy,
         see guidelines.
       </Typography>
+
       <Grid container spacing={2}>
         {[
           "Hemodialysis",
@@ -111,7 +109,7 @@ const SpecialConsiderations = ({
           "Chemotherapy",
           "Simple Debridement",
         ].map((label, index) => (
-          <Grid item xs={4} key={index}>
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -136,8 +134,9 @@ const SpecialConsiderations = ({
         value={formData.zBenefitPackageCode || ""}
         onChange={handleChange}
       />
+
       <Typography mt={2}>
-        c. For MCP Package (enumerate four dates [mm-dd-yyyy] of pre-natal
+        c. For MCP Package (enumerate four dates [yyyy-mm-dd] of pre-natal
         check-ups)
       </Typography>
       <Grid container spacing={2}>
@@ -248,41 +247,6 @@ const SpecialConsiderations = ({
             />
           </Grid>
         ))}
-      </Grid>
-
-      <Divider sx={{ my: 3 }} />
-
-      <Typography variant="h6" gutterBottom>
-        9. PhilHealth Benefits:
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            name="ICD10orRVSCode"
-            label="ICD 10 or RVS Code"
-            fullWidth
-            value={formData.ICD10orRVSCode || ""}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            name="firstCaseRate"
-            label="First Case Rate"
-            fullWidth
-            value={formData.firstCaseRate || ""}
-            onChange={handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            name="secondCaseRate"
-            label="Second Case Rate"
-            fullWidth
-            value={formData.secondCaseRate || ""}
-            onChange={handleChange}
-          />
-        </Grid>
       </Grid>
     </Box>
   );

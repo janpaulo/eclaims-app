@@ -1,4 +1,3 @@
-
 import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -61,25 +60,26 @@ class Forms extends React.Component {
         <Box id="fullWidth">
           {/* Room and Board Section */}
           <Paper sx={{ marginBottom: 2, padding: 2 }} elevation={3}>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <InputLabel>
-                Philhealth Accreditation No. (PAN) of health Care Institution :
-              </InputLabel>
-              <TextField
-                id="outlined-multiline-flexible"
-                fullWidth
-                name="pHciPan"
-                value={this.props.item.pHciPan}
-                size="small"
-                onChange={this.props.handleInputChangePen}
-              />
-            </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <InputLabel>
+                  Philhealth Accreditation No. (PAN) of health Care Institution
+                  :
+                </InputLabel>
+                <TextField
+                  id="outlined-multiline-flexible"
+                  fullWidth
+                  name="pHciPan"
+                  value={this.props.item.pHciPan}
+                  size="small"
+                  onChange={this.props.handleInputChangePen}
+                />
+              </Grid>
             </Grid>
             <Typography variant="h6" gutterBottom>
               Room And Board
             </Typography>
-            
+
             <Grid container spacing={2}>
               {[
                 "Senior Citizen Discount",
@@ -273,7 +273,7 @@ class Forms extends React.Component {
           />
         </Paper>
 
-          <ItemizzedBill />
+        <ItemizzedBill />
 
         <Paper sx={{ marginBottom: 2, padding: 2 }} elevation={3}>
           <Itembills

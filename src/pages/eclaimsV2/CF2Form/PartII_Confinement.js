@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -12,58 +12,105 @@ import {
   Checkbox,
   FormGroup,
   Divider,
+  MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DiagnosisCode from "./DiagnosisCode";
 import SpecialConsiderations from "./SpecialConsiderations";
-export default function PartII_PatientConfinement({ form, handleChange,setForm }) {
-
+export default function PartII_PatientConfinement({
+  form,
+  handleChange,
+  setForm,
+  prefillData,
+}) {
   const [formData, setFormData] = useState({
     // Initialize all checkbox fields with false
     Hemodialysis: false,
-    'Peritoneal Dialysis': false,
-    'Radiotherapy (LINAC)': false,
-    'Radiotherapy (COBALT)': false,
-    'Blood Transfusion': false,
+    "Peritoneal Dialysis": false,
+    "Radiotherapy (LINAC)": false,
+    "Radiotherapy (COBALT)": false,
+    "Blood Transfusion": false,
     Brachytherapy: false,
     Chemotherapy: false,
-    'Simple Debridement': false,
-    'Intensive Phase': false,
-    'Maintenance Phase': false,
-    'Essential Newborn Care': false,
-    'Newborn Hearing Screening Test': false,
-    'Newborn Screening Test': false,
-    'Immediate drying of newborn': false,
-    'Early skin-to-skin contact': false,
-    'Timely cord clamping': false,
-    'Eye Prophylaxis': false,
-    'Vitamin K administration': false,
-    'BCG vaccination': false,
-    'Hepatitis B vaccination': false,
-    'Non-separation of mother/baby for early breastfeeding initiation': false,
-  
+    "Simple Debridement": false,
+    "Intensive Phase": false,
+    "Maintenance Phase": false,
+    "Essential Newborn Care": false,
+    "Newborn Hearing Screening Test": false,
+    "Newborn Screening Test": false,
+    "Immediate drying of newborn": false,
+    "Early skin-to-skin contact": false,
+    "Timely cord clamping": false,
+    "Eye Prophylaxis": false,
+    "Vitamin K administration": false,
+    "BCG vaccination": false,
+    "Hepatitis B vaccination": false,
+    "Non-separation of mother/baby for early breastfeeding initiation": false,
+
     // Initialize text fields with empty strings
-    zBenefitPackageCode: '',
-    mcpDate1: '',
-    mcpDate2: '',
-    mcpDate3: '',
-    mcpDate4: '',
-    'Day 0 ARV': '',
-    'Day 3 ARV': '',
-    'Day 7 ARV': '',
-    RIG: '',
-    OthersSpecify: '',
-    ICD10orRVSCode: '',
-    firstCaseRate: '',
-    secondCaseRate: '',
+    zBenefitPackageCode: "",
+    mcpDate1: "",
+    mcpDate2: "",
+    mcpDate3: "",
+    mcpDate4: "",
+    "Day 0 ARV": "",
+    "Day 3 ARV": "",
+    "Day 7 ARV": "",
+    RIG: "",
+    OthersSpecify: "",
+    ICD10orRVSCode: "",
+    firstCaseRate: "",
+    secondCaseRate: "",
   });
+
+  // Prefill form when data is available
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      console.log(prefillData);
+
+      setForm({
+        lastName: prefillData.patientBasicInformation?.lastname || "",
+        firstName: prefillData.patientBasicInformation?.firstname || "",
+        middleName: prefillData.patientBasicInformation?.middlename || "",
+        nameExt: prefillData.patientBasicInformation?.nameExtension || "",
+      });
+    }
+  }, [prefillData]);
+
+  useEffect(() => {
+    const stillExists = form.diagnosisCodes?.some(
+      (item) => item.pitemCode === formData.ICD10orRVSCode
+    );
+
+    if (!stillExists && formData.ICD10orRVSCode) {
+      // Reset selection because selected item was removed
+      setFormData((prev) => ({
+        ...prev,
+        ICD10orRVSCode: "",
+        firstCaseRate: "",
+        secondCaseRate: "",
+      }));
+    }
+  }, [form.diagnosisCodes]);
+
+  const handleDiagnosisSelectChange = (e) => {
+    const selectedCode = e.target.value;
+    const selectedDiagnosis = form.diagnosisCodes?.find(
+      (item) => item.pitemCode === selectedCode
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      ICD10orRVSCode: selectedCode,
+      firstCaseRate: selectedDiagnosis?.amount?.[0]?.pprimaryCaseRate || "",
+      secondCaseRate: selectedDiagnosis?.amount?.[0]?.psecondaryCaseRate || "",
+    }));
+  };
 
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography >
-          Part II – Patient Confinement Information
-        </Typography>
+        <Typography>Part II – Patient Confinement Information</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Grid container spacing={2}>
@@ -71,18 +118,17 @@ export default function PartII_PatientConfinement({ form, handleChange,setForm }
           <Grid item xs={12}>
             <Typography>1. Name of Patient:</Typography>
           </Grid>
-          {["lastName", "firstName", "nameExt", "middleName"].map(
-            (field, idx) => (
-              <Grid item xs={12} md={3} key={field}>
-                <TextField
-                  label={field}
-                  name={field}
-                  fullWidth
-                  onChange={handleChange}
-                />
-              </Grid>
-            )
-          )}
+          {["lastName", "firstName", "nameExt", "middleName"].map((field) => (
+            <Grid item xs={12} md={3} key={field}>
+              <TextField
+                label={field}
+                name={field}
+                value={form[field] || ""}
+                fullWidth
+                onChange={handleChange}
+              />
+            </Grid>
+          ))}
 
           {/* 2. Referred by other HCI */}
           <Grid item xs={12}>
@@ -289,15 +335,79 @@ export default function PartII_PatientConfinement({ form, handleChange,setForm }
               onChange={handleChange}
             />
           </Grid>
-          
+
           <Grid item xs={12}>
-            <DiagnosisCode diagnosCodeData={form.diagnosisCodes} onDataChange={(newData) => setForm({ ...form, diagnosisCodes: newData })} />
+            <DiagnosisCode
+              diagnosCodeData={form.diagnosisCodes}
+              onDataChange={(newData) =>
+                setForm({ ...form, diagnosisCodes: newData })
+              }
+            />
           </Grid>
 
-            {/* {console.log(form.diagnosisCodes)} */}
-          
+          {/* {console.log(form.specialConsiderations)} */}
+          {/* {console.log(form.diagnosisCodes)} */}
+
           <Grid item xs={12}>
-            <SpecialConsiderations formData={formData}  setFormData={setFormData} dateAdmitted={form.dateAdmitted} dateDischarged={form.dateDischarged}/>
+            {/* <SpecialConsiderations
+              formData={formData}
+              setFormData={setFormData}
+              
+              dateAdmitted={form.dateAdmitted}
+              dateDischarged={form.dateDischarged}
+            /> */}
+            <SpecialConsiderations
+              formData={form.specialConsiderations}
+              setFormData={(updated) =>
+                setForm((prev) => ({
+                  ...prev,
+                  specialConsiderations: updated,
+                }))
+              }
+              dateAdmitted={form.dateAdmitted}
+              dateDischarged={form.dateDischarged}
+            />
+          </Grid>
+        </Grid>
+        <Divider sx={{ my: 3 }} />
+
+        <Typography variant="h6" gutterBottom>
+          9. PhilHealth Benefits:
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              select
+              name="ICD10orRVSCode"
+              label="ICD 10 or RVS Code"
+              fullWidth
+              value={formData.ICD10orRVSCode || ""}
+              onChange={handleDiagnosisSelectChange}
+            >
+              {form.diagnosisCodes?.map((item) => (
+                <MenuItem key={item.pitemCode} value={item.pitemCode}>
+                  {item.pitemCode} - {item.pcaseRateDescription}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              name="firstCaseRate"
+              label="First Case Rate"
+              fullWidth
+              value={formData.firstCaseRate || ""}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              name="secondCaseRate"
+              label="Second Case Rate"
+              fullWidth
+              value={formData.secondCaseRate || ""}
+              onChange={handleChange}
+            />
           </Grid>
         </Grid>
       </AccordionDetails>

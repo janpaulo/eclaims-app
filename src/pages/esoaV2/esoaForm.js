@@ -14,265 +14,447 @@ import {
 import { Add, Delete, ExpandMore } from "@mui/icons-material";
 
 // --- INITIAL DATA (complete JSON) ------------------------------------------------
+// const initialData = {
+//   pHciPan: "H93005836",
+//   pHciTransmittalId: "4619",
+
+//   SummaryOfFees: {
+//     RoomAndBoard: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "0",
+//         pSeniorCitizenDiscount: "0",
+//         pPWDDiscount: "0",
+//         pPCSO: "0",
+//         pDSWD: "0",
+//         pDOHMAP: "0",
+//         pHMO: "0",
+//       },
+//     },
+
+//     DrugsAndMedicine: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "2695.53",
+//         pSeniorCitizenDiscount: "0.00",
+//         pPWDDiscount: "539.10",
+//         pPCSO: "0.00",
+//         pDSWD: "0.00",
+//         pDOHMAP: "0.00",
+//         pHMO: "0.00",
+//       },
+//       OtherFundSource: [
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//       ],
+//     },
+
+//     LaboratoryAndDiagnostic: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "2832.15",
+//         pSeniorCitizenDiscount: "0.00",
+//         pPWDDiscount: "566.44",
+//         pPCSO: "0.00",
+//         pDSWD: "0.00",
+//         pDOHMAP: "0.00",
+//         pHMO: "0.00",
+//       },
+//       OtherFundSource: [
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//       ],
+//     },
+
+//     OperatingRoomFees: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "11607.15",
+//         pSeniorCitizenDiscount: "0.00",
+//         pPWDDiscount: "2321.43",
+//         pPCSO: "0.00",
+//         pDSWD: "0.00",
+//         pDOHMAP: "0.00",
+//         pHMO: "0.00",
+//       },
+//       OtherFundSource: [
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//       ],
+//     },
+
+//     MedicalSupplies: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "8928.58",
+//         pSeniorCitizenDiscount: "0.00",
+//         pPWDDiscount: "1785.72",
+//         pPCSO: "0.00",
+//         pDSWD: "0.00",
+//         pDOHMAP: "0.00",
+//         pHMO: "0.00",
+//       },
+//       OtherFundSource: [
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//       ],
+//     },
+
+//     Others: {
+//       SummaryOfFee: {
+//         pChargesNetOfApplicableVat: "2678.57",
+//         pSeniorCitizenDiscount: "0.00",
+//         pPWDDiscount: "535.71",
+//         pPCSO: "0.00",
+//         pDSWD: "0.00",
+//         pDOHMAP: "0.00",
+//         pHMO: "0.00",
+//       },
+//       OtherFundSource: [
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
+//       ],
+//     },
+//   },
+
+//   PhilHealth: {
+//     pTotalCaseRateAmount: "5460.00",
+//   },
+
+//   Balance: {
+//     pAmount: "12704.93",
+//   },
+//   ProfessionalFees: {
+//     ProfessionalFee: [
+//       {
+//         ProfessionalInfo: {
+//           pPAN: "1504-2400015-3",
+//           pFirstName: "LIFE",
+//           pMiddleName: "GOES",
+//           pLastName: "ON",
+//           pSuffixName: "",
+//         },
+//         SummaryOfFee: {
+//           pChargesNetOfApplicableVat: "20000.00",
+//           pSeniorCitizenDiscount: "0.00",
+//           pPWDDiscount: "1000.00",
+//           pPCSO: "1000.00",
+//           pDSWD: "2000.00",
+//           pDOHMAP: "3000.00",
+//           pHMO: "5000.00",
+//         },
+//       },
+//       {
+//         ProfessionalInfo: {
+//           pPAN: "1100-2400002-5",
+//           pFirstName: "LIVE",
+//           pMiddleName: "LOVE",
+//           pLastName: "LAUGH",
+//           pSuffixName: "",
+//         },
+//         SummaryOfFee: {
+//           pChargesNetOfApplicableVat: "23928.57",
+//           pSeniorCitizenDiscount: "0.00",
+//           pPWDDiscount: "1785.71",
+//           pPCSO: "0.00",
+//           pDSWD: "0.00",
+//           pDOHMAP: "0.00",
+//           pHMO: "5000.00",
+//         },
+//       },
+//     ],
+//   },
+//   ItemizedBillingItems: {
+//     ItemizedBillingItem: [
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "1727",
+//         pItemName: "PATHOLOGY: CD8",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "1136.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "1136.00",
+//         pCategory: "LaboratoryAndDiagnostic",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "",
+//         pItemName: "CHEMISTRY: AMYLASE",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "1242.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "1242.00",
+//         pCategory: "LaboratoryAndDiagnostic",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "1607",
+//         pItemName: "CHEMISTRY: IONIZED CA",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "794.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "794.00",
+//         pCategory: "LaboratoryAndDiagnostic",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "1898",
+//         pItemName: "OPERATING ROOM",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "5000.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "5000.00",
+//         pCategory: "OperatingRoomFees",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "1898",
+//         pItemName: "OPERATING ROOM",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "8000.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "8000.00",
+//         pCategory: "OperatingRoomFees",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "",
+//         pItemName: "ASSIST FEE",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "2000.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "2000.00",
+//         pCategory: "Others",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "",
+//         pItemName: "PROCEDURE FEE",
+//         pUnitOfMeasurement: "",
+//         pUnitPrice: "1000.00",
+//         pQuantity: "1.00",
+//         pTotalAmount: "1000.00",
+//         pCategory: "Others",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "122",
+//         pItemName: "SYRINGE DISPOSABLE 50CC W/OUT NEEDLE, 25'S/BX",
+//         pUnitOfMeasurement: "BOTTLE",
+//         pUnitPrice: "100.00",
+//         pQuantity: "50.00",
+//         pTotalAmount: "5000.00",
+//         pCategory: "MedicalSupplies",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "3",
+//         pItemName: "ALCOHOL ISOPROPHYL 70%, 500ML.",
+//         pUnitOfMeasurement: "PIECE",
+//         pUnitPrice: "100.00",
+//         pQuantity: "50.00",
+//         pTotalAmount: "5000.00",
+//         pCategory: "MedicalSupplies",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "ASPIR0000000066TAB490000000000",
+//         pItemName: "ASPIRIN 80 mg TABLET",
+//         pUnitOfMeasurement: "PIECE",
+//         pUnitPrice: "166.68",
+//         pQuantity: "10.00",
+//         pTotalAmount: "1666.80",
+//         pCategory: "DrugsAndMedicine",
+//       },
+//       {
+//         pServiceDate: "03-21-2025",
+//         pItemCode: "PARAC0000000047TAB490000000000",
+//         pItemName: "PARACETAMOL 500 mg TABLET",
+//         pUnitOfMeasurement: "PIECE",
+//         pUnitPrice: "135.22",
+//         pQuantity: "10.00",
+//         pTotalAmount: "1352.20",
+//         pCategory: "DrugsAndMedicine",
+//       },
+//     ],
+//   },
+// };
+
 const initialData = {
-  pHciPan: "H93005836",
-  pHciTransmittalId: "4619",
+  pHciPan: "",
+  pHciTransmittalId: "",
 
   SummaryOfFees: {
     RoomAndBoard: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "0",
-        pSeniorCitizenDiscount: "0",
-        pPWDDiscount: "0",
-        pPCSO: "0",
-        pDSWD: "0",
-        pDOHMAP: "0",
-        pHMO: "0",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
     },
 
     DrugsAndMedicine: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "2695.53",
-        pSeniorCitizenDiscount: "0.00",
-        pPWDDiscount: "539.10",
-        pPCSO: "0.00",
-        pDSWD: "0.00",
-        pDOHMAP: "0.00",
-        pHMO: "0.00",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
-      OtherFundSource: [
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-      ],
+      OtherFundSource: [],
     },
 
     LaboratoryAndDiagnostic: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "2832.15",
-        pSeniorCitizenDiscount: "0.00",
-        pPWDDiscount: "566.44",
-        pPCSO: "0.00",
-        pDSWD: "0.00",
-        pDOHMAP: "0.00",
-        pHMO: "0.00",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
-      OtherFundSource: [
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-      ],
+      OtherFundSource: [],
     },
 
     OperatingRoomFees: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "11607.15",
-        pSeniorCitizenDiscount: "0.00",
-        pPWDDiscount: "2321.43",
-        pPCSO: "0.00",
-        pDSWD: "0.00",
-        pDOHMAP: "0.00",
-        pHMO: "0.00",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
-      OtherFundSource: [
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-      ],
+      OtherFundSource: [],
     },
 
     MedicalSupplies: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "8928.58",
-        pSeniorCitizenDiscount: "0.00",
-        pPWDDiscount: "1785.72",
-        pPCSO: "0.00",
-        pDSWD: "0.00",
-        pDOHMAP: "0.00",
-        pHMO: "0.00",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
-      OtherFundSource: [
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-      ],
+      OtherFundSource: [],
     },
 
     Others: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "2678.57",
-        pSeniorCitizenDiscount: "0.00",
-        pPWDDiscount: "535.71",
-        pPCSO: "0.00",
-        pDSWD: "0.00",
-        pDOHMAP: "0.00",
-        pHMO: "0.00",
+        pChargesNetOfApplicableVat: "",
+        pSeniorCitizenDiscount: "",
+        pPWDDiscount: "",
+        pPCSO: "",
+        pDSWD: "",
+        pDOHMAP: "",
+        pHMO: "",
       },
-      OtherFundSource: [
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-        { pDescription: "Courtesy Discount", pAmount: "452.85" },
-      ],
+      OtherFundSource: [],
     },
   },
 
   PhilHealth: {
-    pTotalCaseRateAmount: "5460.00",
+    pTotalCaseRateAmount: "",
   },
 
   Balance: {
-    pAmount: "12704.93",
+    pAmount: "",
   },
+
   ProfessionalFees: {
     ProfessionalFee: [
       {
         ProfessionalInfo: {
-          pPAN: "1504-2400015-3",
-          pFirstName: "LIFE",
-          pMiddleName: "GOES",
-          pLastName: "ON",
+          pPAN: "",
+          pFirstName: "",
+          pMiddleName: "",
+          pLastName: "",
           pSuffixName: "",
         },
         SummaryOfFee: {
-          pChargesNetOfApplicableVat: "20000.00",
-          pSeniorCitizenDiscount: "0.00",
-          pPWDDiscount: "1000.00",
-          pPCSO: "1000.00",
-          pDSWD: "2000.00",
-          pDOHMAP: "3000.00",
-          pHMO: "5000.00",
+          pChargesNetOfApplicableVat: "",
+          pSeniorCitizenDiscount: "",
+          pPWDDiscount: "",
+          pPCSO: "",
+          pDSWD: "",
+          pDOHMAP: "",
+          pHMO: "",
         },
       },
       {
         ProfessionalInfo: {
-          pPAN: "1100-2400002-5",
-          pFirstName: "LIVE",
-          pMiddleName: "LOVE",
-          pLastName: "LAUGH",
+          pPAN: "",
+          pFirstName: "",
+          pMiddleName: "",
+          pLastName: "",
           pSuffixName: "",
         },
         SummaryOfFee: {
-          pChargesNetOfApplicableVat: "23928.57",
-          pSeniorCitizenDiscount: "0.00",
-          pPWDDiscount: "1785.71",
-          pPCSO: "0.00",
-          pDSWD: "0.00",
-          pDOHMAP: "0.00",
-          pHMO: "5000.00",
+          pChargesNetOfApplicableVat: "",
+          pSeniorCitizenDiscount: "",
+          pPWDDiscount: "",
+          pPCSO: "",
+          pDSWD: "",
+          pDOHMAP: "",
+          pHMO: "",
         },
       },
     ],
   },
+
   ItemizedBillingItems: {
     ItemizedBillingItem: [
       {
-        pServiceDate: "03-21-2025",
-        pItemCode: "1727",
-        pItemName: "PATHOLOGY: CD8",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "1136.00",
-        pQuantity: "1.00",
-        pTotalAmount: "1136.00",
-        pCategory: "LaboratoryAndDiagnostic",
-      },
-      {
-        pServiceDate: "03-21-2025",
+        pServiceDate: "",
         pItemCode: "",
-        pItemName: "CHEMISTRY: AMYLASE",
+        pItemName: "",
         pUnitOfMeasurement: "",
-        pUnitPrice: "1242.00",
-        pQuantity: "1.00",
-        pTotalAmount: "1242.00",
-        pCategory: "LaboratoryAndDiagnostic",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "1607",
-        pItemName: "CHEMISTRY: IONIZED CA",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "794.00",
-        pQuantity: "1.00",
-        pTotalAmount: "794.00",
-        pCategory: "LaboratoryAndDiagnostic",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "1898",
-        pItemName: "OPERATING ROOM",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "5000.00",
-        pQuantity: "1.00",
-        pTotalAmount: "5000.00",
-        pCategory: "OperatingRoomFees",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "1898",
-        pItemName: "OPERATING ROOM",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "8000.00",
-        pQuantity: "1.00",
-        pTotalAmount: "8000.00",
-        pCategory: "OperatingRoomFees",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "",
-        pItemName: "ASSIST FEE",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "2000.00",
-        pQuantity: "1.00",
-        pTotalAmount: "2000.00",
-        pCategory: "Others",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "",
-        pItemName: "PROCEDURE FEE",
-        pUnitOfMeasurement: "",
-        pUnitPrice: "1000.00",
-        pQuantity: "1.00",
-        pTotalAmount: "1000.00",
-        pCategory: "Others",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "122",
-        pItemName: "SYRINGE DISPOSABLE 50CC W/OUT NEEDLE, 25'S/BX",
-        pUnitOfMeasurement: "BOTTLE",
-        pUnitPrice: "100.00",
-        pQuantity: "50.00",
-        pTotalAmount: "5000.00",
-        pCategory: "MedicalSupplies",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "3",
-        pItemName: "ALCOHOL ISOPROPHYL 70%, 500ML.",
-        pUnitOfMeasurement: "PIECE",
-        pUnitPrice: "100.00",
-        pQuantity: "50.00",
-        pTotalAmount: "5000.00",
-        pCategory: "MedicalSupplies",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "ASPIR0000000066TAB490000000000",
-        pItemName: "ASPIRIN 80 mg TABLET",
-        pUnitOfMeasurement: "PIECE",
-        pUnitPrice: "166.68",
-        pQuantity: "10.00",
-        pTotalAmount: "1666.80",
-        pCategory: "DrugsAndMedicine",
-      },
-      {
-        pServiceDate: "03-21-2025",
-        pItemCode: "PARAC0000000047TAB490000000000",
-        pItemName: "PARACETAMOL 500 mg TABLET",
-        pUnitOfMeasurement: "PIECE",
-        pUnitPrice: "135.22",
-        pQuantity: "10.00",
-        pTotalAmount: "1352.20",
-        pCategory: "DrugsAndMedicine",
+        pUnitPrice: "",
+        pQuantity: "",
+        pTotalAmount: "",
+        pCategory: "",
       },
     ],
   },
+};
+
+
+
+
+// Label formatter function
+const formatLabel = (key) => {
+  const customLabels = {
+    pChargesNetOfApplicableVat: "Charges (Net of VAT)",
+    pSeniorCitizenDiscount: "Senior Citizen Discount",
+    pPWDDiscount: "PWD Discount",
+    pPCSO: "PCSO",
+    pDSWD: "DSWD",
+    pDOHMAP: "DOH MAP",
+    pHMO: "HMO",
+    pTotalCaseRateAmount: "Total Case Rate Amount",
+    pAmount: "Balance Amount",
+    pPAN: "PAN",
+    pFirstName: "First Name",
+    pMiddleName: "Middle Name",
+    pLastName: "Last Name",
+    pSuffixName: "Suffix Name",
+    pServiceDate: "Service Date",
+    pItemCode: "Item Code",
+    pItemName: "Item Name",
+    pUnitOfMeasurement: "Unit of Measurement",
+    pUnitPrice: "Unit Price",
+    pQuantity: "Quantity",
+    pTotalAmount: "Total Amount",
+    pCategory: "Category",
+    pDescription: "Description",
+  };
+
+  return customLabels[key] || key.replace(/([a-z])([A-Z])/g, "$1 $2");
 };
 
 // --- COMPONENT --------------------------------------------------------------------
@@ -424,7 +606,7 @@ const EsoaForm = () => {
   return (
     <Box p={2}>
       <Typography variant="h4" gutterBottom>
-        PhilHealth Billing Form
+        Electronic Statement of Account Form
       </Typography>
 
       {/* Summary of Fees sections */}
@@ -444,7 +626,7 @@ const EsoaForm = () => {
                       <Grid item xs={12} sm={6} md={4} key={key}>
                         <TextField
                           fullWidth
-                          label={key}
+                          label={formatLabel(key)}
                           value={value}
                           onChange={(e) =>
                             handleSummaryField(sectionName, key, e.target.value)
@@ -546,28 +728,6 @@ const EsoaForm = () => {
         </Grid>
       </Paper>
 
-      {/* Balance Section
-      <Accordion defaultExpanded sx={{ mb: 2 }}>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6">Balance</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper sx={{ p: 2 }} variant="outlined">
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="Amount"
-                  value={formData.Balance.pAmount}
-                  onChange={(e) =>
-                    handleBalanceChange("pAmount", e.target.value)
-                  }
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </AccordionDetails>
-      </Accordion> */}
 
       {/* PROFESSIONAL FEES */}
       <Accordion defaultExpanded sx={{ mb: 2 }}>
@@ -585,7 +745,7 @@ const EsoaForm = () => {
                   <Grid item xs={12} sm={6} md={4} key={key}>
                     <TextField
                       fullWidth
-                      label={key}
+                      label={formatLabel(key)}
                       value={value}
                       onChange={(e) =>
                         handleProfessionalFeeChange(
@@ -602,7 +762,7 @@ const EsoaForm = () => {
                   <Grid item xs={12} sm={6} md={4} key={key}>
                     <TextField
                       fullWidth
-                      label={key}
+                      label={formatLabel(key)}
                       value={value}
                       onChange={(e) =>
                         handleProfessionalFeeChange(
@@ -652,7 +812,7 @@ const EsoaForm = () => {
                     <Grid item xs={12} sm={6} md={4} key={key}>
                       <TextField
                         fullWidth
-                        label={key}
+                        label={formatLabel(key)}
                         value={value}
                         onChange={(e) =>
                           handleItemizedChange(idx, key, e.target.value)

@@ -34,7 +34,7 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
     landline: "",
     mobile: "",
     email: "",
-    isPatientMember: "yes",
+    isPatientMember: "",
     pinDependent: "",
     depLastName: "",
     depFirstName: "",
@@ -69,6 +69,7 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
   
       setForm({
         pinMember: prefillData.memberPIN || "",
+        isPatientMember: prefillData.patientIs || "",
         lastname: prefillData.memberBasicInformation?.lastname || "",
         firstname: prefillData.memberBasicInformation?.firstname || "",
         middlename: prefillData.memberBasicInformation?.middlename || "",
@@ -84,14 +85,22 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
 
   // Expose methods to parent (Main.js)
   useImperativeHandle(ref, () => ({
+    // validateForm: () => {
+    //   // Add your validation logic here
+    //   return !!(form.pinMember && form.firstName && form.dobMember);
+    // },
+    // handleSubmit: () => {
+    //   // Submit logic (e.g., API call)
+    //   console.log("Submitting CF1:", form);
+    // },
+
     validateForm: () => {
-      // Add your validation logic here
-      return !!(form.pinMember && form.firstName && form.dobMember);
+      return !!(form.pinMember && form.firstname && form.dobMember);
     },
     handleSubmit: () => {
-      // Submit logic (e.g., API call)
       console.log("Submitting CF1:", form);
     },
+    getFormData: () => form, // <-- MISSING, needed for Main.js
   }));
 
   const handleChange = (e) => {
@@ -103,7 +112,7 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
   };
 
   return (
-    <form onSubmit={useImperativeHandle}>
+    <form >
       <Typography variant="h6">Part I – Member Information</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
@@ -186,12 +195,12 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
             value={form.isPatientMember}
             onChange={handleChange}
           >
-            <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio />} label="No" />
+            <FormControlLabel value="M" control={<Radio />} label="Yes" />
+            <FormControlLabel value="D" control={<Radio />} label="No" />
           </RadioGroup>
         </Grid>
 
-        {form.isPatientMember === "no" && (
+        {form.isPatientMember === "D" && (
           <>
             <Grid item xs={12} md={12}>
               <Divider>
@@ -257,7 +266,7 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
           </>
         )}
 
-        <Grid item xs={12} md={12}>
+        {/* <Grid item xs={12} md={12}>
           <Divider>
             <Typography variant="h6">
               Part III – Member Certification
@@ -305,7 +314,7 @@ const ClaimForm1 = forwardRef(({ prefillData,authUser }, ref) => {
             onChange={handleChange}
             fullWidth
           />
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <Typography>Representative Relationship to Member</Typography>
           <TextField

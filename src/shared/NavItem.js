@@ -100,9 +100,10 @@ const items = [
   { name: "Dashboard", icon: <HomeTwoToneIcon />, path: "" },
   { name: "eSOA", icon: <AddToQueueOutlinedIcon />, path: "esoa_table_list" },
   { name: "claims", icon: <VaccinesIcon />, path: "claims" },
-  { name: "Claim Signature Form", icon: <MedicalInformationOutlinedIcon />, path: "claim-signature-form" },
-  { name: "CForm 3", icon: <ListAltOutlinedIcon />, path: "cf3" },
-  { name: "CForm 4", icon: <SummarizeOutlinedIcon />, path: "cf4" },
+  // { name: "Claim Signature Form", icon: <MedicalInformationOutlinedIcon />, path: "claim-signature-form" },
+  { name: "Claim Form 3", icon: <ListAltOutlinedIcon />, path: "cf3" },
+  { name: "Claim Form 4", icon: <SummarizeOutlinedIcon />, path: "cf4" },
+  { name: "Claim Form 5", icon: <SummarizeOutlinedIcon />, path: "cf5" },
   { name: "Hospitals", icon: <ClosedCaptionDisabledRoundedIcon />, path: "hospitals" },
   {
     name: "User Management",

@@ -15,6 +15,7 @@ import axios from "axios";
 import ClaimForm1 from "./ClaimForm1";
 import ClaimForm2 from "./CF2Form/CF2Form";
 import ClaimFormValidation from "./ClaimFormValidation";
+import AttachmentForm from "./AttachmentForm";
 
 function Main({ authUser }) {
   const [tab, setTab] = useState(0);
@@ -23,31 +24,41 @@ function Main({ authUser }) {
   const [isPbef, setIsPbef] = useState(false);
   const [pbefData, setPbefData] = useState({});
   const [pbefResultData, setPbefResultData] = useState({});
-  const [showTabs, setShowTabs] = useState(false); // NEW
+  const [showTabs, setShowTabs] = useState(false);
 
+  const cf1Ref = useRef();
+  const cf2Ref = useRef();
+  const cf3Ref = useRef();
   useEffect(() => {
     if (isPbef) {
       const timer = setTimeout(() => {
         setShowTabs(true);
-      }, 1000); // 1 second delay
+      }, 1000);
 
-      return () => clearTimeout(timer); // cleanup
+      return () => clearTimeout(timer);
     }
   }, [isPbef]);
-
-  const cf1Ref = useRef();
-  const cf2Ref = useRef();
 
   const handleSubmitAll = () => {
     const valid1 = cf1Ref.current?.validateForm?.();
     const valid2 = cf2Ref.current?.validateForm?.();
 
+    const formData1 = cf1Ref.current?.getFormData?.();
+    const formData2 = cf2Ref.current?.getFormData?.();
+    const formData3 = cf3Ref.current?.getFormData?.();
+
+
+    console.log("CF1 data:", formData1);
+    console.log("CF2 data:", formData2);
+    console.log("CF3 data:", formData3);
+
     setCf1Valid(valid1);
     setCf2Valid(valid2);
 
     if (valid1 && valid2) {
-      cf1Ref.current.handleSubmit();
-      cf2Ref.current.handleSubmit();
+      cf1Ref.current?.handleSubmit?.();
+      cf2Ref.current?.handleSubmit?.();
+      cf3Ref.current?.handleSubmit?.();
       alert("Both CF1 and CF2 submitted successfully!");
     } else {
       alert("Please complete both CF1 and CF2 forms before submitting.");
@@ -76,7 +87,7 @@ function Main({ authUser }) {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url); // cleanup
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF download failed:", error);
       alert("Unable to generate PBEF PDF. Please try again.");
@@ -92,7 +103,6 @@ function Main({ authUser }) {
             <Typography variant="h6" sx={{ mb: 2 }}>
               Validate Claim Eligibility
             </Typography>
-
             <Divider />
             <ClaimFormValidation
               setIsPbef={setIsPbef}
@@ -119,7 +129,6 @@ function Main({ authUser }) {
               </span>
             </Typography>
 
-            {/* {console.log(pbefResultData)} */}
             <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
               <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
                 <Tab label="CF1" />
@@ -128,17 +137,27 @@ function Main({ authUser }) {
               </Tabs>
             </Box>
 
-            {tab === 0 && (
+            {/* Always mount all forms but hide based on tab */}
+            <Box hidden={tab !== 0}>
               <ClaimForm1
                 ref={cf1Ref}
                 prefillData={pbefData}
                 authUser={authUser}
                 pbefResultData={pbefResultData}
               />
-            )}
-            {tab === 1 && (
-              <ClaimForm2 ref={cf2Ref} pbefResultData={pbefResultData} />
-            )}
+            </Box>
+
+            <Box hidden={tab !== 1}>
+              <ClaimForm2
+                ref={cf2Ref}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+              />
+            </Box>
+
+            <Box hidden={tab !== 2}>
+              <AttachmentForm ref={cf3Ref} pbefResultData={pbefResultData} />
+            </Box>
 
             <Box sx={{ mt: 4, textAlign: "right" }}>
               <Button variant="contained" onClick={handleSubmitAll}>

@@ -55,9 +55,49 @@ const initial = {
   referralProvince: "",
   referralZip: "",
   diagnosisCodes: [],
+  specialConsiderations:{
+ Hemodialysis: false,
+    "Peritoneal Dialysis": false,
+    "Radiotherapy (LINAC)": false,
+    "Radiotherapy (COBALT)": false,
+    "Blood Transfusion": false,
+    Brachytherapy: false,
+    Chemotherapy: false,
+    "Simple Debridement": false,
+    "Intensive Phase": false,
+    "Maintenance Phase": false,
+    "Essential Newborn Care": false,
+    "Newborn Hearing Screening Test": false,
+    "Newborn Screening Test": false,
+    "Immediate drying of newborn": false,
+    "Early skin-to-skin contact": false,
+    "Timely cord clamping": false,
+    "Eye Prophylaxis": false,
+    "Vitamin K administration": false,
+    "BCG vaccination": false,
+    "Hepatitis B vaccination": false,
+    "Non-separation of mother/baby for early breastfeeding initiation": false,
+
+    // Initialize text fields with empty strings
+    zBenefitPackageCode: "",
+    mcpDate1: "",
+    mcpDate2: "",
+    mcpDate3: "",
+    mcpDate4: "",
+    "Day 0 ARV": "",
+    "Day 3 ARV": "",
+    "Day 7 ARV": "",
+    RIG: "",
+    OthersSpecify: "",
+    ICD10orRVSCode: "",
+    firstCaseRate: "",
+    secondCaseRate: "",
+  }
+
 };
 
 const CF2Form = forwardRef((props, ref) => {
+  const { prefillData } = props;
   const [data, setData] = useState(initial);
 
   const handleChange = (e) => {
@@ -75,14 +115,17 @@ const CF2Form = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     validateForm: validate,
     handleSubmit: handleSubmit,
+    
+    getFormData: () => data, // <-- MISSING, needed for Main.js
   }));
 
   return (
     <Box sx={{ p: 2 }}>
+      
       <PartI_HCI data={data} onChange={handleChange} />
-      <PartII_Confinement form={data} handleChange={handleChange} setForm={setData}/>
-      <PartIII_Certification data={data} onChange={handleChange}  />
-      <PartIV_HCICert data={data} onChange={handleChange} />
+      <PartII_Confinement form={data} handleChange={handleChange} setForm={setData} prefillData={prefillData}/>
+      {/* <PartIII_Certification data={data} onChange={handleChange}  />
+      <PartIV_HCICert data={data} onChange={handleChange} /> */}
     </Box>
   );
 });
