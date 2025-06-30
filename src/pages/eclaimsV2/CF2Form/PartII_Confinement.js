@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -18,18 +18,14 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DiagnosisCode from "./DiagnosisCode";
 import SpecialConsiderations from "./SpecialConsiderations";
 
-export default function PartII_PatientConfinement({
-  form,
-  handleChange,
-  setForm,
-  prefillData,
-  packageType
-}) {
-  const [formData, setFormData] = useState({
-    ICD10orRVSCode: "",
-    firstCaseRate: "",
-    secondCaseRate: "",
-  });
+const PartII_PatientConfinement = forwardRef(
+  ({ form, handleChange, setForm, prefillData, packageType }, ref) => {
+
+    const [formData, setFormData] = useState({
+      ICD10orRVSCode: "",
+      firstCaseRate: "",
+      secondCaseRate: "",
+    });
 
   // Prefill form when data is available
   useEffect(() => {
@@ -61,24 +57,11 @@ export default function PartII_PatientConfinement({
     }
   }, [form.DIAGNOSIS]);
 
-  const handleDiagnosisSelectChange = (e) => {
-    const selectedCode = e.target.value;
-    const selectedDiagnosis = form.DIAGNOSIS?.find(
-      (item) => item.pitemCode === selectedCode
-    );
-
-    setFormData((prev) => ({
-      ...prev,
-      ICD10orRVSCode: selectedCode,
-      firstCaseRate: selectedDiagnosis?.amount?.[0]?.pprimaryCaseRate || "",
-      secondCaseRate: selectedDiagnosis?.amount?.[0]?.psecondaryCaseRate || "",
-    }));
-  };
 
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>Part II – Patient Confinement Information</Typography>
+        <Typography>PATIENT CONFINEMENT INFORMATION</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Grid container spacing={2}>
@@ -294,7 +277,7 @@ export default function PartII_PatientConfinement({
           </Grid>
 
           {/* 6. Admission Diagnosis/es */}
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <TextField
               label="6. Admission Diagnosis/es"
               name="admissionDiagnosis"
@@ -302,19 +285,28 @@ export default function PartII_PatientConfinement({
               multiline
               onChange={handleChange}
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12}>
-            <DiagnosisCode
+            {/* <DiagnosisCode
               diagnosCodeData={form.DIAGNOSIS}
               onDataChange={(newData) =>
                 setForm({ ...form, DIAGNOSIS: newData })
+              }
+            /> */}
+            <DiagnosisCode 
+              ref={ref}
+              setFormData={(updated) =>
+                setForm((prev) => ({
+                  ...prev,
+                  DIAGNOSIS: updated,
+                }))
               }
             />
           </Grid>
 
           {/* {console.log(form.specialConsiderations)} */}
-          {/* {console.log(form.DIAGNOSIS)} */}
+          {console.log(form.DIAGNOSIS)}
 
           <Grid item xs={12}>
             <SpecialConsiderations
@@ -345,10 +337,11 @@ export default function PartII_PatientConfinement({
               dateDischarged={form.pDischargeDate}
             /> */}
           </Grid>
-          
-
         </Grid>
       </AccordionDetails>
     </Accordion>
   );
-}
+})
+
+
+export default PartII_PatientConfinement;

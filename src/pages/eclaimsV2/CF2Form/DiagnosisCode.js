@@ -1,107 +1,74 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState,useImperativeHandle,forwardRef  } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Box,
   TextField,
-  Button,
-  LinearProgress,
+  Typography,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Checkbox,
+  Button,
+  Grid,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import PositionedSnackbar from "../../../shared/alerts/PositionedSnackbar"; // your snackbar
+import axios from "axios";
 
-const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
-  const [data, setData] = useState(diagnosCodeData);
+const newDischargeGroup = () => ({
+  pDischargeDiagnosis: "",
+  ICDCODEOrRVSCODES: [],
+});
+
+// const DiagnosisCode = ({ onSubmit }) => {
+// const DiagnosisCode = ({ diagnosCodeData, setFormData }) => {
+  
+const DiagnosisCode = forwardRef(
+  ({ diagnosCodeData, setFormData}, ref) => {
+  const [pAdmissionDiagnosis, setAdmissionDiagnosis] = useState("");
+  const [dischargeGroups, setDischargeGroups] = useState([newDischargeGroup()]);
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
   const [caseParam, setCaseParam] = useState({
     icdcode: "",
     rvscode: "",
     description: "",
-    targetdate: "12-31-2024",
+    targetdate: "12-31-2025",
   });
   const [itemSearch, setItemSearch] = useState([]);
-  const [tableData, setTableData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAlert, setIsAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState(null);
+  const [tempItem, setTempItem] = useState(null);
+  const [targetGroupIdx, setTargetGroupIdx] = useState(0);
+  const [searchCache, setSearchCache] = useState([]);
 
-  const handleAlertClose = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsAlert(false);
-  };
-
-  const handleChange = (e) => {
+  const handleCaseChange = (e) => {
     const { name, value } = e.target;
     setCaseParam((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handleChangeTabledata = (e, i) => {
-    const { name, value } = e.target;
-    const updatedData = [...tableData];
-    updatedData[i][name] = value;
-    setTableData(updatedData);
-    onDataChange(updatedData);
-  };
-
-  const handleCheckboxChange = (e, index) => {
-    const { name, value } = e.target;
-    const updatedData = [...tableData];
-    updatedData[index][name] = value;
-    setTableData(updatedData);
-    onDataChange(updatedData);
-  };
-
-  const addToTable = (item) => {
-    if (tableData.some((d) => d.pitemCode === item.pitemCode)) {
-      alert("This item is already in the table.");
-    } else {
-      setTableData((prev) => [...prev, item]);
-      setItemSearch((prev) =>
-        prev.filter((i) => i.pitemCode !== item.pitemCode)
-      );
-    }
-  };
-  const deleteFromTable = (index) => {
-    const removedItem = tableData[index];
-    const updatedTable = tableData.filter((_, i) => i !== index);
-    setTableData(updatedTable);
-    setItemSearch((prev) => [...prev, removedItem]);
-
-    // Notify parent about the updated table
-    onDataChange(updatedTable);
-  };
-
-  const validateFields = (data) => {
-    const errors = [];
-
-    data.forEach((item, index) => {
-      if (!item.pProcedureDate) {
-        errors.push(`Row ${index + 1}: Procedure Date is required.`);
-      }
-      if (!item.pLaterality) {
-        errors.push(`Row ${index + 1}: Laterality is required.`);
-      }
-      if (!item.pRelatedProcedure || item.pRelatedProcedure.trim() === "") {
-        errors.push(`Row ${index + 1}: Related Procedure is required.`);
-      }
+  const clearSearch = () => {
+    setCaseParam({
+      icdcode: "",
+      rvscode: "",
+      description: "",
+      targetdate: "12-31-2025",
     });
-
-    return errors;
+    setItemSearch([]);
   };
-
-  const searchCase = () => {
+  const searchCase = async () => {
     setIsLoading(true);
-    axios
-      .post(
-        process.env.REACT_APP_NEW_PHIC_URL + "/SearchCaseRates",
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/SearchCaseRates`,
         caseParam,
         {
           headers: {
@@ -110,253 +77,367 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
             "Content-Type": "text/plain",
           },
         }
-      )
-      .then((resp) => {
-        const updatedData = resp.data.result.caserates.map((item) => ({
-          ...item,
-          pLaterality: null,
-          pRelatedProcedure: "",
-          pProcedureDate: "",
-        }));
-        setIsLoading(false);
-        setIsAlert(updatedData.length === 0);
-        setAlertMessage(updatedData.length > 0 ? "" : "No data record found");
-        setItemSearch(updatedData);
-      })
-      .catch((error) => {
-        console.error(error);
-        setIsLoading(false);
-      });
+      );
+      const results = res.data.result?.caserates || [];
+      const processed = results.map((item) => ({
+        pitemCode: item.pitemCode,
+        pitemDescription: item.pitemDescription,
+        pRelatedProcedure: item.pitemDescription,
+        pProcedureDate: "",
+        pLaterality: "",
+        amount: item.amount,
+      }));
+      setItemSearch(processed);
+      setSearchCache(processed);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const clearData = () => {
-    setCaseParam({
-      icdcode: "",
-      rvscode: "",
-      description: "",
-      targetdate: "12-31-2025",
-    });
-    setTableData([]);
-    setItemSearch([]);
+  const addDischargeGroup = () => {
+    const updated = [...dischargeGroups, newDischargeGroup()];
+    setDischargeGroups(updated);
+    setTargetGroupIdx(updated.length - 1);
   };
+
+  const removeDischargeItem = (groupIdx, itemIdx) => {
+    const updated = [...dischargeGroups];
+    const [removed] = updated[groupIdx].ICDCODEOrRVSCODES.splice(itemIdx, 1);
+    const code = removed?.ICDCODE?.pICDCode || removed?.RVSCODES?.pRVSCode;
+    const existsInCache = searchCache.find((i) => i.pitemCode === code);
+    if (code && existsInCache) {
+      setItemSearch((prev) => [...prev, existsInCache]);
+    }
+    setDischargeGroups(updated);
+  };
+
+  const addItemToGroup = (item) => {
+    
+    console.log(item)
+    setTempItem(item);
+    setConfirmDialog("confirm");
+  };
+
+  const confirmAdd = () => {
+    if (!tempItem) return;
+    const updated = [...dischargeGroups];
+    const group = updated[targetGroupIdx];
+    const isICD = !!caseParam.icdcode || !!caseParam.description;
+    if (isICD) {
+      group.ICDCODEOrRVSCODES.push({
+        ICDCODE: { pICDCode: tempItem.pitemCode,pRelatedProcedure: tempItem.pRelatedProcedure },
+        // RVSCODES: {
+        //   pRelatedProcedure: tempItem.pRelatedProcedure,
+        // },
+      });
+    } else {
+      group.ICDCODEOrRVSCODES.push({
+        RVSCODES: {
+          pRVSCode: tempItem.pitemCode,
+          pRelatedProcedure: tempItem.pRelatedProcedure,
+          pProcedureDate: tempItem.pProcedureDate,
+          pLaterality: tempItem.pLaterality,
+        },
+      });
+    }
+
+    setDischargeGroups(updated);
+    setItemSearch((prev) =>
+      prev.filter((i) => i.pitemCode !== tempItem.pitemCode)
+    );
+    setTempItem(null);
+    setConfirmDialog(null);
+  };
+
+  const updateRVSField = (gIdx, rIdx, field, value) => {
+    const updated = [...dischargeGroups];
+    const rvsItem = updated[gIdx].ICDCODEOrRVSCODES[rIdx]?.RVSCODES;
+    if (rvsItem) rvsItem[field] = value;
+    setDischargeGroups(updated);
+  };
+
+  const transformToDTDOutput = () => ({
+    DIAGNOSIS: {
+      pAdmissionDiagnosis,
+      DISCHARGE: dischargeGroups.map((group) => ({
+        pDischargeDiagnosis: group.pDischargeDiagnosis,
+        ICDCODEOrRVSCODES: group.ICDCODEOrRVSCODES,
+      })),
+    },
+  });
+  
+
+  useImperativeHandle(ref, () => ({
+    getFormData: () => transformToDTDOutput(),
+  }));
 
   return (
-    <div>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="description"
-                  size="small"
-                  label="Description"
-                  value={caseParam.description}
-                  onChange={handleChange}
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="icdcode"
-                  size="small"
-                  label="ICD Codes"
-                  value={caseParam.icdcode}
-                  onChange={handleChange}
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="rvscode"
-                  size="small"
-                  label="RVS Codes"
-                  value={caseParam.rvscode}
-                  onChange={handleChange}
-                />
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="contained"
-                  color="success"
-                  style={{ marginRight: "5px" }}
-                  onClick={searchCase}
-                  disabled={!(caseParam.description || caseParam.icdcode || caseParam.rvscode)}
-                
-                >
-                  Search
-                </Button>
-                <Button variant="contained" color="success" onClick={clearData}>
-                  Clear
-                </Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-        {isLoading && <LinearProgress />}
+    <Box >
+      <TextField
+        label="Admission Diagnosis"
+        fullWidth
+        value={pAdmissionDiagnosis}
+        onChange={(e) => setAdmissionDiagnosis(e.target.value)}
+        sx={{ mb: 2 }}
+      />
 
-        {itemSearch.length > 0 && (
-          <Accordion defaultExpanded>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              style={{ background: "#efefef" }}
-            >
-              <b style={{ color: "red" }}>Search result</b>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TableContainer>
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center">ICD/RVS Code</TableCell>
-                      <TableCell align="center">Description</TableCell>
-                      <TableCell align="center">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {itemSearch.map((val, i) => (
-                      <TableRow key={i}>
-                        <TableCell align="center">{val.pitemCode}</TableCell>
-                        <TableCell align="center">
-                          {val.pitemDescription}
-                        </TableCell>
-                        {/* <TableCell align="center">{val.rvscode || ''}</TableCell> */}
-                        <TableCell align="center">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => addToTable(val)}
-                          >
-                            Add
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </AccordionDetails>
-          </Accordion>
-        )}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={3}>
+          <TextField
+            name="description"
+            label="Description"
+            fullWidth
+            size="small"
+            value={caseParam.description}
+            onChange={handleCaseChange}
+          />
+        </Grid>
+        <Grid item xs={2}>
+          <TextField
+            name="icdcode"
+            label="ICD Code"
+            fullWidth
+            size="small"
+            value={caseParam.icdcode}
+            onChange={handleCaseChange}
+          />
+        </Grid>
+        <Grid item xs={2}>
+          <TextField
+            name="rvscode"
+            label="RVS Code"
+            fullWidth
+            size="small"
+            value={caseParam.rvscode}
+            onChange={handleCaseChange}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <TextField
+            select
+            size="small"
+            fullWidth
+            label="Select Discharge Group"
+            value={targetGroupIdx}
+            onChange={(e) => setTargetGroupIdx(Number(e.target.value))}
+            sx={{ mb: 2 }}
+          >
+            {dischargeGroups.map((_, idx) => (
+              <MenuItem key={idx} value={idx}>
+                Discharge #{idx + 1}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item xs={2}>
+          <Button variant="contained"  disabled={!(caseParam.description || caseParam.icdcode || caseParam.rvscode)} onClick={searchCase} sx={{ mr: 1 } }>
+            Search
+          </Button>
+          <Button variant="outlined" onClick={clearSearch}>
+            Clear
+          </Button>
+        </Grid>
+      </Grid>
 
-        {tableData.length > 0 && (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">
-                    <b>Diagnosis</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>ICD/RVS Code</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>Related Procedure/s (if there’s any)</b>
-                  </TableCell>
-                  {/* <TableCell align="center"><b>RVS Code</b></TableCell> */}
-                  <TableCell align="center">
-                    <b>DATE OF PROCEDURE</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>LEFT</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>RIGHT</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>BOTH</b>
-                  </TableCell>
-                  <TableCell align="center">
-                    <b>Actions</b>
+      {isLoading && <LinearProgress />}
+
+      {itemSearch.length > 0 && (
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Code</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {itemSearch.map((item, i) => (
+                <TableRow key={i}>
+                  <TableCell>{item.pitemCode}</TableCell>
+                  <TableCell>{item.pitemDescription}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => addItemToGroup(item)} style={{fontWeight: "700"}}>
+                      Discharge #{targetGroupIdx + 1}
+                    </Button>
                   </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {tableData.map((data, index) => (
-                  <TableRow key={index}>
-                    <TableCell align="center">
-                      {data.pitemDescription}
-                    </TableCell>
-                    <TableCell align="center">{data.pitemCode}</TableCell>
-                    <TableCell align="center">
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {dischargeGroups.map((group, gIdx) => (
+        <Accordion key={gIdx} defaultExpanded>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            onClick={() => setTargetGroupIdx(gIdx)}
+          >
+            <Typography>Discharge {gIdx + 1}</Typography>
+            {/* <Typography>Discharge Group #{gIdx + 1}</Typography> */}
+          </AccordionSummary>
+          <AccordionDetails>
+            <TextField
+              fullWidth
+              label="pDischargeDiagnosis"
+              value={group.pDischargeDiagnosis}
+              onChange={(e) => {
+                const updated = [...dischargeGroups];
+                updated[gIdx].pDischargeDiagnosis = e.target.value;
+                setDischargeGroups(updated);
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            {group.ICDCODEOrRVSCODES.map((item, idx) =>
+              item.ICDCODE ? (
+                <Box key={idx} sx={{ mb: 2 }}>
+                  <Box>
+                    <Grid container spacing={1} alignItems="center">
+                      <Grid item xs={2}>
+                        <TextField
+                          label="ICD Codes"
+                          fullWidth
+                          value={item.ICDCODE.pICDCode}
+                        />
+                      </Grid>
+                      <Grid item xs={8}>
+                        <TextField
+                          label="Procedure"
+                          fullWidth
+                          value={item.ICDCODE?.pRelatedProcedure || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <Button
+                          color="error"
+                          size="small"
+                          onClick={() => removeDischargeItem(gIdx, idx)}
+                        >
+                          Remove
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    {/* <Typography variant="body2">ICD Code: {item.ICDCODE.pICDCode}</Typography>
+                    <Typography variant="body2">Procedure: {item.RVSCODES?.pRelatedProcedure || ""}</Typography> */}
+                  </Box>
+                </Box>
+              ) : item.RVSCODES ? (
+                <Box key={idx} sx={{ mb: 2 }}>
+                  <Grid container spacing={1} alignItems="center">
+                    <Grid item xs={2}>
                       <TextField
+                        label="RVS Code"
                         fullWidth
-                        name="pRelatedProcedure"
-                        size="small"
-                        value={data.pRelatedProcedure || ""}
-                        onChange={(e) => handleChangeTabledata(e, index)}
-                        error={!data.pRelatedProcedure}
-                        helperText={!data.pRelatedProcedure ? "Required" : ""}
+                        value={item.RVSCODES?.pRVSCode || ""}
                       />
-                    </TableCell>
-                    {/* <TableCell align="center">{data.rvscode || ''}</TableCell> */}
-                    <TableCell align="center">
+                    </Grid>
+                    <Grid item xs={3}>
                       <TextField
+                        label="Procedure"
                         fullWidth
-                        name="pProcedureDate"
+                        value={item.RVSCODES.pRelatedProcedure}
+                        onChange={(e) =>
+                          updateRVSField(
+                            gIdx,
+                            idx,
+                            "pRelatedProcedure",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={3}>
+                      <TextField
+                        label="Date"
+                        fullWidth
                         type="date"
                         InputLabelProps={{ shrink: true }}
-                        size="small"
-                        value={data.pProcedureDate || ""}
-                        onChange={(e) => handleChangeTabledata(e, index)}
-                        error={!data.pProcedureDate}
-                        helperText={!data.pProcedureDate ? "Required" : ""}
+                        value={item.RVSCODES.pProcedureDate}
+                        onChange={(e) =>
+                          updateRVSField(
+                            gIdx,
+                            idx,
+                            "pProcedureDate",
+                            e.target.value
+                          )
+                        }
                       />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Checkbox
-                        name="pLaterality"
-                        value="L"
-                        checked={data.pLaterality === "L"}
-                        onChange={(e) => handleCheckboxChange(e, index)}
-                        sx={{ color: !data.pLaterality ? "red" : undefined }}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Checkbox
-                        name="pLaterality"
-                        value="R"
-                        checked={data.pLaterality === "R"}
-                        onChange={(e) => handleCheckboxChange(e, index)}
-                        sx={{ color: !data.pLaterality ? "red" : undefined }}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Checkbox
-                        name="pLaterality"
-                        value="B"
-                        checked={data.pLaterality === "B"}
-                        onChange={(e) => handleCheckboxChange(e, index)}
-                        sx={{ color: !data.pLaterality ? "red" : undefined }}
-                      />
-                    </TableCell>
-
-                    <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => deleteFromTable(index)}
+                    </Grid>
+                    <Grid item xs={2}>
+                      <TextField
+                        label="Laterality"
+                        fullWidth
+                        select
+                        SelectProps={{ native: true }}
+                        value={item.RVSCODES.pLaterality}
+                        onChange={(e) =>
+                          updateRVSField(
+                            gIdx,
+                            idx,
+                            "pLaterality",
+                            e.target.value
+                          )
+                        }
                       >
-                        Delete
+                        <option value="">Select</option>
+                        <option value="L">Left</option>
+                        <option value="R">Right</option>
+                        <option value="B">Both</option>
+                        <option value="N">None</option>
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Button
+                        color="error"
+                        size="small"
+                        onClick={() => removeDischargeItem(gIdx, idx)}
+                      >
+                        Remove
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </TableContainer>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ) : null
+            )}
+          </AccordionDetails>
+        </Accordion>
+      ))}
 
-      {/* <PositionedSnackbar
-        open={isAlert}
-        alertMessage={alertMessage}
-        handleAlertClose={handleAlertClose}
-        alertColor="error"
-      /> */}
-    </div>
+      <Button
+        onClick={addDischargeGroup}
+        variant="contained"
+        sx={{ mr: 2, mt: 2 }}
+      >
+        Add DISCHARGE Group
+      </Button>
+      <Button
+        onClick={() => transformToDTDOutput()}
+        // onClick={() => onSubmit(transformToDTDOutput())}
+        variant="contained"
+        color="success"
+        sx={{ mt: 2 }}
+      >
+        Submit / Transform
+      </Button>
+
+      <Dialog open={!!confirmDialog} onClose={() => setConfirmDialog(null)}>
+        <DialogTitle>Confirm Add</DialogTitle>
+        <DialogContent>
+          Are you sure you want to add this item to the selected group?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog(null)}>Cancel</Button>
+          <Button onClick={confirmAdd} variant="contained">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
-};
+});
 
 export default DiagnosisCode;

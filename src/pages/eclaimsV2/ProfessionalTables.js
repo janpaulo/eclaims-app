@@ -111,7 +111,7 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
 
   return (
     <div>
-      <Typography variant="h6" gutterBottom mt={3}>
+      <Typography variant="h6" gutterBottom mt={3} style={{ marginLeft: 15}}>
         Professional Fees / Charges 
       <Button
         variant="contained"

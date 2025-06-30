@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useReducer,useRef } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useReducer,
+  useRef,
+} from "react";
 import {
   Box,
   Typography,
@@ -116,6 +121,7 @@ const initial = {
     pLeftEyeIOLExpiryDate: "",
     pRightEyeIOLStickerNumber: "",
     pRightEyeIOLExpiryDate: "",
+    isCataract: false,
   },
   pLaboratoryNumber: "",
   PROFESSIONALS: [
@@ -132,7 +138,7 @@ const initial = {
   ],
   CONSUMPTION: defaultConsumption,
 };
-
+// <!ELEMENT SPECIAL (PROCEDURES?, MCP?, TBDOTS?, ABP?, NCP?, HIVAIDS?, CATARACTINFO?)>
 const reducer = (state, action) =>
   typeof action === "function" ? action(state) : { ...state, ...action };
 
@@ -140,8 +146,8 @@ const CF2Form = forwardRef((props, ref) => {
   const { prefillData, packageType, authUser } = props;
   const [data, setForm] = useReducer(reducer, initial);
 
-  const aprFormRef = useRef(); 
-
+  const aprFormRef = useRef();
+   const diagnosisRef = useRef();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -167,16 +173,18 @@ const CF2Form = forwardRef((props, ref) => {
     validateForm: validate,
     getFormData: () => {
       const aprData = aprFormRef.current?.getFormData?.() || {};
+      const diagData = diagnosisRef.current?.getFormData?.() || {};
       return {
         ...JSON.parse(JSON.stringify(data)),
         ...aprData,
+        ...diagData,
       };
     },
   }));
 
   return (
     <Box sx={{ p: 2 }}>
-      <PartI_HCI data={data} onChange={handleChange} />
+      {/* <PartI_HCI data={data} onChange={handleChange} /> */}
 
       <PartII_Confinement
         form={data}
@@ -184,6 +192,7 @@ const CF2Form = forwardRef((props, ref) => {
         setForm={(partial) => setForm(partial)}
         prefillData={prefillData}
         packageType={packageType}
+        ref={diagnosisRef}
       />
 
       <PartIII_ConsumptionForm data={data} onChange={setForm} />
@@ -202,7 +211,7 @@ const CF2Form = forwardRef((props, ref) => {
       <Divider sx={{ my: 3 }} />
 
       <Typography variant="h6" gutterBottom mt={3}>
-      PhilHealth Benefits:
+        PhilHealth Benefits:
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
@@ -213,6 +222,7 @@ const CF2Form = forwardRef((props, ref) => {
             fullWidth
             value={data.ICD10orRVSCode || ""}
             onChange={handleDiagnosisSelectChange}
+            disabled={!(data.DIAGNOSIS?.length > 0 || data.ICD10orRVSCode)} // Enable if DIAGNOSIS array has values or ICD10orRVSCode is selected
           >
             {data.DIAGNOSIS?.map((item) => (
               <MenuItem key={item.pitemCode} value={item.pitemCode}>
@@ -221,6 +231,7 @@ const CF2Form = forwardRef((props, ref) => {
             ))}
           </TextField>
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextField
             name="firstCaseRate"
@@ -241,7 +252,7 @@ const CF2Form = forwardRef((props, ref) => {
         </Grid>
       </Grid>
       <Divider sx={{ my: 3 }} />
-      
+
       <APRForm ref={aprFormRef} />
     </Box>
   );

@@ -244,7 +244,7 @@ function Main({ authUser }) {
   return (
     <>
       <CssBaseline />
-      <Container maxWidth="lg" sx={{ my: 4 }}>
+      <Container maxWidth="full" sx={{ my: 4 }}>
         {!showTabs && (
           <>
             <Typography variant="h6" sx={{ mb: 2 }}>

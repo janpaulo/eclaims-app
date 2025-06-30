@@ -173,7 +173,7 @@ const SpecialConsiderations = ({
           </FormControl>
         </Grid>
         <Grid item md={6} sm={3} mt={3}>
-        <TextField
+          <TextField
             name="pPreAuthDate"
             label="Auth Date"
             fullWidth
@@ -352,62 +352,89 @@ const SpecialConsiderations = ({
             />
           </Typography>
         </Grid>
+
+        
         <Grid item xs={12} md={12}>
           <Typography gutterBottom>h. Cataract Information</Typography>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField
-            fullWidth
-            name="pCataractPreAuth"
-            label="Cataract Pre-Auth Code"
-            value={formData.pCataractPreAuth || ""}
-            onChange={handleChange}
-          />
+
+          {/* Checkbox for Cataract information */}
+          <Grid item xs={12} sm={6} md={4}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isCataract"
+                  checked={formData.isCataract || false}
+                  onChange={handleCheckboxToggle} // Toggle the state of "isCataract"
+                />
+              }
+              label="Does the patient have cataracts?"
+            />
+          </Grid>
         </Grid>
 
-        <Grid item xs={12} md={3}>
-          <TextField
-            fullWidth
-            name="pLeftEyeIOLStickerNumber"
-            label="Left Eye IOL Sticker Number"
-            value={formData.pLeftEyeIOLStickerNumber || ""}
-            onChange={handleChange}
-          />
+        {/* Fields that depend on the checkbox */}
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={7}>
+            <TextField
+              fullWidth
+              name="pCataractPreAuth"
+              label="Cataract Pre-Auth Code"
+              value={formData.pCataractPreAuth || ""}
+              onChange={handleChange}
+              disabled={!formData.isCataract} // Disable field if "isCataract" is false
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              name="pLeftEyeIOLStickerNumber"
+              label="Left Eye IOL Sticker Number"
+              value={formData.pLeftEyeIOLStickerNumber || ""}
+              onChange={handleChange}
+              disabled={!formData.isCataract} // Disable field if "isCataract" is false
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              name="pLeftEyeIOLExpiryDate"
+              label="Left Eye IOL Expiry Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={formData.pLeftEyeIOLExpiryDate || ""}
+              onChange={handleChange}
+              disabled={!formData.isCataract} // Disable field if "isCataract" is false
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              name="pRightEyeIOLStickerNumber"
+              label="Right Eye IOL Sticker Number"
+              value={formData.pRightEyeIOLStickerNumber || ""}
+              onChange={handleChange}
+              disabled={!formData.isCataract} // Disable field if "isCataract" is false
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Right Eye IOL Expiry Date"
+              type="date"
+              name="pRightEyeIOLExpiryDate"
+              InputLabelProps={{ shrink: true }}
+              value={formData.pRightEyeIOLExpiryDate || ""}
+              onChange={handleChange}
+              disabled={!formData.isCataract} // Disable field if "isCataract" is false
+            />
+          </Grid>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            name="pLeftEyeIOLExpiryDate"
-            label="Left Eye IOL Expiry Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={formData.pLeftEyeIOLExpiryDate || ""}
-            onChange={handleChange}
-          />
-        </Grid>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            name="pRightEyeIOLStickerNumber"
-            label="Right Eye IOL Sticker Number"
-            value={formData.pRightEyeIOLStickerNumber || ""}
-            onChange={handleChange}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Right Eye IOL Expiry Date"
-            type="date"
-            name="pRightEyeIOLExpiryDate"
-            InputLabelProps={{ shrink: true }}
-            value={formData.pRightEyeIOLExpiryDate || ""}
-            onChange={handleChange}
-          />
-        </Grid>
       </Grid>
     </Box>
   );

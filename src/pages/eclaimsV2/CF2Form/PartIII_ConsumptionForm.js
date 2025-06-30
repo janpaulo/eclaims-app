@@ -104,7 +104,7 @@ const PartIII_ConsumptionForm = ({ data = {}, onChange }) => {
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography>
           {" "}
-          PART III - CERTIFICATION OF CONSUMPTION OF BENEFITS
+          CERTIFICATION OF CONSUMPTION OF BENEFITS
         </Typography>
       </AccordionSummary>
       <AccordionDetails>

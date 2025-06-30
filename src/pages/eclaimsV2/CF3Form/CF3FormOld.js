@@ -991,18 +991,18 @@ const CF3FormOld = forwardRef((props, ref) => {
               <Divider sx={{ my: 4 }} />
 
               {/* Certification block */}
-              <Typography variant="subtitle1" gutterBottom>
+              {/* <Typography variant="subtitle1" gutterBottom>
                 <strong>
                   19. Certification of Attending Physician/Midwife:
                 </strong>
-              </Typography>
+              </Typography> */}
 
-              <Typography fontStyle="italic" sx={{ mb: 3 }}>
+              {/* <Typography fontStyle="italic" sx={{ mb: 3 }}>
                 I certify that the above information given in this form are true
                 and correct.
-              </Typography>
+              </Typography> */}
 
-              <Grid container spacing={2} alignItems="center">
+              {/* <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={8}>
                   <TextField
                     fullWidth
@@ -1014,7 +1014,6 @@ const CF3FormOld = forwardRef((props, ref) => {
                   />
                 </Grid>
 
-                {/* Date signed */}
                 <Grid item xs={12} md={4}>
                   <Grid container spacing={1}>
                     <TextField
@@ -1028,7 +1027,7 @@ const CF3FormOld = forwardRef((props, ref) => {
                     />
                   </Grid>
                 </Grid>
-              </Grid>
+              </Grid> */}
             </Box>
           </Paper>
           {/* 
