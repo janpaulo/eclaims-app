@@ -25,38 +25,47 @@ class TableList extends React.Component {
   componentDidMount() {
     this.handleGetClaims();
   }
-
   handleGetClaims = async () => {
     const { authUser } = this.state;
-
+  
+    if (!authUser || !authUser.hci_no || !authUser.access_token) {
+      this.setState({ items: [], error: "Missing credentials. Please log in again." });
+      return;
+    }
+  
     try {
-      const response = await api.get(`claims/${authUser.hci_no}`, {
+      const response = await api.get(`/claims/${authUser.hci_no}`, {
         headers: {
           Authorization: `Bearer ${authUser.access_token}`,
         },
       });
-
+  
       const claims = response.data?.claims;
-
+  
       if (Array.isArray(claims) && claims.length > 0) {
         this.setState({ items: claims, error: null });
       } else {
-        this.setState({ items: [], error: "No records found." });
+        this.setState({ items: [], error: "No claims found for this HCI." });
       }
     } catch (err) {
+      const status = err.response?.status;
+      const serverMsg = err.response?.data?.error || err.response?.data?.message;
+  
       let errorMessage = "An error occurred while fetching claims.";
-
-      if (err.response?.status === 404) {
-        errorMessage = "No claims found for this HCI.";
+  
+      if (status === 404) {
+        errorMessage = serverMsg || "No claims found for this HCI.";
+      } else if (serverMsg) {
+        errorMessage = serverMsg;
       } else if (err.message) {
         errorMessage = err.message;
       }
-
+  
       this.setState({ items: [], error: errorMessage });
-      console.error("Error fetching claims:", errorMessage);
+      console.error("Error fetching claims:", err);
     }
   };
-
+  
   handleSubmit(params) {
     console.log("handleSubmit called", params);
   }

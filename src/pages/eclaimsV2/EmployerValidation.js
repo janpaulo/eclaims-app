@@ -14,18 +14,18 @@ import {
   TableRow,
 } from "@mui/material";
 import axios from "axios";
-import CryptoJS from "crypto-js";
-import { Buffer } from "buffer";
-import xml2js from "xml2js";
 
-const CIPHER_KEY_LEN = 32;
-const passphrase = "PHilheaLthDuMmyciPHerKeyS";
-
-const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) => {
+const EmployerValidation = ({
+  searchEmployer,
+  updateEmployerData,
+  authUser,
+  setForm,
+}) => {
   const [loading, setLoading] = useState(false);
   const [isData, setIsData] = useState(false);
   const [searchText, setSearchText] = useState(searchEmployer || {});
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const handleInputChange = (e) => {
     setSearchText((prev) => ({
@@ -37,10 +37,9 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) =>
   const handleSubmit = () => {
     setIsData(false);
     setLoading(true);
-    setResults(null);
     const item = {
       philhealthno: searchText.pPen || "",
-      employername:searchText.employerName || "",
+      employername: searchText.employerName || "",
     };
 
     axios
@@ -52,7 +51,10 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) =>
         },
       })
       .then((resp) => {
-        setResults(resp.data);
+        const employerList = resp.data?.result?.employers || [];
+        setResults(employerList);
+        setIsData(employerList.length === 0);
+        setLoading(false);
       })
       .catch((error) => {
         setLoading(false);
@@ -63,7 +65,7 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) =>
 
   return (
     <div>
-      <h5>Make sure member details are correct before proceeding</h5>
+      <h5>Search Employer</h5>
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={5}>
           <TextField
@@ -102,7 +104,7 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) =>
         </Typography>
       )}
 
-      {results && (
+      {results.length > 0 && (
         <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
@@ -114,10 +116,23 @@ const EmployerValidation = ({ searchEmployer, updateEmployerData, authUser }) =>
             </TableHead>
             <TableBody>
               {results.map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{row.epmlist?.pPen || "-"}</TableCell>
-                  <TableCell>{row.epmlist?.employerName || "-"}</TableCell>
-                  <TableCell>{row.epmlist?.employerAddress || "-"}</TableCell>
+                <TableRow
+                  key={idx}
+                  hover
+                  selected={selectedIndex === idx}
+                  onClick={() => {
+                    setSelectedIndex(idx);
+                    setForm((prev) => ({
+                      ...prev,
+                      pPEN: row.philhealthno,
+                      pEmployerName: row.name,
+                    }));
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <TableCell>{row.philhealthno || "-"}</TableCell>
+                  <TableCell>{row.name || "-"}</TableCell>
+                  <TableCell>{row.address || "-"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

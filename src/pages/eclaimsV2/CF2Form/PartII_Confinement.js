@@ -17,47 +17,15 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DiagnosisCode from "./DiagnosisCode";
 import SpecialConsiderations from "./SpecialConsiderations";
+
 export default function PartII_PatientConfinement({
   form,
   handleChange,
   setForm,
   prefillData,
+  packageType
 }) {
   const [formData, setFormData] = useState({
-    // Initialize all checkbox fields with false
-    Hemodialysis: false,
-    "Peritoneal Dialysis": false,
-    "Radiotherapy (LINAC)": false,
-    "Radiotherapy (COBALT)": false,
-    "Blood Transfusion": false,
-    Brachytherapy: false,
-    Chemotherapy: false,
-    "Simple Debridement": false,
-    "Intensive Phase": false,
-    "Maintenance Phase": false,
-    "Essential Newborn Care": false,
-    "Newborn Hearing Screening Test": false,
-    "Newborn Screening Test": false,
-    "Immediate drying of newborn": false,
-    "Early skin-to-skin contact": false,
-    "Timely cord clamping": false,
-    "Eye Prophylaxis": false,
-    "Vitamin K administration": false,
-    "BCG vaccination": false,
-    "Hepatitis B vaccination": false,
-    "Non-separation of mother/baby for early breastfeeding initiation": false,
-
-    // Initialize text fields with empty strings
-    zBenefitPackageCode: "",
-    mcpDate1: "",
-    mcpDate2: "",
-    mcpDate3: "",
-    mcpDate4: "",
-    "Day 0 ARV": "",
-    "Day 3 ARV": "",
-    "Day 7 ARV": "",
-    RIG: "",
-    OthersSpecify: "",
     ICD10orRVSCode: "",
     firstCaseRate: "",
     secondCaseRate: "",
@@ -78,7 +46,7 @@ export default function PartII_PatientConfinement({
   }, [prefillData]);
 
   useEffect(() => {
-    const stillExists = form.diagnosisCodes?.some(
+    const stillExists = form.DIAGNOSIS?.some(
       (item) => item.pitemCode === formData.ICD10orRVSCode
     );
 
@@ -91,11 +59,11 @@ export default function PartII_PatientConfinement({
         secondCaseRate: "",
       }));
     }
-  }, [form.diagnosisCodes]);
+  }, [form.DIAGNOSIS]);
 
   const handleDiagnosisSelectChange = (e) => {
     const selectedCode = e.target.value;
-    const selectedDiagnosis = form.diagnosisCodes?.find(
+    const selectedDiagnosis = form.DIAGNOSIS?.find(
       (item) => item.pitemCode === selectedCode
     );
 
@@ -135,13 +103,13 @@ export default function PartII_PatientConfinement({
             <Typography>
               2. Was patient referred by another Health Care Institution (HCI)?
             </Typography>
-            <RadioGroup row name="referredHCI" onChange={handleChange}>
-              <FormControlLabel value="no" control={<Radio />} label="No" />
-              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+            <RadioGroup row name="pPatientReferred" onChange={handleChange}>
+              <FormControlLabel value="Y" control={<Radio />} label="Yes" />
+              <FormControlLabel value="N" control={<Radio />} label="No" />
             </RadioGroup>
           </Grid>
           {/* Referring HCI Details */}
-          {form.referredHCI === "yes" && (
+          {form.pPatientReferred === "Y" && (
             <>
               <Grid item xs={12} md={4}>
                 <TextField
@@ -183,10 +151,10 @@ export default function PartII_PatientConfinement({
             <Typography>3. Confinement Period:</Typography>
           </Grid>
           {[
-            ["Date Admitted", "dateAdmitted", "date"],
-            ["Time Admitted", "timeAdmitted", "time"],
-            ["Date Discharged", "dateDischarged", "date"],
-            ["Time Discharged", "timeDischarged", "time"],
+            ["Date Admitted", "pAdmissionDate", "date"],
+            ["Time Admitted", "pAdmissionTime", "time"],
+            ["Date Discharged", "pDischargeDate", "date"],
+            ["Time Discharged", "pDischargeTime", "time"],
           ].map(([label, name, type]) => (
             <Grid item xs={12} md={3} key={name}>
               <TextField
@@ -204,24 +172,24 @@ export default function PartII_PatientConfinement({
           <Grid item xs={12}>
             <Typography variant="subtitle1">4. Patient Disposition</Typography>
             <RadioGroup
-              name="patientDisposition"
-              value={form.patientDisposition}
+              name="pDisposition"
+              value={form.pDisposition}
               onChange={handleChange}
             >
               <Grid container spacing={2}>
                 {[
-                  "Improved",
-                  "Recovered",
-                  "Home/Discharged Against Medical Advice",
-                  "Absconded",
-                  "Expired",
-                  "Transferred/Referred",
-                ].map((label, i) => (
-                  <Grid item xs={12} sm={6} key={label}>
+                  ["Improved", "I", "date"],
+                  ["Recovered", "R", "date"],
+                  ["Home/Discharged Against Medical Advice", "H", "date"],
+                  ["Absconded", "A", "date"],
+                  ["Transferred/Referred", "T", "date"],
+                  ["Expired", "E", "date"],
+                ].map(([label, value]) => (
+                  <Grid item xs={12} sm={6} key={value}>
                     <FormControlLabel
-                      value={label}
+                      value={value}
                       control={<Radio />}
-                      label={`${String.fromCharCode(97 + i)}. ${label}`}
+                      label={label}
                     />
                   </Grid>
                 ))}
@@ -230,26 +198,26 @@ export default function PartII_PatientConfinement({
           </Grid>
 
           {/* Conditional: If Expired */}
-          {form.patientDisposition === "Expired" && (
+          {form.pDisposition === "E" && (
             <>
               <Grid item xs={6} md={3}>
                 <TextField
-                  name="dateExpired"
+                  name="pExpiredDate"
                   label="Date Expired"
                   type="date"
                   InputLabelProps={{ shrink: true }}
-                  value={form.dateExpired}
+                  value={form.pExpiredDate}
                   onChange={handleChange}
                   fullWidth
                 />
               </Grid>
               <Grid item xs={6} md={3}>
                 <TextField
-                  name="timeExpired"
+                  name="pExpiredTime"
                   label="Time Expired"
                   type="time"
                   InputLabelProps={{ shrink: true }}
-                  value={form.timeExpired}
+                  value={form.pExpiredTime}
                   onChange={handleChange}
                   fullWidth
                 />
@@ -258,27 +226,27 @@ export default function PartII_PatientConfinement({
           )}
 
           {/* Conditional: If Transferred/Referred */}
-          {form.patientDisposition === "Transferred/Referred" && (
+          {form.pDisposition === "T" && (
             <>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={12}>
                 <TextField
-                  name="referralHCIName"
-                  label="Name of Referral Health Care Institution"
-                  value={form.referralHCIName}
+                  name="pReferralIHCPAccreCode"
+                  label="Accreditation number of Referral Health Care Institution"
+                  value={form.pReferralIHCPAccreCode}
                   onChange={handleChange}
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={12}>
                 <TextField
-                  name="referralReason"
+                  name="pReferralReasons"
                   label="Reason for Referral/Transfer"
-                  value={form.referralReason}
+                  value={form.pReferralReasons}
                   onChange={handleChange}
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              {/* <Grid item xs={12} md={4}>
                 <TextField
                   name="referralCity"
                   label="City/Municipality"
@@ -286,8 +254,8 @@ export default function PartII_PatientConfinement({
                   onChange={handleChange}
                   fullWidth
                 />
-              </Grid>
-              <Grid item xs={12} md={4}>
+              </Grid> */}
+              {/* <Grid item xs={12} md={4}>
                 <TextField
                   name="referralProvince"
                   label="Province"
@@ -304,14 +272,14 @@ export default function PartII_PatientConfinement({
                   onChange={handleChange}
                   fullWidth
                 />
-              </Grid>
+              </Grid> */}
             </>
           )}
 
           {/* 5. Type of Accommodation */}
           <Grid item xs={12}>
             <Typography>5. Type of Accommodation:</Typography>
-            <RadioGroup row name="accommodation" onChange={handleChange}>
+            <RadioGroup row name="pAccommodationType" onChange={handleChange}>
               <FormControlLabel
                 value="private"
                 control={<Radio />}
@@ -338,25 +306,34 @@ export default function PartII_PatientConfinement({
 
           <Grid item xs={12}>
             <DiagnosisCode
-              diagnosCodeData={form.diagnosisCodes}
+              diagnosCodeData={form.DIAGNOSIS}
               onDataChange={(newData) =>
-                setForm({ ...form, diagnosisCodes: newData })
+                setForm({ ...form, DIAGNOSIS: newData })
               }
             />
           </Grid>
 
           {/* {console.log(form.specialConsiderations)} */}
-          {/* {console.log(form.diagnosisCodes)} */}
+          {/* {console.log(form.DIAGNOSIS)} */}
 
           <Grid item xs={12}>
-            {/* <SpecialConsiderations
-              formData={formData}
-              setFormData={setFormData}
-              
-              dateAdmitted={form.dateAdmitted}
-              dateDischarged={form.dateDischarged}
-            /> */}
             <SpecialConsiderations
+              formData={form.specialConsiderations}
+              setFormData={(updated) =>
+                setForm((prev) => ({
+                  ...prev,
+                  specialConsiderations: {
+                    ...prev.specialConsiderations,
+                    ...updated,
+                  },
+                }))
+              }
+              dateAdmitted={form.pAdmissionDate}
+              dateDischarged={form.pDischargeDate}
+              packageType={packageType}
+            />
+
+            {/* <SpecialConsiderations
               formData={form.specialConsiderations}
               setFormData={(updated) =>
                 setForm((prev) => ({
@@ -364,51 +341,12 @@ export default function PartII_PatientConfinement({
                   specialConsiderations: updated,
                 }))
               }
-              dateAdmitted={form.dateAdmitted}
-              dateDischarged={form.dateDischarged}
-            />
+              dateAdmitted={form.pAdmissionDate}
+              dateDischarged={form.pDischargeDate}
+            /> */}
           </Grid>
-        </Grid>
-        <Divider sx={{ my: 3 }} />
+          
 
-        <Typography variant="h6" gutterBottom>
-          9. PhilHealth Benefits:
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              select
-              name="ICD10orRVSCode"
-              label="ICD 10 or RVS Code"
-              fullWidth
-              value={formData.ICD10orRVSCode || ""}
-              onChange={handleDiagnosisSelectChange}
-            >
-              {form.diagnosisCodes?.map((item) => (
-                <MenuItem key={item.pitemCode} value={item.pitemCode}>
-                  {item.pitemCode} - {item.pcaseRateDescription}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="firstCaseRate"
-              label="First Case Rate"
-              fullWidth
-              value={formData.firstCaseRate || ""}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="secondCaseRate"
-              label="Second Case Rate"
-              fullWidth
-              value={formData.secondCaseRate || ""}
-              onChange={handleChange}
-            />
-          </Grid>
         </Grid>
       </AccordionDetails>
     </Accordion>

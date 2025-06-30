@@ -299,9 +299,51 @@ export default function CF4Form() {
     />
   );
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log("CF4 SUBMIT", { ...formData, physicalExam: pe });
+  // };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("CF4 SUBMIT", { ...formData, physicalExam: pe });
+
+    // Map formData.drugs keys to DTD keys
+    const transformedDrugs = formData.drugs.map((drug) => ({
+      pHciCaseNo: drug.pHciCaseNo || "", // or map from another key if needed
+      pHciTransNo: drug.pHciTransNo || "",
+      pDrugCode: drug.pDrugCode || "",
+      pGenericName: drug.genericName || "", // example if your state uses genericName
+      pGenericCode: drug.pGenericCode || "",
+      pSaltCode: drug.pSaltCode || "",
+      pStrengthCode: drug.pStrengthCode || "",
+      pFormCode: drug.pFormCode || "",
+      pUnitCode: drug.pUnitCode || "",
+      pPackageCode: drug.pPackageCode || "",
+      pRoute: drug.route || "",
+      pQuantity: drug.quantity || "",
+      pActualUnitPrice: drug.actualUnitPrice || "",
+      pCoPayment: drug.coPayment || "",
+      pTotalAmtPrice: drug.totalAmtPrice || "",
+      pInstructionQuantity: drug.instructionQuantity || "",
+      pInstructionStrength: drug.instructionStrength || "",
+      pInstructionFrequency: drug.instructionFrequency || "",
+      pPrescPhysician: drug.prescPhysician || "",
+      pIsApplicable: drug.isApplicable || "Y",
+      pDateAdded: drug.dateAdded || "",
+      pModule: drug.module || "",
+      pReportStatus: drug.reportStatus || "U",
+      pDeficiencyRemarks: drug.deficiencyRemarks || "",
+    }));
+
+    // Build the final payload
+    const payload = {
+      ...formData,
+      drugs: transformedDrugs,
+      physicalExam: pe, // assuming pe is your physical exam data
+    };
+
+    console.log("CF4 SUBMIT", payload);
+
+    // Here you can send payload to API or further process
   };
 
   // ---------- RENDER ----------

@@ -182,6 +182,8 @@ const DiagnosisCode = ({ diagnosCodeData, onDataChange }) => {
                   color="success"
                   style={{ marginRight: "5px" }}
                   onClick={searchCase}
+                  disabled={!(caseParam.description || caseParam.icdcode || caseParam.rvscode)}
+                
                 >
                   Search
                 </Button>

@@ -1,62 +1,82 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { Box, Button } from "@mui/material";
+import React, { forwardRef, useImperativeHandle, useReducer,useRef } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Grid,
+  MenuItem,
+  Divider,
+} from "@mui/material";
 import PartI_HCI from "./PartI_HCI";
 import PartII_Confinement from "./PartII_Confinement";
-import PartIII_Certification from "./PartIII_Certification";
-import PartIV_HCICert from "./PartIV_HCICert";
+import PartIII_ConsumptionForm from "./PartIII_ConsumptionForm";
+
+import APRForm from "./APRForm";
+
+import ProfessionalTables from "../ProfessionalTables";
+const defaultConsumption = {
+  pEnoughBenefits: "N",
+  BENEFITSOrHCIFEESOrPROFFEESOrPURCHASES: [
+    {
+      BENEFITS: {
+        pTotalHCIFees: "",
+        pTotalProfFees: "",
+        pGrandTotal: "",
+      },
+    },
+    {
+      HCIFEES: {
+        pTotalActualCharges: "",
+        pDiscount: "",
+        pPhilhealthBenefit: "",
+        pTotalAmount: "",
+        pMemberPatient: "N",
+        pHMO: "N",
+        pOthers: "N",
+      },
+    },
+    {
+      PROFFEES: {
+        pTotalActualCharges: "",
+        pDiscount: "",
+        pPhilhealthBenefit: "",
+        pTotalAmount: "",
+        pMemberPatient: "N",
+        pHMO: "N",
+        pOthers: "N",
+      },
+    },
+    {
+      PURCHASES: {
+        pDrugsMedicinesSupplies: "N",
+        pDMSTotalAmount: "",
+        pExaminations: "N",
+        pExamTotalAmount: "",
+      },
+    },
+  ],
+};
 
 const initial = {
-  // all form fields keys here
+  pPatientReferred: "N",
+  pReferredIHCPAccreCode: "",
+  pAdmissionDate: "",
+  pAdmissionTime: "",
+  pDischargeDate: "",
+  pDischargeTime: "",
+  pDisposition: "",
+  pExpiredDate: "",
+  pExpiredTime: "",
+  pReferralIHCPAccreCode: "",
+  pReferralReasons: "",
+  pAccommodationType: "",
+  pHasAttachedSOA: "N",
   pan: "",
   hciName: "",
   hciAddress: "",
-  patientLast: "",
-  patientFirst: "",
-  patientMiddle: "",
-  patientExt: "",
-  referredHCI: "no",
-  referringHCIName: "",
-  referringStreet: "",
-  referringCity: "",
-  referringZip: "",
-  referral: false,
-  referringHCI: "",
-  admitDate: "",
-  admitTime: "",
-  admitAMPM: "AM",
-  dischargeDate: "",
-  dischargeTime: "",
-  dischargeAMPM: "AM",
-  disposition: "",
-  accommodation: "",
-  admissionDx: "",
-  dischargeDx: "",
-  consumedBenefit: false,
-  totalHCIFees: "",
-  totalProfFees: "",
-  copayInst: "",
-  copayProf: "",
-  drugsSupplies: "",
-  diagnostics: "",
-  patientSig: "",
-  patientSigDate: "",
-  patientRelation: "",
-  thumbmark: false,
-  certName: "",
-  certPosition: "",
-  certSignature: "",
-  certDate: "",
-  patientDisposition: "",
-  dateExpired: "",
-  timeExpired: "",
-  referralHCIName: "",
-  referralReason: "",
-  referralCity: "",
-  referralProvince: "",
-  referralZip: "",
-  diagnosisCodes: [],
-  specialConsiderations:{
- Hemodialysis: false,
+  DIAGNOSIS: [],
+  specialConsiderations: {
+    Hemodialysis: false,
     "Peritoneal Dialysis": false,
     "Radiotherapy (LINAC)": false,
     "Radiotherapy (COBALT)": false,
@@ -77,8 +97,6 @@ const initial = {
     "BCG vaccination": false,
     "Hepatitis B vaccination": false,
     "Non-separation of mother/baby for early breastfeeding initiation": false,
-
-    // Initialize text fields with empty strings
     zBenefitPackageCode: "",
     mcpDate1: "",
     mcpDate2: "",
@@ -88,44 +106,143 @@ const initial = {
     "Day 3 ARV": "",
     "Day 7 ARV": "",
     RIG: "",
-    OthersSpecify: "",
+    pABPOthers: "",
+    pABPSpecify: "",
     ICD10orRVSCode: "",
     firstCaseRate: "",
     secondCaseRate: "",
-  }
-
+    pCataractPreAuth: "",
+    pLeftEyeIOLStickerNumber: "",
+    pLeftEyeIOLExpiryDate: "",
+    pRightEyeIOLStickerNumber: "",
+    pRightEyeIOLExpiryDate: "",
+  },
+  pLaboratoryNumber: "",
+  PROFESSIONALS: [
+    {
+      pDoctorAccreCode: "",
+      pDoctorLastName: "",
+      pDoctorFirstName: "",
+      pDoctorMiddleName: "",
+      pDoctorSuffix: "",
+      pWithCoPay: "",
+      pDoctorCoPay: "",
+      pDoctorSignDate: "",
+    },
+  ],
+  CONSUMPTION: defaultConsumption,
 };
 
+const reducer = (state, action) =>
+  typeof action === "function" ? action(state) : { ...state, ...action };
+
 const CF2Form = forwardRef((props, ref) => {
-  const { prefillData } = props;
-  const [data, setData] = useState(initial);
+  const { prefillData, packageType, authUser } = props;
+  const [data, setForm] = useReducer(reducer, initial);
+
+  const aprFormRef = useRef(); 
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm({ [name]: type === "checkbox" ? checked : value });
+  };
+  const handleDiagnosisSelectChange = (e) => {
+    const selectedCode = e.target.value;
+    const selectedDiagnosis = data.DIAGNOSIS?.find(
+      (item) => item.pitemCode === selectedCode
+    );
+
+    setForm({
+      ICD10orRVSCode: selectedCode,
+      firstCaseRate: selectedDiagnosis?.amount?.[0]?.pprimaryCaseRate || "",
+      secondCaseRate: selectedDiagnosis?.amount?.[0]?.psecondaryCaseRate || "",
+    });
   };
 
   const validate = () =>
-    data.pan && data.patientLast && data.admitDate && data.dischargeDate;
-  const handleSubmit = () => console.log("Submit CF2:", data);
+    data.pan && data.patientLast && data.pAdmissionDate && data.pDischargeDate;
 
   useImperativeHandle(ref, () => ({
     validateForm: validate,
-    handleSubmit: handleSubmit,
-    
-    getFormData: () => data, // <-- MISSING, needed for Main.js
+    getFormData: () => {
+      const aprData = aprFormRef.current?.getFormData?.() || {};
+      return {
+        ...JSON.parse(JSON.stringify(data)),
+        ...aprData,
+      };
+    },
   }));
 
   return (
     <Box sx={{ p: 2 }}>
-      
       <PartI_HCI data={data} onChange={handleChange} />
-      <PartII_Confinement form={data} handleChange={handleChange} setForm={setData} prefillData={prefillData}/>
-      {/* <PartIII_Certification data={data} onChange={handleChange}  />
-      <PartIV_HCICert data={data} onChange={handleChange} /> */}
+
+      <PartII_Confinement
+        form={data}
+        handleChange={handleChange}
+        setForm={(partial) => setForm(partial)}
+        prefillData={prefillData}
+        packageType={packageType}
+      />
+
+      <PartIII_ConsumptionForm data={data} onChange={setForm} />
+      {/* <Grid item xs={12} sm={12}> */}
+      <ProfessionalTables
+        formData={data.PROFESSIONALS}
+        setFormData={(updated) =>
+          setForm((prev) => ({
+            ...prev,
+            PROFESSIONALS: updated,
+          }))
+        }
+        authUser={authUser}
+      />
+      {/* </Grid> */}
+      <Divider sx={{ my: 3 }} />
+
+      <Typography variant="h6" gutterBottom mt={3}>
+      PhilHealth Benefits:
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            select
+            name="ICD10orRVSCode"
+            label="ICD 10 or RVS Code"
+            fullWidth
+            value={data.ICD10orRVSCode || ""}
+            onChange={handleDiagnosisSelectChange}
+          >
+            {data.DIAGNOSIS?.map((item) => (
+              <MenuItem key={item.pitemCode} value={item.pitemCode}>
+                {item.pitemCode} - {item.pcaseRateDescription}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="firstCaseRate"
+            label="First Case Rate"
+            fullWidth
+            value={data.firstCaseRate || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="secondCaseRate"
+            label="Second Case Rate"
+            fullWidth
+            value={data.secondCaseRate || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+      </Grid>
+      <Divider sx={{ my: 3 }} />
+      
+      <APRForm ref={aprFormRef} />
     </Box>
   );
 });

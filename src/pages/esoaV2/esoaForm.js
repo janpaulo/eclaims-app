@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -10,270 +10,11 @@ import {
   Paper,
   TextField,
   Typography,
+  MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import { Add, Delete, ExpandMore } from "@mui/icons-material";
-
-// --- INITIAL DATA (complete JSON) ------------------------------------------------
-// const initialData = {
-//   pHciPan: "H93005836",
-//   pHciTransmittalId: "4619",
-
-//   SummaryOfFees: {
-//     RoomAndBoard: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "0",
-//         pSeniorCitizenDiscount: "0",
-//         pPWDDiscount: "0",
-//         pPCSO: "0",
-//         pDSWD: "0",
-//         pDOHMAP: "0",
-//         pHMO: "0",
-//       },
-//     },
-
-//     DrugsAndMedicine: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "2695.53",
-//         pSeniorCitizenDiscount: "0.00",
-//         pPWDDiscount: "539.10",
-//         pPCSO: "0.00",
-//         pDSWD: "0.00",
-//         pDOHMAP: "0.00",
-//         pHMO: "0.00",
-//       },
-//       OtherFundSource: [
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//       ],
-//     },
-
-//     LaboratoryAndDiagnostic: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "2832.15",
-//         pSeniorCitizenDiscount: "0.00",
-//         pPWDDiscount: "566.44",
-//         pPCSO: "0.00",
-//         pDSWD: "0.00",
-//         pDOHMAP: "0.00",
-//         pHMO: "0.00",
-//       },
-//       OtherFundSource: [
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//       ],
-//     },
-
-//     OperatingRoomFees: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "11607.15",
-//         pSeniorCitizenDiscount: "0.00",
-//         pPWDDiscount: "2321.43",
-//         pPCSO: "0.00",
-//         pDSWD: "0.00",
-//         pDOHMAP: "0.00",
-//         pHMO: "0.00",
-//       },
-//       OtherFundSource: [
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//       ],
-//     },
-
-//     MedicalSupplies: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "8928.58",
-//         pSeniorCitizenDiscount: "0.00",
-//         pPWDDiscount: "1785.72",
-//         pPCSO: "0.00",
-//         pDSWD: "0.00",
-//         pDOHMAP: "0.00",
-//         pHMO: "0.00",
-//       },
-//       OtherFundSource: [
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//       ],
-//     },
-
-//     Others: {
-//       SummaryOfFee: {
-//         pChargesNetOfApplicableVat: "2678.57",
-//         pSeniorCitizenDiscount: "0.00",
-//         pPWDDiscount: "535.71",
-//         pPCSO: "0.00",
-//         pDSWD: "0.00",
-//         pDOHMAP: "0.00",
-//         pHMO: "0.00",
-//       },
-//       OtherFundSource: [
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//         { pDescription: "Courtesy Discount", pAmount: "452.85" },
-//       ],
-//     },
-//   },
-
-//   PhilHealth: {
-//     pTotalCaseRateAmount: "5460.00",
-//   },
-
-//   Balance: {
-//     pAmount: "12704.93",
-//   },
-//   ProfessionalFees: {
-//     ProfessionalFee: [
-//       {
-//         ProfessionalInfo: {
-//           pPAN: "1504-2400015-3",
-//           pFirstName: "LIFE",
-//           pMiddleName: "GOES",
-//           pLastName: "ON",
-//           pSuffixName: "",
-//         },
-//         SummaryOfFee: {
-//           pChargesNetOfApplicableVat: "20000.00",
-//           pSeniorCitizenDiscount: "0.00",
-//           pPWDDiscount: "1000.00",
-//           pPCSO: "1000.00",
-//           pDSWD: "2000.00",
-//           pDOHMAP: "3000.00",
-//           pHMO: "5000.00",
-//         },
-//       },
-//       {
-//         ProfessionalInfo: {
-//           pPAN: "1100-2400002-5",
-//           pFirstName: "LIVE",
-//           pMiddleName: "LOVE",
-//           pLastName: "LAUGH",
-//           pSuffixName: "",
-//         },
-//         SummaryOfFee: {
-//           pChargesNetOfApplicableVat: "23928.57",
-//           pSeniorCitizenDiscount: "0.00",
-//           pPWDDiscount: "1785.71",
-//           pPCSO: "0.00",
-//           pDSWD: "0.00",
-//           pDOHMAP: "0.00",
-//           pHMO: "5000.00",
-//         },
-//       },
-//     ],
-//   },
-//   ItemizedBillingItems: {
-//     ItemizedBillingItem: [
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "1727",
-//         pItemName: "PATHOLOGY: CD8",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "1136.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "1136.00",
-//         pCategory: "LaboratoryAndDiagnostic",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "",
-//         pItemName: "CHEMISTRY: AMYLASE",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "1242.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "1242.00",
-//         pCategory: "LaboratoryAndDiagnostic",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "1607",
-//         pItemName: "CHEMISTRY: IONIZED CA",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "794.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "794.00",
-//         pCategory: "LaboratoryAndDiagnostic",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "1898",
-//         pItemName: "OPERATING ROOM",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "5000.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "5000.00",
-//         pCategory: "OperatingRoomFees",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "1898",
-//         pItemName: "OPERATING ROOM",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "8000.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "8000.00",
-//         pCategory: "OperatingRoomFees",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "",
-//         pItemName: "ASSIST FEE",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "2000.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "2000.00",
-//         pCategory: "Others",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "",
-//         pItemName: "PROCEDURE FEE",
-//         pUnitOfMeasurement: "",
-//         pUnitPrice: "1000.00",
-//         pQuantity: "1.00",
-//         pTotalAmount: "1000.00",
-//         pCategory: "Others",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "122",
-//         pItemName: "SYRINGE DISPOSABLE 50CC W/OUT NEEDLE, 25'S/BX",
-//         pUnitOfMeasurement: "BOTTLE",
-//         pUnitPrice: "100.00",
-//         pQuantity: "50.00",
-//         pTotalAmount: "5000.00",
-//         pCategory: "MedicalSupplies",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "3",
-//         pItemName: "ALCOHOL ISOPROPHYL 70%, 500ML.",
-//         pUnitOfMeasurement: "PIECE",
-//         pUnitPrice: "100.00",
-//         pQuantity: "50.00",
-//         pTotalAmount: "5000.00",
-//         pCategory: "MedicalSupplies",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "ASPIR0000000066TAB490000000000",
-//         pItemName: "ASPIRIN 80 mg TABLET",
-//         pUnitOfMeasurement: "PIECE",
-//         pUnitPrice: "166.68",
-//         pQuantity: "10.00",
-//         pTotalAmount: "1666.80",
-//         pCategory: "DrugsAndMedicine",
-//       },
-//       {
-//         pServiceDate: "03-21-2025",
-//         pItemCode: "PARAC0000000047TAB490000000000",
-//         pItemName: "PARACETAMOL 500 mg TABLET",
-//         pUnitOfMeasurement: "PIECE",
-//         pUnitPrice: "135.22",
-//         pQuantity: "10.00",
-//         pTotalAmount: "1352.20",
-//         pCategory: "DrugsAndMedicine",
-//       },
-//     ],
-//   },
-// };
+import axios from "axios";
 
 const initialData = {
   pHciPan: "",
@@ -411,8 +152,8 @@ const initialData = {
     ItemizedBillingItem: [
       {
         pServiceDate: "",
-        pItemCode: "",
         pItemName: "",
+        pItemCode: "",
         pUnitOfMeasurement: "",
         pUnitPrice: "",
         pQuantity: "",
@@ -422,9 +163,6 @@ const initialData = {
     ],
   },
 };
-
-
-
 
 // Label formatter function
 const formatLabel = (key) => {
@@ -458,8 +196,37 @@ const formatLabel = (key) => {
 };
 
 // --- COMPONENT --------------------------------------------------------------------
-const EsoaForm = () => {
+const EsoaForm = ({ authUser }) => {
   const [formData, setFormData] = useState(initialData);
+  const [unitOptions, setUnitOptions] = useState([]);
+  const [itemOptions, setItemOptions] = useState([]);
+
+  useEffect(() => {
+    const headers = {
+      Authorization: authUser.access_token,
+      accreno: authUser.hospital?.accreditation_num,
+      softwarecertid: authUser.hospital?.username_code,
+      "Content-Type": "text/plain",
+    };
+
+    const fetchUnits = axios.get(
+      `${process.env.REACT_APP_API_CLAIMS}esoa-units`,
+      { headers }
+    );
+    const fetchItems = axios.get(
+      `${process.env.REACT_APP_API_CLAIMS}esoa-items`,
+      { headers }
+    );
+
+    Promise.all([fetchUnits, fetchItems])
+      .then(([unitsRes, itemsRes]) => {
+        setUnitOptions(unitsRes.data); // from /esoa-units
+        setItemOptions(itemsRes.data); // from /esoa-items
+      })
+      .catch((error) => {
+        console.error("Error fetching unit or item data:", error);
+      });
+  }, []);
 
   // ------ root level fields -------------------------------------------------------
   const handleRootChange = (field, value) => {
@@ -602,10 +369,24 @@ const EsoaForm = () => {
     alert("Form data dumped to console (dev tools)");
   };
 
+  const numericFields = [
+    "pQuantity",
+    "pUnitPrice",
+    "pTotalAmount",
+    "pAmount",
+    "pChargesNetOfApplicableVat",
+    "pSeniorCitizenDiscount",
+    "pPWDDiscount",
+    "pPCSO",
+    "pDSWD",
+    "pDOHMAP",
+    "pHMO"
+  ];
+
   // =================================================================================
   return (
     <Box p={2}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Electronic Statement of Account Form
       </Typography>
 
@@ -623,14 +404,19 @@ const EsoaForm = () => {
                 <Grid container spacing={2}>
                   {Object.entries(sectionData.SummaryOfFee).map(
                     ([key, value]) => (
-                      <Grid item xs={12} sm={6} md={4} key={key}>
+                      <Grid item xs={12} sm={4} md={3} key={key}>
                         <TextField
                           fullWidth
                           label={formatLabel(key)}
                           value={value}
-                          onChange={(e) =>
-                            handleSummaryField(sectionName, key, e.target.value)
-                          }
+                          inputMode={numericFields.includes(key) ? "decimal" : "text"}
+                          inputProps={numericFields.includes(key) ? { pattern: "[0-9]*[.,]?[0-9]*" } : {}}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!numericFields.includes(key) || /^\d*\.?\d*$/.test(val) || val === "") {
+                              handleSummaryField(sectionName, key, val); // Or relevant handler
+                            }
+                          }}
                         />
                       </Grid>
                     )
@@ -728,7 +514,6 @@ const EsoaForm = () => {
         </Grid>
       </Paper>
 
-
       {/* PROFESSIONAL FEES */}
       <Accordion defaultExpanded sx={{ mb: 2 }}>
         <AccordionSummary expandIcon={<ExpandMore />}>
@@ -742,7 +527,7 @@ const EsoaForm = () => {
               </Typography>
               <Grid container spacing={2}>
                 {Object.entries(fee.ProfessionalInfo).map(([key, value]) => (
-                  <Grid item xs={12} sm={6} md={4} key={key}>
+                  <Grid item xs={12} sm={6} md={3} key={key}>
                     <TextField
                       fullWidth
                       label={formatLabel(key)}
@@ -759,7 +544,7 @@ const EsoaForm = () => {
                   </Grid>
                 ))}
                 {Object.entries(fee.SummaryOfFee).map(([key, value]) => (
-                  <Grid item xs={12} sm={6} md={4} key={key}>
+                  <Grid item xs={12} sm={6} md={3} key={key}>
                     <TextField
                       fullWidth
                       label={formatLabel(key)}
@@ -810,14 +595,119 @@ const EsoaForm = () => {
                 <Grid container spacing={2}>
                   {Object.entries(item).map(([key, value]) => (
                     <Grid item xs={12} sm={6} md={4} key={key}>
-                      <TextField
-                        fullWidth
-                        label={formatLabel(key)}
-                        value={value}
-                        onChange={(e) =>
-                          handleItemizedChange(idx, key, e.target.value)
-                        }
-                      />
+                      {key === "pUnitOfMeasurement" ? (
+                        <TextField
+                          select
+                          fullWidth
+                          label={formatLabel(key)}
+                          value={value}
+                          onChange={(e) =>
+                            handleItemizedChange(idx, key, e.target.value)
+                          }
+                        >
+                          {unitOptions.map((option) => (
+                            <MenuItem
+                              key={option.unit_id}
+                              value={option.unit_desc}
+                            >
+                              {option.unit_desc}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      ) : key === "pItemName" ? (
+                        <Autocomplete
+                          fullWidth
+                          freeSolo
+                          options={itemOptions}
+                          getOptionLabel={(option) =>
+                            typeof option === "string"
+                              ? option
+                              : option.item_desc
+                          }
+                          value={
+                            itemOptions.find(
+                              (opt) => opt.item_desc === value
+                            ) || value
+                          }
+                          onChange={(event, newValue) => {
+                            const today = new Date()
+                              .toISOString()
+                              .split("T")[0];
+                            if (
+                              typeof newValue === "object" &&
+                              newValue !== null
+                            ) {
+                              handleItemizedChange(
+                                idx,
+                                "pItemName",
+                                newValue.item_desc
+                              );
+                              handleItemizedChange(
+                                idx,
+                                "pItemCode",
+                                newValue.item_id
+                              );
+                              handleItemizedChange(
+                                idx,
+                                "pCategory",
+                                newValue.cat_id
+                              );
+                              handleItemizedChange(idx, "pServiceDate", today);
+                            } else {
+                              handleItemizedChange(
+                                idx,
+                                "pItemName",
+                                newValue || ""
+                              );
+                            }
+                          }}
+                          onInputChange={(event, newInputValue) => {
+                            if (typeof newInputValue === "string") {
+                              handleItemizedChange(
+                                idx,
+                                "pItemName",
+                                newInputValue
+                              );
+                            }
+                          }}
+                          renderInput={(params) => (
+                            <TextField {...params} label={formatLabel(key)} />
+                          )}
+                        />
+                      ) : (
+                        <TextField
+                          fullWidth
+                          type={key === "pServiceDate" ? "date" : "text"}
+                          label={formatLabel(key)}
+                          InputLabelProps={
+                            key === "pServiceDate"
+                              ? { shrink: true }
+                              : undefined
+                          }
+                          value={value}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            handleItemizedChange(idx, key, newValue);
+
+                            // Auto compute pTotalAmount
+                            if (key === "pQuantity" || key === "pUnitPrice") {
+                              const quantity = parseFloat(
+                                key === "pQuantity" ? newValue : item.pQuantity
+                              );
+                              const unitPrice = parseFloat(
+                                key === "pUnitPrice"
+                                  ? newValue
+                                  : item.pUnitPrice
+                              );
+                              const total =
+                                !isNaN(quantity) && !isNaN(unitPrice)
+                                  ? (quantity * unitPrice).toFixed(2)
+                                  : "";
+                              handleItemizedChange(idx, "pTotalAmount", total);
+                            }
+                          }}
+                        />
+                      )}
                     </Grid>
                   ))}
                 </Grid>
@@ -833,6 +723,7 @@ const EsoaForm = () => {
               </Paper>
             )
           )}
+
           <Button startIcon={<Add />} onClick={addItemized} variant="outlined">
             Add Itemized Billing
           </Button>

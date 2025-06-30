@@ -6,6 +6,10 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 
 const SpecialConsiderations = ({
@@ -13,6 +17,7 @@ const SpecialConsiderations = ({
   setFormData,
   dateAdmitted,
   dateDischarged,
+  packageType,
 }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -124,16 +129,63 @@ const SpecialConsiderations = ({
           </Grid>
         ))}
       </Grid>
-
       <Typography mt={2}>b. For Z-Benefit Package</Typography>
-      <TextField
-        name="zBenefitPackageCode"
-        label="Z-Benefit Package Code"
-        fullWidth
-        margin="dense"
-        value={formData.zBenefitPackageCode || ""}
-        onChange={handleChange}
-      />
+
+      <Grid container spacing={2}>
+        <Grid item md={6} sm={3} mt={2}>
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="zBenefitPackageCode-label">
+              Z-Benefit Package Code
+            </InputLabel>
+            <Select
+              labelId="zBenefitPackageCode-label"
+              name="pZBenefitCode"
+              value={formData.pZBenefitCode || ""}
+              onChange={handleChange}
+              label="Z-Benefit Package Code"
+              disabled={packageType === "All Case Rate"}
+            >
+              {[
+                "Z0011",
+                "Z0012",
+                "Z0013",
+                "Z0021",
+                "Z0022",
+                "Z003",
+                "Z0041",
+                "Z0042",
+                "Z0051",
+                "Z0052",
+                "Z0061",
+                "Z0062",
+                "Z0071",
+                "Z0072",
+                "Z0081",
+                "Z0082",
+                "Z0091",
+                "Z0092",
+              ].map((code) => (
+                <MenuItem key={code} value={code}>
+                  {code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item md={6} sm={3} mt={3}>
+        <TextField
+            name="pPreAuthDate"
+            label="Auth Date"
+            fullWidth
+            type="date"
+            mt={2}
+            InputLabelProps={{ shrink: true }}
+            value={formData.pPreAuthDate || ""}
+            onChange={handleChange}
+            disabled={packageType === "All Case Rate"}
+          />
+        </Grid>
+      </Grid>
 
       <Typography mt={2}>
         c. For MCP Package (enumerate four dates [yyyy-mm-dd] of pre-natal
@@ -158,21 +210,50 @@ const SpecialConsiderations = ({
           </Grid>
         ))}
       </Grid>
+      <Grid container spacing={2} mt={2}>
+        <Grid item xs={6}>
+          <Typography mt={2}>d. For TB DOTS Package</Typography>
+          {["Intensive Phase", "Maintenance Phase"].map((label) => (
+            <FormControlLabel
+              key={label}
+              control={
+                <Checkbox
+                  name={label}
+                  checked={formData[label] || false}
+                  onChange={(e) => {
+                    const selected = e.target.name;
+                    const checked = e.target.checked;
 
-      <Typography mt={2}>d. For TB DOTS Package</Typography>
-      {["Intensive Phase", "Maintenance Phase"].map((label) => (
-        <FormControlLabel
-          key={label}
-          control={
-            <Checkbox
-              name={label}
-              checked={formData[label] || false}
-              onChange={handleChange}
+                    if (checked) {
+                      setFormData({
+                        "Intensive Phase": false,
+                        "Maintenance Phase": false,
+                        [selected]: true, // only this one is true
+                      });
+                    } else {
+                      // Optional: uncheck all if user clicks again to deselect
+                      setFormData({
+                        "Intensive Phase": false,
+                        "Maintenance Phase": false,
+                      });
+                    }
+                  }}
+                />
+              }
+              label={label}
             />
-          }
-          label={label}
-        />
-      ))}
+          ))}
+        </Grid>
+        <Grid item xs={6} mt={4}>
+          <TextField
+            name="pNTPCardNo"
+            label="Card No."
+            fullWidth
+            value={formData.pNTPCardNo || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+      </Grid>
 
       <Typography mt={2}>e. For Animal Bite Package</Typography>
       <Grid container spacing={2}>
@@ -181,18 +262,29 @@ const SpecialConsiderations = ({
             <TextField
               name={label}
               label={label}
+              type="date"
               fullWidth
               value={formData[label] || ""}
               onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
             />
           </Grid>
         ))}
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <TextField
-            name="OthersSpecify"
-            label="Others (Specify)"
+            name="pABPOthers"
+            label="Others"
             fullWidth
-            value={formData.OthersSpecify || ""}
+            value={formData.pABPOthers || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            name="pABPSpecify"
+            label="Specify"
+            fullWidth
+            value={formData.pABPSpecify || ""}
             onChange={handleChange}
           />
         </Grid>
@@ -247,6 +339,75 @@ const SpecialConsiderations = ({
             />
           </Grid>
         ))}
+
+        <Grid item xs={12}>
+          <Typography gutterBottom>
+            g. For Outpatient HIV/AIDS Treatment Package
+            <TextField
+              name="pLaboratoryNumber"
+              label="Laboratory Number:"
+              fullWidth
+              value={formData.pLaboratoryNumber || ""}
+              onChange={handleChange}
+            />
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={12}>
+          <Typography gutterBottom>h. Cataract Information</Typography>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            name="pCataractPreAuth"
+            label="Cataract Pre-Auth Code"
+            value={formData.pCataractPreAuth || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            name="pLeftEyeIOLStickerNumber"
+            label="Left Eye IOL Sticker Number"
+            value={formData.pLeftEyeIOLStickerNumber || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            name="pLeftEyeIOLExpiryDate"
+            label="Left Eye IOL Expiry Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={formData.pLeftEyeIOLExpiryDate || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            name="pRightEyeIOLStickerNumber"
+            label="Right Eye IOL Sticker Number"
+            value={formData.pRightEyeIOLStickerNumber || ""}
+            onChange={handleChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Right Eye IOL Expiry Date"
+            type="date"
+            name="pRightEyeIOLExpiryDate"
+            InputLabelProps={{ shrink: true }}
+            value={formData.pRightEyeIOLExpiryDate || ""}
+            onChange={handleChange}
+          />
+        </Grid>
       </Grid>
     </Box>
   );

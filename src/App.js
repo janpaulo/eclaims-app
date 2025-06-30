@@ -56,10 +56,11 @@ function App() {
               
                 <Routes>
                   <Route exact path="/"  element={ <Dashboard authDetails={parseUser}/> } />
-                  <Route exact path="/claims_registration"  element={ <MainRegistration authUser={parseUser}/> } />
+                  {/* <Route exact path="/claims_registration"  element={ <MainRegistration authUser={parseUser}/> } /> */}
+                  <Route exact path="/claims_registration"  element={ <MainCf1 authUser={parseUser}/> } />
                   <Route exact path="/claims"  element={ <ClaimTableList authUser={parseUser}/> } />
                   <Route exact path="/esoa_table_list"  element={ <EsoatableList authUser={parseUser}/> } />
-                  <Route exact path="/esoa_registration"  element={ <EsoaRegistration authUser={parseUser}/> } />
+                  {/* <Route exact path="/esoa_registration"  element={ <EsoaRegistration authUser={parseUser}/> } /> */}
                   <Route exact path="/encryptor"  element={ <XMLEncryptor/> } />
                   <Route exact path="/icd_codes"  element={ <ICDCodes/> } />
                   <Route exact path="/rvs_codes"  element={ <RVSCodes/> } />
@@ -75,7 +76,7 @@ function App() {
                   <Route exact path="/claim-signature-form"  element={ <CSFormMain authUser={parseUser}/> } />
                   <Route exact path="/csignature_forms"  element={ <CSForm authUser={parseUser}/> } />
                   <Route exact path="/cf1"  element={ <MainCf1 authUser={parseUser}/> } />
-                  <Route exact path="/esoa"  element={ <MainEsoa authUser={parseUser}/> } />
+                  <Route exact path="/esoa_registration"  element={ <MainEsoa authUser={parseUser}/> } />
                   
                 </Routes>
 

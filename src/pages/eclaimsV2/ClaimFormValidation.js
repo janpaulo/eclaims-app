@@ -406,18 +406,38 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
       </Box>
 
       <Box mb={3}>
-        <Typography variant="subtitle1">Other Info</Typography>
+        {/* <Typography variant="subtitle1">Other Info</Typography> */}
         <Grid container spacing={2}>
           <Grid item xs={4}>
-            <TextField
+
+          <FormControl component="fieldset">
+              <FormLabel component="legend">Membership Type</FormLabel>
+              <RadioGroup
+                row
+                name="membershipType"
+                value={formData.membershipType}
+                onChange={(e) =>
+                  handleChange("membershipType", e.target.value)
+                }
+              >
+                <FormControlLabel value="S" control={<Radio />} label="Self Employed" />
+                <FormControlLabel
+                  value="E"
+                  control={<Radio />}
+                  label="Employed"
+                />
+              </RadioGroup>
+            </FormControl>
+            {/* <TextField
               fullWidth
               label="Membership Type"
               value={formData.membershipType}
               onChange={(e) => handleChange("membershipType", e.target.value)}
-            />
+            /> */}
           </Grid>
           <Grid item xs={4}>
             <TextField
+              sx={{ display: "none" }}
               fullWidth
               label="PEN"
               value={formData.pEN}
@@ -426,6 +446,7 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
           </Grid>
           <Grid item xs={4}>
             <TextField
+              sx={{ display: "none" }}
               fullWidth
               label="Employer Name"
               value={formData.employerName}
