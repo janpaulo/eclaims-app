@@ -127,38 +127,21 @@ const initialData = {
           pHMO: "",
         },
       },
-      {
-        ProfessionalInfo: {
-          pPAN: "",
-          pFirstName: "",
-          pMiddleName: "",
-          pLastName: "",
-          pSuffixName: "",
-        },
-        SummaryOfFee: {
-          pChargesNetOfApplicableVat: "",
-          pSeniorCitizenDiscount: "",
-          pPWDDiscount: "",
-          pPCSO: "",
-          pDSWD: "",
-          pDOHMAP: "",
-          pHMO: "",
-        },
-      },
+     
     ],
   },
 
   ItemizedBillingItems: {
     ItemizedBillingItem: [
       {
-        pServiceDate: "",
         pItemName: "",
         pItemCode: "",
+        pCategory: "",
+        pServiceDate: "",
         pUnitOfMeasurement: "",
         pUnitPrice: "",
         pQuantity: "",
         pTotalAmount: "",
-        pCategory: "",
       },
     ],
   },
@@ -343,14 +326,14 @@ const EsoaForm = ({ authUser }) => {
     setFormData((prev) => {
       const updated = structuredClone(prev);
       updated.ItemizedBillingItems.ItemizedBillingItem.push({
-        pServiceDate: "",
-        pItemCode: "",
         pItemName: "",
+        pItemCode: "",
+        pCategory: "",
+        pServiceDate: "",
         pUnitOfMeasurement: "",
         pUnitPrice: "",
         pQuantity: "",
         pTotalAmount: "",
-        pCategory: "",
       });
       return updated;
     });
@@ -380,9 +363,15 @@ const EsoaForm = ({ authUser }) => {
     "pPCSO",
     "pDSWD",
     "pDOHMAP",
-    "pHMO"
+    "pHMO",
   ];
-
+  const itemTypes = [
+    "MedicalSupplies",
+    "LaboratoryAndDiagnostic",
+    "RoomAndBoard",
+    "OperatingRoomFees",
+    "DrugsAndMedicine",
+  ];
   // =================================================================================
   return (
     <Box p={2}>
@@ -409,11 +398,21 @@ const EsoaForm = ({ authUser }) => {
                           fullWidth
                           label={formatLabel(key)}
                           value={value}
-                          inputMode={numericFields.includes(key) ? "decimal" : "text"}
-                          inputProps={numericFields.includes(key) ? { pattern: "[0-9]*[.,]?[0-9]*" } : {}}
+                          inputMode={
+                            numericFields.includes(key) ? "decimal" : "text"
+                          }
+                          inputProps={
+                            numericFields.includes(key)
+                              ? { pattern: "[0-9]*[.,]?[0-9]*" }
+                              : {}
+                          }
                           onChange={(e) => {
                             const val = e.target.value;
-                            if (!numericFields.includes(key) || /^\d*\.?\d*$/.test(val) || val === "") {
+                            if (
+                              !numericFields.includes(key) ||
+                              /^\d*\.?\d*$/.test(val) ||
+                              val === ""
+                            ) {
                               handleSummaryField(sectionName, key, val); // Or relevant handler
                             }
                           }}
@@ -591,126 +590,170 @@ const EsoaForm = ({ authUser }) => {
           {formData.ItemizedBillingItems?.ItemizedBillingItem.map(
             (item, idx) => (
               <Paper key={idx} sx={{ p: 2, mb: 2 }} variant="outlined">
-                <Typography variant="subtitle1">Item #{idx + 1}</Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(item).map(([key, value]) => (
-                    <Grid item xs={12} sm={6} md={4} key={key}>
-                      {key === "pUnitOfMeasurement" ? (
-                        <TextField
-                          select
-                          fullWidth
-                          label={formatLabel(key)}
-                          value={value}
-                          onChange={(e) =>
-                            handleItemizedChange(idx, key, e.target.value)
-                          }
-                        >
-                          {unitOptions.map((option) => (
-                            <MenuItem
-                              key={option.unit_id}
-                              value={option.unit_desc}
-                            >
-                              {option.unit_desc}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      ) : key === "pItemName" ? (
-                        <Autocomplete
-                          fullWidth
-                          freeSolo
-                          options={itemOptions}
-                          getOptionLabel={(option) =>
-                            typeof option === "string"
-                              ? option
-                              : option.item_desc
-                          }
-                          value={
-                            itemOptions.find(
-                              (opt) => opt.item_desc === value
-                            ) || value
-                          }
-                          onChange={(event, newValue) => {
-                            const today = new Date()
-                              .toISOString()
-                              .split("T")[0];
-                            if (
-                              typeof newValue === "object" &&
-                              newValue !== null
-                            ) {
-                              handleItemizedChange(
-                                idx,
-                                "pItemName",
-                                newValue.item_desc
-                              );
-                              handleItemizedChange(
-                                idx,
-                                "pItemCode",
-                                newValue.item_id
-                              );
-                              handleItemizedChange(
-                                idx,
-                                "pCategory",
-                                newValue.cat_id
-                              );
-                              handleItemizedChange(idx, "pServiceDate", today);
-                            } else {
-                              handleItemizedChange(
-                                idx,
-                                "pItemName",
-                                newValue || ""
-                              );
-                            }
-                          }}
-                          onInputChange={(event, newInputValue) => {
-                            if (typeof newInputValue === "string") {
-                              handleItemizedChange(
-                                idx,
-                                "pItemName",
-                                newInputValue
-                              );
-                            }
-                          }}
-                          renderInput={(params) => (
-                            <TextField {...params} label={formatLabel(key)} />
-                          )}
-                        />
-                      ) : (
-                        <TextField
-                          fullWidth
-                          type={key === "pServiceDate" ? "date" : "text"}
-                          label={formatLabel(key)}
-                          InputLabelProps={
-                            key === "pServiceDate"
-                              ? { shrink: true }
-                              : undefined
-                          }
-                          value={value}
-                          onChange={(e) => {
-                            const newValue = e.target.value;
-                            handleItemizedChange(idx, key, newValue);
+                <Typography variant="subtitle1">
+                  Item #{idx + 1} ({item.pCategory || "Select Type"})
+                </Typography>
 
-                            // Auto compute pTotalAmount
-                            if (key === "pQuantity" || key === "pUnitPrice") {
-                              const quantity = parseFloat(
-                                key === "pQuantity" ? newValue : item.pQuantity
-                              );
-                              const unitPrice = parseFloat(
-                                key === "pUnitPrice"
-                                  ? newValue
-                                  : item.pUnitPrice
-                              );
-                              const total =
-                                !isNaN(quantity) && !isNaN(unitPrice)
-                                  ? (quantity * unitPrice).toFixed(2)
-                                  : "";
-                              handleItemizedChange(idx, "pTotalAmount", total);
+                <Grid container spacing={2}>
+                  {/* Select Type */}
+                  <Grid item xs={12} sm={6} md={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      label="Item Type"
+                      value={item.pCategory || ""}
+                      onChange={(e) => {
+                        const selectedType = e.target.value;
+                        handleItemizedChange(idx, "pCategory", selectedType);
+                        // Optionally clear pItemName and pItemCode when type changes
+                        handleItemizedChange(idx, "pItemName", "");
+                        handleItemizedChange(idx, "pItemCode", "");
+                      }}
+                    >
+                      {itemTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  {Object.entries(item).map(([key, value]) => {
+                    if (
+                      key === "pCategory" ||
+                      key === "pCategoryType" // we now render category manually
+                    )
+                      return null;
+
+                    return (
+                      <Grid item xs={12} sm={6} md={4} key={key}>
+                        {key === "pUnitOfMeasurement" ? (
+                          <TextField
+                            select
+                            fullWidth
+                            label={formatLabel(key)}
+                            value={value}
+                            onChange={(e) =>
+                              handleItemizedChange(idx, key, e.target.value)
                             }
-                          }}
-                        />
-                      )}
-                    </Grid>
-                  ))}
+                          >
+                            {unitOptions.map((option) => (
+                              <MenuItem
+                                key={option.unit_id}
+                                value={option.unit_desc}
+                              >
+                                {option.unit_desc}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        ) : key === "pItemName" ? (
+                          <Autocomplete
+                            fullWidth
+                            freeSolo
+                            options={itemOptions.filter(
+                              (opt) => opt.cat_id === item.pCategory
+                            )}
+                            getOptionLabel={(option) =>
+                              typeof option === "string"
+                                ? option
+                                : option.item_desc
+                            }
+                            value={
+                              itemOptions.find(
+                                (opt) => opt.item_desc === item.pItemName
+                              ) || item.pItemName
+                            }
+                            onChange={(event, newValue) => {
+                              const today = new Date()
+                                .toISOString()
+                                .split("T")[0];
+                              if (
+                                typeof newValue === "object" &&
+                                newValue !== null
+                              ) {
+                                handleItemizedChange(
+                                  idx,
+                                  "pItemName",
+                                  newValue.item_desc
+                                );
+                                handleItemizedChange(
+                                  idx,
+                                  "pItemCode",
+                                  newValue.item_id
+                                );
+                                handleItemizedChange(
+                                  idx,
+                                  "pCategory",
+                                  newValue.cat_id
+                                );
+                                handleItemizedChange(
+                                  idx,
+                                  "pServiceDate",
+                                  today
+                                );
+                              } else {
+                                handleItemizedChange(
+                                  idx,
+                                  "pItemName",
+                                  newValue || ""
+                                );
+                              }
+                            }}
+                            renderOption={(props, option) => (
+                              <li {...props} key={option.item_id}>
+                                {option.item_desc}
+                              </li>
+                            )}
+                            renderInput={(params) => (
+                              <TextField {...params} label="Item Name" />
+                            )}
+                          />
+                        ) : (
+                          <TextField
+                            fullWidth
+                            type={key === "pServiceDate" ? "date" : "text"}
+                            label={formatLabel(key)}
+                            InputLabelProps={
+                              key === "pServiceDate"
+                                ? { shrink: true }
+                                : undefined
+                            }
+                            disabled={key === "pItemCode" || key === "pTotalAmount" } 
+                            value={value}
+                            onChange={(e) => {
+                              const newValue = e.target.value;
+                              handleItemizedChange(idx, key, newValue);
+
+                              // Auto compute pTotalAmount
+                              if (key === "pQuantity" || key === "pUnitPrice") {
+                                const quantity = parseFloat(
+                                  key === "pQuantity"
+                                    ? newValue
+                                    : item.pQuantity
+                                );
+                                const unitPrice = parseFloat(
+                                  key === "pUnitPrice"
+                                    ? newValue
+                                    : item.pUnitPrice
+                                );
+                                const total =
+                                  !isNaN(quantity) && !isNaN(unitPrice)
+                                    ? (quantity * unitPrice).toFixed(2)
+                                    : "";
+                                handleItemizedChange(
+                                  idx,
+                                  "pTotalAmount",
+                                  total
+                                );
+                              }
+                            }}
+                          />
+                        )}
+                      </Grid>
+                    );
+                  })}
                 </Grid>
+
                 <Box mt={1}>
                   <Button
                     color="error"

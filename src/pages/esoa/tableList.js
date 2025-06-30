@@ -32,35 +32,78 @@ class tableList extends React.Component {
     this.handleGetEsoa();
   }
 
+
   handleGetEsoa = async () => {
+    const { authUser } = this.state;
+  
+    if (!authUser || !authUser.hci_no || !authUser.access_token) {
+      this.setState({ items: [], error: "Missing credentials. Please log in again." });
+      return;
+    }
   
     try {
-      const response = await api.get(`esoas/${this.state.authUser.hci_no}`, {
+      const response = await api.get(`/esoas/${authUser.hci_no}`, {
         headers: {
-          Authorization: `Bearer ${this.state.authUser.access_token}`,
+          Authorization: `Bearer ${authUser.access_token}`,
         },
       });
   
-      // Check if result exists and has items
-      if (response.status === 200 && response.data?.esoa?.length > 0) {
-        this.setState({ items: response.data.esoa, error: null });
+      const esoa = response.data?.esoa;
+  
+      if (Array.isArray(esoa) && esoa.length > 0) {
+        this.setState({ items: esoa, error: null });
       } else {
-        this.setState({ items: [], error: "No records found." });
-        // console.warn("No claims found.");
+        this.setState({ items: []});
       }
     } catch (err) {
-      // let errorMessage = "An error occurred while fetching Esoas.";
+      const status = err.response?.status;
+      const serverMsg = err.response?.data?.error || err.response?.data?.message;
   
-      // if (err.response && err.response.status === 404) {
-      //   errorMessage = "No Esoas found for this HCI.";
-      // } else if (err.message) {
-      //   errorMessage = err.message;
-      // }
+      let errorMessage = "An error occurred while fetching esoa.";
   
-      this.setState({ items: []});
-      // console.error("Error fetching claims:", errorMessage);
+      if (status === 404) {
+        errorMessage = serverMsg || "No esoa found for this HCI.";
+      } else if (serverMsg) {
+        errorMessage = serverMsg;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+  
+      this.setState({ items: [], error: errorMessage });
+      console.error("Error fetching esoa:", err);
     }
   };
+  
+
+  // handleGetEsoa = async () => {
+  
+  //   try {
+  //     const response = await api.get(`esoas/${this.state.authUser.hci_no}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${this.state.authUser.access_token}`,
+  //       },
+  //     });
+  
+  //     // Check if result exists and has items
+  //     if (response.status === 200 && response.data?.esoa?.length > 0) {
+  //       this.setState({ items: response.data.esoa, error: null });
+  //     } else {
+  //       this.setState({ items: [], error: "No records found." });
+  //       // console.warn("No esoa found.");
+  //     }
+  //   } catch (err) {
+  //     // let errorMessage = "An error occurred while fetching Esoas.";
+  
+  //     // if (err.response && err.response.status === 404) {
+  //     //   errorMessage = "No Esoas found for this HCI.";
+  //     // } else if (err.message) {
+  //     //   errorMessage = err.message;
+  //     // }
+  
+  //     this.setState({ items: []});
+  //     // console.error("Error fetching esoa:", errorMessage);
+  //   }
+  // };
 
 
   
