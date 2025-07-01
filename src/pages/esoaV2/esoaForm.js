@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import { Add, Delete, ExpandMore } from "@mui/icons-material";
 import axios from "axios";
+import NumericFormatInput from "../../utils/NumericFormatInput";
+import moment from "moment";
 
 const initialData = {
   pHciPan: "",
@@ -23,88 +25,87 @@ const initialData = {
   SummaryOfFees: {
     RoomAndBoard: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
     },
 
     DrugsAndMedicine: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
       OtherFundSource: [],
     },
 
     LaboratoryAndDiagnostic: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
       OtherFundSource: [],
     },
 
     OperatingRoomFees: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
       OtherFundSource: [],
     },
 
     MedicalSupplies: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
       OtherFundSource: [],
     },
 
     Others: {
       SummaryOfFee: {
-        pChargesNetOfApplicableVat: "",
-        pSeniorCitizenDiscount: "",
-        pPWDDiscount: "",
-        pPCSO: "",
-        pDSWD: "",
-        pDOHMAP: "",
-        pHMO: "",
+        pChargesNetOfApplicableVat: "0.00",
+        pSeniorCitizenDiscount: "0.00",
+        pPWDDiscount: "0.00",
+        pPCSO: "0.00",
+        pDSWD: "0.00",
+        pDOHMAP: "0.00",
+        pHMO: "0.00",
       },
       OtherFundSource: [],
     },
-  },
 
-  PhilHealth: {
-    pTotalCaseRateAmount: "",
-  },
-
-  Balance: {
-    pAmount: "",
+    PhilHealth: {
+      pTotalCaseRateAmount: "0.00",
+    },
+    Balance: {
+      pAmount: "0.00",
+    },
   },
 
   ProfessionalFees: {
@@ -118,17 +119,23 @@ const initialData = {
           pSuffixName: "",
         },
         SummaryOfFee: {
-          pChargesNetOfApplicableVat: "",
-          pSeniorCitizenDiscount: "",
-          pPWDDiscount: "",
-          pPCSO: "",
-          pDSWD: "",
-          pDOHMAP: "",
-          pHMO: "",
+          pChargesNetOfApplicableVat: "0.00",
+          pSeniorCitizenDiscount: "0.00",
+          pPWDDiscount: "0.00",
+          pPCSO: "0.00",
+          pDSWD: "0.00",
+          pDOHMAP: "0.00",
+          pHMO: "0.00",
         },
       },
-     
     ],
+
+    PhilHealth: {
+      pTotalCaseRateAmount: "0.00",
+    },
+    Balance: {
+      pAmount: "0.00",
+    },
   },
 
   ItemizedBillingItems: {
@@ -139,9 +146,9 @@ const initialData = {
         pCategory: "",
         pServiceDate: "",
         pUnitOfMeasurement: "",
-        pUnitPrice: "",
+        pUnitPrice: "0.00",
         pQuantity: "",
-        pTotalAmount: "",
+        pTotalAmount: "0.00",
       },
     ],
   },
@@ -348,8 +355,52 @@ const EsoaForm = ({ authUser }) => {
   };
 
   const handleSubmit = () => {
-    console.log("Submitted Form Data:", formData);
-    alert("Form data dumped to console (dev tools)");
+    // Validate ItemizedBillingItems
+    const itemizedErrors =
+      formData.ItemizedBillingItems.ItemizedBillingItem.some((item, idx) => {
+        for (const [key, value] of Object.entries(item)) {
+          if (value === "" || value === null || value === undefined) {
+            alert(`ItemizedBillingItem #${idx + 1}: "${key}" is required.`);
+            return true;
+          }
+        }
+        return false;
+      });
+
+    if (itemizedErrors) return;
+
+    // Validate ProfessionalFees - only pFirstName
+    const professionalErrors = formData.ProfessionalFees.ProfessionalFee.some(
+      (prof, idx) => {
+        const firstName = prof.ProfessionalInfo?.pFirstName;
+        if (!firstName || firstName.trim() === "") {
+          alert(`Professional Fee #${idx + 1}: "pFirstName" is required.`);
+          return true;
+        }
+        return false;
+      }
+    );
+
+    if (professionalErrors) return;
+
+    // Format pServiceDate
+    const formattedData = {
+      ...formData,
+      ItemizedBillingItems: {
+        ItemizedBillingItem:
+          formData.ItemizedBillingItems.ItemizedBillingItem.map((item) => ({
+            ...item,
+            pServiceDate: item.pServiceDate
+              ? moment(item.pServiceDate).format("MM-DD-YYYY")
+              : "",
+          })),
+      },
+      pHciPan: authUser.hospital?.accreditation_num,
+      pHciTransmittalId: "4619",
+    };
+
+    console.log("Submitted Form Data:", formattedData);
+    alert("Form submitted successfully. Data dumped to console (dev tools).");
   };
 
   const numericFields = [
@@ -380,138 +431,146 @@ const EsoaForm = ({ authUser }) => {
       </Typography>
 
       {/* Summary of Fees sections */}
+
       {Object.entries(formData.SummaryOfFees).map(
-        ([sectionName, sectionData]) => (
-          <Accordion key={sectionName} defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMore />}>
-              <Typography variant="h6">{sectionName}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Paper sx={{ p: 2 }} variant="outlined">
-                {/* SummaryOfFee fields */}
-                <Typography variant="subtitle1">Summary of Fee</Typography>
+        ([sectionName, sectionData]) => {
+          if (sectionName === "PhilHealth") {
+            return (
+              <Paper
+                key="PhilHealthBalance"
+                sx={{ p: 2, mb: 2 }}
+                variant="outlined"
+              >
+                <Typography variant="h6" gutterBottom>
+                  PhilHealth & Balance
+                </Typography>
                 <Grid container spacing={2}>
-                  {Object.entries(sectionData.SummaryOfFee).map(
-                    ([key, value]) => (
-                      <Grid item xs={12} sm={4} md={3} key={key}>
-                        <TextField
-                          fullWidth
-                          label={formatLabel(key)}
-                          value={value}
-                          inputMode={
-                            numericFields.includes(key) ? "decimal" : "text"
-                          }
-                          inputProps={
-                            numericFields.includes(key)
-                              ? { pattern: "[0-9]*[.,]?[0-9]*" }
-                              : {}
-                          }
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (
-                              !numericFields.includes(key) ||
-                              /^\d*\.?\d*$/.test(val) ||
-                              val === ""
-                            ) {
-                              handleSummaryField(sectionName, key, val); // Or relevant handler
-                            }
-                          }}
-                        />
-                      </Grid>
-                    )
-                  )}
+                  <Grid item xs={12} sm={6} md={4}>
+                    <NumericFormatInput
+                      label={formatLabel("pTotalCaseRateAmount")}
+                      value={
+                        formData.SummaryOfFees.PhilHealth.pTotalCaseRateAmount
+                      }
+                      onChange={(val) => {
+                        setFormData((prev) => {
+                          const updated = structuredClone(prev);
+                          updated.SummaryOfFees.PhilHealth.pTotalCaseRateAmount =
+                            val;
+                          return updated;
+                        });
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <NumericFormatInput
+                      label={formatLabel("pAmount")}
+                      value={formData.SummaryOfFees.Balance.pAmount}
+                      onChange={(val) => {
+                        setFormData((prev) => {
+                          const updated = structuredClone(prev);
+                          updated.SummaryOfFees.Balance.pAmount = val;
+                          return updated;
+                        });
+                      }}
+                    />
+                  </Grid>
                 </Grid>
-
-                {/* Other Fund Source */}
-                {sectionData.OtherFundSource?.map((ofs, idx) => (
-                  <Box key={idx} mt={3}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Other Fund Source #{idx + 1}
-                    </Typography>
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={12} sm={5}>
-                        <TextField
-                          fullWidth
-                          label="Description"
-                          value={ofs.pDescription}
-                          onChange={(e) =>
-                            handleOtherFundSourceField(
-                              sectionName,
-                              idx,
-                              "pDescription",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={5}>
-                        <TextField
-                          fullWidth
-                          label="Amount"
-                          value={ofs.pAmount}
-                          onChange={(e) =>
-                            handleOtherFundSourceField(
-                              sectionName,
-                              idx,
-                              "pAmount",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={2}>
-                        <IconButton
-                          color="error"
-                          onClick={() =>
-                            removeOtherFundSource(sectionName, idx)
-                          }
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                ))}
-
-                <Box mt={2}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Add />}
-                    onClick={() => addOtherFundSource(sectionName)}
-                  >
-                    Add Other Fund Source
-                  </Button>
-                </Box>
               </Paper>
-            </AccordionDetails>
-          </Accordion>
-        )
-      )}
+            );
+          }
 
-      {/* PhilHealth Section */}
-      <Paper sx={{ p: 2 }} variant="outlined">
-        <Typography variant="h6">PhilHealth</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              label="Total Case Rate Amount"
-              value={formData.PhilHealth.pTotalCaseRateAmount}
-              onChange={(e) =>
-                handlePhilHealthChange("pTotalCaseRateAmount", e.target.value)
-              }
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              label="Amount"
-              value={formData.Balance.pAmount}
-              onChange={(e) => handleBalanceChange("pAmount", e.target.value)}
-            />
-          </Grid>
-        </Grid>
-      </Paper>
+          if (sectionName === "Balance") return null;
+
+          return (
+            <Accordion key={sectionName} defaultExpanded sx={{ mb: 2 }}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Typography variant="h6">{sectionName}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Paper sx={{ p: 2 }} variant="outlined">
+                  <Grid container spacing={2}>
+                    <Grid container spacing={2}>
+                      {Object.entries(sectionData.SummaryOfFee).map(
+                        ([key, value]) => (
+                          <Grid item xs={12} sm={4} md={3} key={key}>
+                            <NumericFormatInput
+                              label={formatLabel(key)}
+                              value={value}
+                              onChange={(val) =>
+                                handleSummaryField(sectionName, key, val)
+                              }
+                            />
+                          </Grid>
+                        )
+                      )}
+                    </Grid>
+                  </Grid>
+
+                  {/* Other Fund Source */}
+                  {sectionData.OtherFundSource?.map((ofs, idx) => (
+                    <Box key={idx} mt={3}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Other Fund Source #{idx + 1}
+                      </Typography>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} sm={5}>
+                          <TextField
+                            fullWidth
+                            label="Description"
+                            value={ofs.pDescription}
+                            onChange={(e) =>
+                              handleOtherFundSourceField(
+                                sectionName,
+                                idx,
+                                "pDescription",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={5}>
+                          <NumericFormatInput
+                            label="Amount"
+                            value={ofs.pAmount}
+                            onChange={(val) =>
+                              handleOtherFundSourceField(
+                                sectionName,
+                                idx,
+                                "pAmount",
+                                val
+                              )
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={2}>
+                          <IconButton
+                            color="error"
+                            onClick={() =>
+                              removeOtherFundSource(sectionName, idx)
+                            }
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))}
+
+                  <Box mt={2}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Add />}
+                      onClick={() => addOtherFundSource(sectionName)}
+                    >
+                      Add Other Fund Source
+                    </Button>
+                  </Box>
+                </Paper>
+              </AccordionDetails>
+            </Accordion>
+          );
+        }
+      )}
 
       {/* PROFESSIONAL FEES */}
       <Accordion defaultExpanded sx={{ mb: 2 }}>
@@ -524,6 +583,8 @@ const EsoaForm = ({ authUser }) => {
               <Typography variant="subtitle1">
                 Professional #{idx + 1}
               </Typography>
+
+              {/* Professional Info */}
               <Grid container spacing={2}>
                 {Object.entries(fee.ProfessionalInfo).map(([key, value]) => (
                   <Grid item xs={12} sm={6} md={3} key={key}>
@@ -542,25 +603,32 @@ const EsoaForm = ({ authUser }) => {
                     />
                   </Grid>
                 ))}
-                {Object.entries(fee.SummaryOfFee).map(([key, value]) => (
-                  <Grid item xs={12} sm={6} md={3} key={key}>
-                    <TextField
-                      fullWidth
-                      label={formatLabel(key)}
-                      value={value}
-                      onChange={(e) =>
-                        handleProfessionalFeeChange(
-                          idx,
-                          "SummaryOfFee",
-                          key,
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Grid>
-                ))}
               </Grid>
-              <Box mt={1}>
+
+              {/* Summary of Fee */}
+              <Box mt={2}>
+                <Typography variant="subtitle1">Summary of Fee</Typography>
+                <Grid container spacing={2}>
+                  {Object.entries(fee.SummaryOfFee).map(([key, value]) => (
+                    <Grid item xs={12} sm={6} md={3} key={key}>
+                      <NumericFormatInput
+                        label={formatLabel(key)}
+                        value={value}
+                        onChange={(val) =>
+                          handleProfessionalFeeChange(
+                            idx,
+                            "SummaryOfFee",
+                            key,
+                            val
+                          )
+                        }
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+
+              <Box mt={2}>
                 <Button
                   color="error"
                   startIcon={<Delete />}
@@ -571,10 +639,50 @@ const EsoaForm = ({ authUser }) => {
               </Box>
             </Paper>
           ))}
+
+          {/* PhilHealth & Balance at the parent level */}
+          <Paper sx={{ p: 2, mt: 2 }} variant="outlined">
+            <Typography variant="subtitle1">PhilHealth & Balance</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <NumericFormatInput
+                  label={formatLabel("pTotalCaseRateAmount")}
+                  value={
+                    formData.ProfessionalFees.PhilHealth
+                      ?.pTotalCaseRateAmount || ""
+                  }
+                  onChange={(val) => {
+                    setFormData((prev) => {
+                      const updated = structuredClone(prev);
+                      updated.ProfessionalFees.PhilHealth.pTotalCaseRateAmount =
+                        val;
+                      return updated;
+                    });
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={4}>
+                <NumericFormatInput
+                  label={formatLabel("pAmount")}
+                  value={formData.ProfessionalFees.Balance?.pAmount || ""}
+                  onChange={(val) => {
+                    setFormData((prev) => {
+                      const updated = structuredClone(prev);
+                      updated.ProfessionalFees.Balance.pAmount = val;
+                      return updated;
+                    });
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
           <Button
             startIcon={<Add />}
             onClick={addProfessionalFee}
             variant="outlined"
+            sx={{ mt: 2 }}
           >
             Add Professional Fee
           </Button>
@@ -708,6 +816,69 @@ const EsoaForm = ({ authUser }) => {
                               <TextField {...params} label="Item Name" />
                             )}
                           />
+                        ) : key === "pQuantity" ? (
+                          <TextField
+                            fullWidth
+                            label={formatLabel(key)}
+                            value={value}
+                            onChange={(e) => {
+                              const quantity = e.target.value;
+                              handleItemizedChange(idx, "pQuantity", quantity);
+
+                              const unitPrice = parseFloat(item.pUnitPrice);
+                              const qty = parseFloat(quantity);
+
+                              if (!isNaN(qty) && !isNaN(unitPrice)) {
+                                const total = (qty * unitPrice).toFixed(2);
+                                handleItemizedChange(
+                                  idx,
+                                  "pTotalAmount",
+                                  total
+                                );
+                              } else {
+                                // If either input is invalid, reset total to "0.00"
+                                handleItemizedChange(
+                                  idx,
+                                  "pTotalAmount",
+                                  "0.00"
+                                );
+                              }
+                            }}
+                          />
+                        ) : key === "pUnitPrice" ? (
+                          <NumericFormatInput
+                            label={formatLabel(key)}
+                            value={value}
+                            onChange={(val) => {
+                              handleItemizedChange(idx, "pUnitPrice", val);
+
+                              const quantity = parseFloat(item.pQuantity);
+                              const unitPrice = parseFloat(val);
+
+                              if (!isNaN(quantity) && !isNaN(unitPrice)) {
+                                const total = (quantity * unitPrice).toFixed(2);
+                                handleItemizedChange(
+                                  idx,
+                                  "pTotalAmount",
+                                  total
+                                );
+                              } else {
+                                // Reset total if values are invalid or cleared
+                                handleItemizedChange(
+                                  idx,
+                                  "pTotalAmount",
+                                  "0.00"
+                                );
+                              }
+                            }}
+                          />
+                        ) : key === "pTotalAmount" ? (
+                          <NumericFormatInput
+                            label={formatLabel(key)}
+                            value={value}
+                            disabled
+                            onChange={() => {}}
+                          />
                         ) : (
                           <TextField
                             fullWidth
@@ -718,35 +889,11 @@ const EsoaForm = ({ authUser }) => {
                                 ? { shrink: true }
                                 : undefined
                             }
-                            disabled={key === "pItemCode" || key === "pTotalAmount" } 
+                            disabled={key === "pItemCode"}
                             value={value}
-                            onChange={(e) => {
-                              const newValue = e.target.value;
-                              handleItemizedChange(idx, key, newValue);
-
-                              // Auto compute pTotalAmount
-                              if (key === "pQuantity" || key === "pUnitPrice") {
-                                const quantity = parseFloat(
-                                  key === "pQuantity"
-                                    ? newValue
-                                    : item.pQuantity
-                                );
-                                const unitPrice = parseFloat(
-                                  key === "pUnitPrice"
-                                    ? newValue
-                                    : item.pUnitPrice
-                                );
-                                const total =
-                                  !isNaN(quantity) && !isNaN(unitPrice)
-                                    ? (quantity * unitPrice).toFixed(2)
-                                    : "";
-                                handleItemizedChange(
-                                  idx,
-                                  "pTotalAmount",
-                                  total
-                                );
-                              }
-                            }}
+                            onChange={(e) =>
+                              handleItemizedChange(idx, key, e.target.value)
+                            }
                           />
                         )}
                       </Grid>
