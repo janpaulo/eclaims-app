@@ -17,6 +17,7 @@ import { Add, Delete, ExpandMore } from "@mui/icons-material";
 import axios from "axios";
 import NumericFormatInput from "../../utils/NumericFormatInput";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 const initialData = {
   pHciPan: "",
@@ -190,6 +191,7 @@ const EsoaForm = ({ authUser }) => {
   const [formData, setFormData] = useState(initialData);
   const [unitOptions, setUnitOptions] = useState([]);
   const [itemOptions, setItemOptions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const headers = {
@@ -353,9 +355,14 @@ const EsoaForm = ({ authUser }) => {
       return updated;
     });
   };
-
   const handleSubmit = () => {
-    // Validate ItemizedBillingItems
+    
+    
+  // Show confirmation before proceeding
+  const confirmSubmit = window.confirm("Are you sure you want to submit this form?");
+  if (!confirmSubmit) return; // Cancel submission if user clicks "Cancel"
+
+  
     const itemizedErrors =
       formData.ItemizedBillingItems.ItemizedBillingItem.some((item, idx) => {
         for (const [key, value] of Object.entries(item)) {
@@ -399,8 +406,37 @@ const EsoaForm = ({ authUser }) => {
       pHciTransmittalId: "4619",
     };
 
+    const data = {
+      professional_fee: 0,
+      hci_no: formattedData.pHciPan,
+      date_created: new Date(),
+      total_amount: 0,
+      sum_philhealth_amount:
+        formattedData.SummaryOfFees.PhilHealth.pTotalCaseRateAmount,
+      prof_philhealth_amount:
+        formattedData.ProfessionalFees.PhilHealth.pTotalCaseRateAmount,
+      xml_data: JSON.stringify(formattedData),
+    };
+
+    axios({
+      method: "POST",
+      url: process.env.REACT_APP_API_CLAIMS + "esoas",
+      data: data,
+      headers: {
+        Authorization: `Bearer ${authUser.access_token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((resp) => {
+        alert("Form saved successfully.");
+        navigate("/esoa_table_list"); // <-- ✅ Redirect here
+      })
+      .catch((error) => {
+        console.error("Save failed:", error);
+        alert("An error occurred while saving.");
+      });
+
     console.log("Submitted Form Data:", formattedData);
-    alert("Form submitted successfully. Data dumped to console (dev tools).");
   };
 
   const numericFields = [

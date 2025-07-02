@@ -49,12 +49,7 @@ class tableList extends React.Component {
       });
   
       const esoa = response.data?.esoa;
-  
-      if (Array.isArray(esoa) && esoa.length > 0) {
-        this.setState({ items: esoa, error: null });
-      } else {
-        this.setState({ items: []});
-      }
+      this.setState({ items: esoa });
     } catch (err) {
       const status = err.response?.status;
       const serverMsg = err.response?.data?.error || err.response?.data?.message;
@@ -74,38 +69,6 @@ class tableList extends React.Component {
     }
   };
   
-
-  // handleGetEsoa = async () => {
-  
-  //   try {
-  //     const response = await api.get(`esoas/${this.state.authUser.hci_no}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${this.state.authUser.access_token}`,
-  //       },
-  //     });
-  
-  //     // Check if result exists and has items
-  //     if (response.status === 200 && response.data?.esoa?.length > 0) {
-  //       this.setState({ items: response.data.esoa, error: null });
-  //     } else {
-  //       this.setState({ items: [], error: "No records found." });
-  //       // console.warn("No esoa found.");
-  //     }
-  //   } catch (err) {
-  //     // let errorMessage = "An error occurred while fetching Esoas.";
-  
-  //     // if (err.response && err.response.status === 404) {
-  //     //   errorMessage = "No Esoas found for this HCI.";
-  //     // } else if (err.message) {
-  //     //   errorMessage = err.message;
-  //     // }
-  
-  //     this.setState({ items: []});
-  //     // console.error("Error fetching esoa:", errorMessage);
-  //   }
-  // };
-
-
   
 
   render() {
@@ -151,11 +114,11 @@ class tableList extends React.Component {
             <TableHead>
               <TableRow>
                 <TableCell align="center">PAN No.</TableCell>
-                <TableCell align="center">Professional fee</TableCell>
+                {/* <TableCell align="center">Professional fee</TableCell> */}
                 <TableCell align="center">Professional PhilHealth Amount</TableCell>
                 <TableCell align="center">Summary PhilHealth Amount</TableCell>
-                <TableCell align="center">Total Amount</TableCell>
-                <TableCell align="center">Date Created</TableCell>
+                {/* <TableCell align="center">Total Amount</TableCell> */}
+                <TableCell align="center">Date Posted</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -165,10 +128,10 @@ class tableList extends React.Component {
                   {items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell align="center">{item.hci_no}</TableCell>
-                      <TableCell align="center">{item.professional_fee}</TableCell>
+                      {/* <TableCell align="center">{item.professional_fee}</TableCell> */}
                       <TableCell align="center">{item.prof_philhealth_amount}</TableCell>
                       <TableCell align="center">{item.sum_philhealth_amount}</TableCell>
-                      <TableCell align="center">{item.total_amount}</TableCell>
+                      {/* <TableCell align="center">{item.total_amount}</TableCell> */}
                       {/* <TableCell align="center">{item.xml_data}</TableCell> */}
                       <TableCell align="center">{ moment(new Date(item.date_created)).format("MM/DD/YYYY")}</TableCell>
                     </TableRow>
