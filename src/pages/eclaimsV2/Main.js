@@ -169,6 +169,10 @@ function Main({ authUser }) {
       hciName,
       hciAddress,
       pLaboratoryNumber,
+      ICD10orRVSCode1,
+      ICD10orRVSCode2,
+      pCaseRateAmount1,
+      pCaseRateAmount2,
       ...cf2Cleaned
     } = cf2WithoutSpecial;
 

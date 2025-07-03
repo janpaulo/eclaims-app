@@ -104,7 +104,7 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
       setSnackbar({
         open: true,
         message:
-          "Member is eligible refference no." +
+          "Member is eligible reference no." +
           response.data.result.referenceno,
         severity: "success",
       });

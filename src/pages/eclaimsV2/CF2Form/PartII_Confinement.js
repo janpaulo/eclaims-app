@@ -19,7 +19,7 @@ import DiagnosisCode from "./DiagnosisCode";
 import SpecialConsiderations from "./SpecialConsiderations";
 
 const PartII_PatientConfinement = forwardRef(
-  ({ form, handleChange, setForm, prefillData, packageType }, ref) => {
+  ({ form, handleChange, setForm, prefillData, packageType ,setStoreDataDischarge}, ref) => {
 
     const [formData, setFormData] = useState({
       ICD10orRVSCode: "",
@@ -296,17 +296,12 @@ const PartII_PatientConfinement = forwardRef(
             /> */}
             <DiagnosisCode 
               ref={ref}
-              setFormData={(updated) =>
-                setForm((prev) => ({
-                  ...prev,
-                  DIAGNOSIS: updated,
-                }))
-              }
+              setStoreDataDischarge={setStoreDataDischarge}
             />
           </Grid>
 
           {/* {console.log(form.specialConsiderations)} */}
-          {console.log(form.DIAGNOSIS)}
+          {/* {console.log(form.DIAGNOSIS)} */}
 
           <Grid item xs={12}>
             <SpecialConsiderations

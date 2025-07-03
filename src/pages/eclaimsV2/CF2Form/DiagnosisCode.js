@@ -1,4 +1,4 @@
-import React, { useState,useImperativeHandle,forwardRef  } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import {
   Box,
   TextField,
@@ -32,9 +32,8 @@ const newDischargeGroup = () => ({
 
 // const DiagnosisCode = ({ onSubmit }) => {
 // const DiagnosisCode = ({ diagnosCodeData, setFormData }) => {
-  
-const DiagnosisCode = forwardRef(
-  ({ diagnosCodeData, setFormData}, ref) => {
+
+const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   const [pAdmissionDiagnosis, setAdmissionDiagnosis] = useState("");
   const [dischargeGroups, setDischargeGroups] = useState([newDischargeGroup()]);
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
@@ -99,6 +98,7 @@ const DiagnosisCode = forwardRef(
   const addDischargeGroup = () => {
     const updated = [...dischargeGroups, newDischargeGroup()];
     setDischargeGroups(updated);
+    setStoreDataDischarge(updated);
     setTargetGroupIdx(updated.length - 1);
   };
 
@@ -111,11 +111,11 @@ const DiagnosisCode = forwardRef(
       setItemSearch((prev) => [...prev, existsInCache]);
     }
     setDischargeGroups(updated);
+    setStoreDataDischarge(updated);
   };
 
   const addItemToGroup = (item) => {
-    
-    console.log(item)
+    console.log(item);
     setTempItem(item);
     setConfirmDialog("confirm");
   };
@@ -127,10 +127,11 @@ const DiagnosisCode = forwardRef(
     const isICD = !!caseParam.icdcode || !!caseParam.description;
     if (isICD) {
       group.ICDCODEOrRVSCODES.push({
-        ICDCODE: { pICDCode: tempItem.pitemCode,pRelatedProcedure: tempItem.pRelatedProcedure },
-        // RVSCODES: {
-        //   pRelatedProcedure: tempItem.pRelatedProcedure,
-        // },
+        ICDCODE: {
+          pICDCode: tempItem.pitemCode,
+          pRelatedProcedure: tempItem.pRelatedProcedure,
+          amount: tempItem.amount,
+        },
       });
     } else {
       group.ICDCODEOrRVSCODES.push({
@@ -139,11 +140,13 @@ const DiagnosisCode = forwardRef(
           pRelatedProcedure: tempItem.pRelatedProcedure,
           pProcedureDate: tempItem.pProcedureDate,
           pLaterality: tempItem.pLaterality,
+          amount: tempItem.amount,
         },
       });
     }
 
     setDischargeGroups(updated);
+    setStoreDataDischarge(updated);
     setItemSearch((prev) =>
       prev.filter((i) => i.pitemCode !== tempItem.pitemCode)
     );
@@ -156,6 +159,19 @@ const DiagnosisCode = forwardRef(
     const rvsItem = updated[gIdx].ICDCODEOrRVSCODES[rIdx]?.RVSCODES;
     if (rvsItem) rvsItem[field] = value;
     setDischargeGroups(updated);
+    setStoreDataDischarge(updated);
+  };
+
+  const removeDischargeGroup = (indexToRemove) => {
+    const updated = [...dischargeGroups];
+    updated.splice(indexToRemove, 1); // remove selected group
+    setDischargeGroups(updated);
+    setStoreDataDischarge(updated);
+
+    // Adjust target index if needed
+    if (targetGroupIdx >= updated.length) {
+      setTargetGroupIdx(Math.max(0, updated.length - 1));
+    }
   };
 
   const transformToDTDOutput = () => ({
@@ -163,18 +179,32 @@ const DiagnosisCode = forwardRef(
       pAdmissionDiagnosis,
       DISCHARGE: dischargeGroups.map((group) => ({
         pDischargeDiagnosis: group.pDischargeDiagnosis,
-        ICDCODEOrRVSCODES: group.ICDCODEOrRVSCODES,
+        ICDCODEOrRVSCODES: group.ICDCODEOrRVSCODES.map((item) => {
+          if (item.ICDCODE) {
+            // Return only pICDCode, omit pRelatedProcedure if present
+            return {
+              ICDCODE: {
+                pICDCode: item.ICDCODE.pICDCode,
+              },
+            };
+          } else if (item.RVSCODES) {
+            // Keep full RVS entry
+            return {
+              RVSCODES: item.RVSCODES,
+            };
+          }
+          return item; // fallback
+        }),
       })),
     },
   });
-  
 
   useImperativeHandle(ref, () => ({
     getFormData: () => transformToDTDOutput(),
   }));
 
   return (
-    <Box >
+    <Box>
       <TextField
         label="Admission Diagnosis"
         fullWidth
@@ -232,7 +262,14 @@ const DiagnosisCode = forwardRef(
           </TextField>
         </Grid>
         <Grid item xs={2}>
-          <Button variant="contained"  disabled={!(caseParam.description || caseParam.icdcode || caseParam.rvscode)} onClick={searchCase} sx={{ mr: 1 } }>
+          <Button
+            variant="contained"
+            disabled={
+              !(caseParam.description || caseParam.icdcode || caseParam.rvscode)
+            }
+            onClick={searchCase}
+            sx={{ mr: 1 }}
+          >
             Search
           </Button>
           <Button variant="outlined" onClick={clearSearch}>
@@ -259,7 +296,10 @@ const DiagnosisCode = forwardRef(
                   <TableCell>{item.pitemCode}</TableCell>
                   <TableCell>{item.pitemDescription}</TableCell>
                   <TableCell>
-                    <Button onClick={() => addItemToGroup(item)} style={{fontWeight: "700"}}>
+                    <Button
+                      onClick={() => addItemToGroup(item)}
+                      style={{ fontWeight: "700" }}
+                    >
                       Discharge #{targetGroupIdx + 1}
                     </Button>
                   </TableCell>
@@ -276,8 +316,19 @@ const DiagnosisCode = forwardRef(
             expandIcon={<ExpandMoreIcon />}
             onClick={() => setTargetGroupIdx(gIdx)}
           >
-            <Typography>Discharge {gIdx + 1}</Typography>
-            {/* <Typography>Discharge Group #{gIdx + 1}</Typography> */}
+            <Typography>Discharge {gIdx + 1}</Typography>{" "}
+            {dischargeGroups.length > 1 && (
+              <Button
+                size="small"
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent expanding accordion
+                  removeDischargeGroup(gIdx);
+                }}
+              >
+                Delete
+              </Button>
+            )}
           </AccordionSummary>
           <AccordionDetails>
             <TextField
@@ -412,9 +463,9 @@ const DiagnosisCode = forwardRef(
         variant="contained"
         sx={{ mr: 2, mt: 2 }}
       >
-        Add DISCHARGE Group
+        Add DISCHARGE
       </Button>
-      <Button
+      {/* <Button
         onClick={() => transformToDTDOutput()}
         // onClick={() => onSubmit(transformToDTDOutput())}
         variant="contained"
@@ -422,7 +473,7 @@ const DiagnosisCode = forwardRef(
         sx={{ mt: 2 }}
       >
         Submit / Transform
-      </Button>
+      </Button> */}
 
       <Dialog open={!!confirmDialog} onClose={() => setConfirmDialog(null)}>
         <DialogTitle>Confirm Add</DialogTitle>
