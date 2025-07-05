@@ -48,7 +48,7 @@ function App() {
     {get_user != null ? 
       <Box sx={{ display: 'flex' }}>
           <BrowserRouter>
-            <NavItems />
+            <NavItems authUser={parseUser}/>
 
             <CssBaseline />
 
