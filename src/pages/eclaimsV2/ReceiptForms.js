@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import {
   Box,
   Grid,
@@ -27,8 +27,8 @@ const itemFields = [
   { key: "pDescription", label: "Description" },
   { key: "pAmount", label: "Amount", type: "number", disabled: true },
 ];
-
-const ReceiptForm = () => {
+const ReceiptForm = forwardRef((props, ref) => {
+  const { disabled = false } = props;
   const initialItem = {
     pQuantity: "",
     pUnitPrice: "",
@@ -93,11 +93,8 @@ const ReceiptForm = () => {
     if (index === 0) return;
     setReceipts(receipts.filter((_, i) => i !== index));
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const payload = {
+  const transformToDTDOutput = () => {
+    return {
       RECEIPTS: {
         RECEIPT: receipts.map(({ items, ...rest }) => ({
           ...rest,
@@ -105,147 +102,150 @@ const ReceiptForm = () => {
         })),
       },
     };
-
-    console.log("Submitted Payload:", payload);
   };
 
+  useImperativeHandle(ref, () => ({
+    getFormData: () => transformToDTDOutput(),
+  }));
+
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={9}>
-          <Typography variant="h6" gutterBottom>
-            RECEIPT
-          </Typography>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={3}
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Button variant="contained" 
-                    color="success" onClick={addReceipt}>
-            Add Receipt
-          </Button>
-        </Grid>
-      </Grid>
-
-      <Divider />
-      <Box>
-        {receipts.map((receipt, rIdx) => (
-          <Paper key={rIdx} sx={{ p: 3, mb: 4 }}>
+    <form>
+      <fieldset disabled={disabled} style={{ border: 0, padding: 0 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={9}>
             <Typography variant="h6" gutterBottom>
-              Receipt #{rIdx + 1}
+              RECEIPT
             </Typography>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            md={3}
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button variant="contained" color="success" onClick={addReceipt}>
+              Add Receipt
+            </Button>
+          </Grid>
+        </Grid>
 
-            <Grid container spacing={2}>
-              {receiptFields.map(({ key, label, type }) => (
-                <Grid item xs={12} sm={3} key={key}>
-                  <TextField
-                    required
-                    fullWidth
-                    label={label}
-                    type={type === "date" ? "date" : "text"}
-                    InputLabelProps={type === "date" ? { shrink: true } : {}}
-                    value={receipt[key]}
-                    onChange={(e) =>
-                      handleReceiptChange(rIdx, key, e.target.value)
-                    }
-                  />
-                </Grid>
-              ))}
-            </Grid>
+        <Divider />
+        <Box>
+          {receipts.map((receipt, rIdx) => (
+            <Paper key={rIdx} sx={{ p: 3, mb: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Receipt #{rIdx + 1}
+              </Typography>
 
-            <Box mt={3}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} md={9}>
-                  <Typography variant="h6" gutterBottom>
-                    Items
-                  </Typography>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  md={3}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <Button
-                    onClick={() => addItem(rIdx)}
-                    variant="contained"
-                    color="success"
-                  >
-                    Add Item
-                  </Button>
-                </Grid>
+              <Grid container spacing={2}>
+                {receiptFields.map(({ key, label, type }) => (
+                  <Grid item xs={12} sm={3} key={key}>
+                    <TextField
+                      required
+                      fullWidth
+                      label={label}
+                      type={type === "date" ? "date" : "text"}
+                      InputLabelProps={type === "date" ? { shrink: true } : {}}
+                      value={receipt[key]}
+                      onChange={(e) =>
+                        handleReceiptChange(rIdx, key, e.target.value)
+                      }
+                    />
+                  </Grid>
+                ))}
               </Grid>
 
-              <Divider />
-
-              {receipt.items.map((item, iIdx) => (
-                <Box
-                  key={iIdx}
-                  sx={{
-                    mt: 2,
-                    border: "1px solid #ccc",
-                    borderRadius: 2,
-                    p: 2,
-                  }}
-                >
-                  <Grid container spacing={2} alignItems="center">
-                    {itemFields.map(({ key, label, type, disabled }) => (
-                      <Grid item xs={12} sm={3} key={key}>
-                        <TextField
-                          required
-                          fullWidth
-                          label={label}
-                          type={type || "text"}
-                          value={item[key]}
-                          InputProps={{ readOnly: disabled }}
-                          onChange={(e) =>
-                            !disabled &&
-                            handleItemChange(rIdx, iIdx, key, e.target.value)
-                          }
-                        />
-                      </Grid>
-                    ))}
-                    {iIdx > 0 && (
-                      <Grid item xs={12} sm={12} sx={{ mt: 1 }}>
-                        <Button
-                          onClick={() => removeItem(rIdx, iIdx)}
-                          color="error"
-                          variant="outlined"
-                        >
-                          Remove Item
-                        </Button>
-                      </Grid>
-                    )}
+              <Box mt={3}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} md={9}>
+                    <Typography variant="h6" gutterBottom>
+                      Items
+                    </Typography>
                   </Grid>
-                </Box>
-              ))}
-            </Box>
+                  <Grid
+                    item
+                    xs={12}
+                    md={3}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Button
+                      onClick={() => addItem(rIdx)}
+                      variant="contained"
+                      color="success"
+                    >
+                      Add Item
+                    </Button>
+                  </Grid>
+                </Grid>
 
-            {rIdx > 0 && (
-              <Box mt={2}>
-                <Button onClick={() => removeReceipt(rIdx)} color="error">
-                  Remove Receipt
-                </Button>
+                <Divider />
+
+                {receipt.items.map((item, iIdx) => (
+                  <Box
+                    key={iIdx}
+                    sx={{
+                      mt: 2,
+                      border: "1px solid #ccc",
+                      borderRadius: 2,
+                      p: 2,
+                    }}
+                  >
+                    <Grid container spacing={2} alignItems="center">
+                      {itemFields.map(({ key, label, type, disabled }) => (
+                        <Grid item xs={12} sm={3} key={key}>
+                          <TextField
+                            required
+                            fullWidth
+                            label={label}
+                            type={type || "text"}
+                            value={item[key]}
+                            InputProps={{ readOnly: disabled }}
+                            onChange={(e) =>
+                              !disabled &&
+                              handleItemChange(rIdx, iIdx, key, e.target.value)
+                            }
+                          />
+                        </Grid>
+                      ))}
+                      {iIdx > 0 && (
+                        <Grid item xs={12} sm={12} sx={{ mt: 1 }}>
+                          <Button
+                            onClick={() => removeItem(rIdx, iIdx)}
+                            color="error"
+                            variant="outlined"
+                          >
+                            Remove Item
+                          </Button>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                ))}
               </Box>
-            )}
-          </Paper>
-        ))}
 
-        {/* <Button type="submit" variant="contained" color="primary">
+              {rIdx > 0 && (
+                <Box mt={2}>
+                  <Button onClick={() => removeReceipt(rIdx)} color="error">
+                    Remove Receipt
+                  </Button>
+                </Box>
+              )}
+            </Paper>
+          ))}
+
+          {/* <Button type="submit" variant="contained" color="primary">
           Submit
         </Button> */}
-      </Box>
+        </Box>
+      </fieldset>
     </form>
   );
-};
+});
 
 export default ReceiptForm;

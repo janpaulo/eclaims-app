@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import {
   Box,
   Grid,
@@ -7,7 +7,7 @@ import {
   Button,
   MenuItem,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 
 const diagnosticTypes = ["IMAGING", "LABORATORY", "SUPPLIES", "OTHERS"];
 
@@ -30,12 +30,13 @@ const xlsoFields = [
   { key: "pQuantity", label: "Quantity", type: "number" },
 ];
 
-const ParticularsForm = () => {
+const ParticularsForm = forwardRef((props, ref) => {
+  const { disabled = false } = props;
   const [drgmedList, setDrgmedList] = useState([
-    Object.fromEntries(drgmedFields.map(({ key }) => [key, ''])),
+    Object.fromEntries(drgmedFields.map(({ key }) => [key, ""])),
   ]);
   const [xlsoList, setXlsoList] = useState([
-    Object.fromEntries(xlsoFields.map(({ key }) => [key, ''])),
+    Object.fromEntries(xlsoFields.map(({ key }) => [key, ""])),
   ]);
 
   const handleDrgmedChange = (index, field, value) => {
@@ -63,116 +64,165 @@ const ParticularsForm = () => {
     console.log("Submitted Payload:", payload);
   };
 
+  const transformToDTDOutput = () => {
+    const drgmedItems = drgmedList.map((item) => ({
+      DRGMED: { ...item },
+    }));
+  
+    const xlsoItems = xlsoList.map((item) => ({
+      XLSO: { ...item },
+    }));
+  
+    return {
+      PARTICULARS: {
+        DRGMEDOrXLSO: [...drgmedItems, ...xlsoItems],
+      },
+    };
+  };
+  
+
+  useImperativeHandle(ref, () => ({
+    getFormData: () => transformToDTDOutput(),
+  }));
+
   return (
     <form onSubmit={handleSubmit}>
-      <Box>
-        <Typography variant="h6" gutterBottom>PARTICULARS – DRUG MEDICINE</Typography>
-        {drgmedList.map((item, i) => (
-          <Box key={i} sx={{ mb: 2, p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
-            <Grid container spacing={2}>
-              {drgmedFields.map(({ key, label, type }) => (
-                <Grid item xs={12} sm={3} key={key}>
-                  <TextField
-                    required
-                    fullWidth
-                    label={label}
-                    type={type === 'date' || type === 'number' ? type : 'text'}
-                    InputLabelProps={type === 'date' ? { shrink: true } : {}}
-                    value={item[key]}
-                    onChange={(e) => handleDrgmedChange(i, key, e.target.value)}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-            <Box mt={1}>
-              <Button
-                onClick={() => setDrgmedList(drgmedList.filter((_, idx) => idx !== i))}
-                color="error"
-              >
-                Remove
-              </Button>
-            </Box>
-          </Box>
-        ))}
-        <Button
-          variant="outlined"
-          onClick={() =>
-            setDrgmedList([
-              ...drgmedList,
-              Object.fromEntries(drgmedFields.map(({ key }) => [key, ''])),
-            ])
-          }
-        >
-          Add DRUG MEDICINE
-        </Button>
-
-        <Divider sx={{ my: 4 }} />
-
-        <Typography variant="h6" gutterBottom>PARTICULARS – XLSO</Typography>
-        {xlsoList.map((item, i) => (
-          <Box key={i} sx={{ mb: 2, p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
-            <Grid container spacing={2}>
-              {xlsoFields.map(({ key, label, type }) => (
-                <Grid item xs={12} sm={3} key={key}>
-                  {type === "select" ? (
-                    <TextField
-                      select
-                      required
-                      fullWidth
-                      label={label}
-                      value={item[key]}
-                      onChange={(e) => handleXlsoChange(i, key, e.target.value)}
-                    >
-                      {diagnosticTypes.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  ) : (
+      <fieldset disabled={disabled} style={{ border: 0, padding: 0 }}>
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            PARTICULARS – DRUG MEDICINE
+          </Typography>
+          {drgmedList.map((item, i) => (
+            <Box
+              key={i}
+              sx={{ mb: 2, p: 2, border: "1px solid #ccc", borderRadius: 2 }}
+            >
+              <Grid container spacing={2}>
+                {drgmedFields.map(({ key, label, type }) => (
+                  <Grid item xs={12} sm={3} key={key}>
                     <TextField
                       required
                       fullWidth
                       label={label}
-                      type={type === 'date' || type === 'number' ? type : 'text'}
-                      InputLabelProps={type === 'date' ? { shrink: true } : {}}
+                      type={
+                        type === "date" || type === "number" ? type : "text"
+                      }
+                      InputLabelProps={type === "date" ? { shrink: true } : {}}
                       value={item[key]}
-                      onChange={(e) => handleXlsoChange(i, key, e.target.value)}
+                      onChange={(e) =>
+                        handleDrgmedChange(i, key, e.target.value)
+                      }
                     />
-                  )}
-                </Grid>
-              ))}
-            </Grid>
-            <Box mt={1}>
-              <Button
-                onClick={() => setXlsoList(xlsoList.filter((_, idx) => idx !== i))}
-                color="error"
-              >
-                Remove
-              </Button>
+                  </Grid>
+                ))}
+              </Grid>
+              <Box mt={1}>
+                <Button
+                  onClick={() =>
+                    setDrgmedList(drgmedList.filter((_, idx) => idx !== i))
+                  }
+                  color="error"
+                >
+                  Remove
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        ))}
-        <Button
-          variant="outlined"
-          onClick={() =>
-            setXlsoList([
-              ...xlsoList,
-              Object.fromEntries(xlsoFields.map(({ key }) => [key, ''])),
-            ])
-          }
-        >
-          Add XLSO
-        </Button>
+          ))}
+          <Button
+            variant="outlined"
+            onClick={() =>
+              setDrgmedList([
+                ...drgmedList,
+                Object.fromEntries(drgmedFields.map(({ key }) => [key, ""])),
+              ])
+            }
+          >
+            Add DRUG MEDICINE
+          </Button>
 
-        {/* <Divider sx={{ my: 4 }} />
+          <Divider sx={{ my: 4 }} />
+
+          <Typography variant="h6" gutterBottom>
+            PARTICULARS – XLSO
+          </Typography>
+          {xlsoList.map((item, i) => (
+            <Box
+              key={i}
+              sx={{ mb: 2, p: 2, border: "1px solid #ccc", borderRadius: 2 }}
+            >
+              <Grid container spacing={2}>
+                {xlsoFields.map(({ key, label, type }) => (
+                  <Grid item xs={12} sm={3} key={key}>
+                    {type === "select" ? (
+                      <TextField
+                        select
+                        required
+                        fullWidth
+                        label={label}
+                        value={item[key]}
+                        onChange={(e) =>
+                          handleXlsoChange(i, key, e.target.value)
+                        }
+                      >
+                        {diagnosticTypes.map((option) => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    ) : (
+                      <TextField
+                        required
+                        fullWidth
+                        label={label}
+                        type={
+                          type === "date" || type === "number" ? type : "text"
+                        }
+                        InputLabelProps={
+                          type === "date" ? { shrink: true } : {}
+                        }
+                        value={item[key]}
+                        onChange={(e) =>
+                          handleXlsoChange(i, key, e.target.value)
+                        }
+                      />
+                    )}
+                  </Grid>
+                ))}
+              </Grid>
+              <Box mt={1}>
+                <Button
+                  onClick={() =>
+                    setXlsoList(xlsoList.filter((_, idx) => idx !== i))
+                  }
+                  color="error"
+                >
+                  Remove
+                </Button>
+              </Box>
+            </Box>
+          ))}
+          <Button
+            variant="outlined"
+            onClick={() =>
+              setXlsoList([
+                ...xlsoList,
+                Object.fromEntries(xlsoFields.map(({ key }) => [key, ""])),
+              ])
+            }
+          >
+            Add XLSO
+          </Button>
+
+          {/* <Divider sx={{ my: 4 }} />
 
         <Button type="submit" variant="contained" color="primary">
           Submit
         </Button> */}
-      </Box>
+        </Box>
+      </fieldset>
     </form>
   );
-};
+});
 
 export default ParticularsForm;

@@ -42,6 +42,8 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
     pPatientSex: "",
     pPEN: "",
     pEmployerName: "",
+    pClaimNumber: "",
+    pTrackingNumber: "",
   });
 
   useEffect(() => {
@@ -86,17 +88,22 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
   useImperativeHandle(ref, () => ({
     validateForm: () => {
-      return !!(
-        form.pMemberPIN &&
-        form.pMemberFirstName &&
-        form.pMemberBirthDate
-      );
-    },
-    handleSubmit: () => {
-      console.log("Submitting CF1:", form);
+      const isValid =
+        form.pMemberPIN?.trim() &&
+        form.pMemberFirstName?.trim() &&
+        form.pMemberLastName?.trim() &&
+        form.pMemberMiddleName?.trim() &&
+        form.pMemberBirthDate?.trim() &&
+        form.pPatientSex?.trim() &&
+        form.pPatientIs?.trim() &&
+        form.pClaimNumber?.trim() &&
+        form.pTrackingNumber?.trim() 
+      console.log("CF1 valid:", !!isValid);
+      return !!isValid;
     },
     getFormData: () => form,
   }));
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -146,11 +153,33 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
   return (
     <form>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <TextField
+            label="Claim Number *"
+            name="pClaimNumber"
+            value={form.pClaimNumber}
+            onChange={handleChange}
+            fullWidth
+          />
+        </Grid>
+
+        <Grid item xs={6}>
+          <TextField
+            label="Tracking Number *"
+            name="pTrackingNumber"
+            value={form.pTrackingNumber}
+            onChange={handleChange}
+            fullWidth
+            multiline
+          />
+        </Grid>
+      </Grid>
       <Typography variant="h6">Part I – Member Information</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
-            label="PhilHealth Identification Number (PIN)"
+            label="PhilHealth Identification Number (PIN) *"
             name="pMemberPIN"
             value={form.pMemberPIN}
             onChange={handleChange}
@@ -160,14 +189,15 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
         {/* Name Fields */}
         {[
-          { name: "pMemberLastName", label: "Last Name" },
-          { name: "pMemberFirstName", label: "First Name" },
-          { name: "pMemberMiddleName", label: "Middle Name" },
+          { name: "pMemberLastName", label: "Last Name",required:true },
+          { name: "pMemberFirstName", label: "First Name" ,required:true },
+          { name: "pMemberMiddleName", label: "Middle Name" ,required:true },
           { name: "pMemberSuffix", label: "Suffix" },
-        ].map(({ name, label }) => (
+        ].map(({ name, label,required }) => (
           <Grid item xs={12} md={3} key={name}>
             <TextField
               label={label}
+              required={required}
               name={name}
               value={form[name]}
               onChange={handleChange}
@@ -178,7 +208,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
         <Grid item xs={12} md={4}>
           <TextField
-            label="Date of Birth"
+            label="Date of Birth *"
             name="pMemberBirthDate"
             type="date"
             InputLabelProps={{ shrink: true }}
@@ -210,10 +240,11 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Typography>Sex</Typography>
+          <Typography>Sex *</Typography>
           <RadioGroup
             row
             name="pMemberSex"
+            required
             value={form.pMemberSex}
             onChange={handleChange}
           >
@@ -240,7 +271,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         ))}
 
         <Grid item xs={12}>
-          <Typography>Is the patient the member?</Typography>
+          <Typography>Is the patient the member? *</Typography>
           <RadioGroup
             row
             name="pPatientIs"
@@ -293,7 +324,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography>Sex</Typography>
+              <Typography>Sex *</Typography>
               <RadioGroup
                 row
                 name="pPatientSex"
