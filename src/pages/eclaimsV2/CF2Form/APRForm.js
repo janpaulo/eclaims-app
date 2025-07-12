@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from "react";
+import React, { useState, forwardRef, useImperativeHandle,useRef } from "react";
 import {
   Box,
   Typography,
@@ -23,17 +23,30 @@ const APRForm = forwardRef((props, ref) => {
     pThumbmarkedBy: "",
   });
 
+  const initialSelectedOption = useRef("");
+  const initialFormData = useRef({ ...formData });
+
   useImperativeHandle(ref, () => ({
     getFormData: () => {
+      const hasChanged =
+        selectedOption !== initialSelectedOption.current ||
+        JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
+
+      if (!selectedOption || !hasChanged) {
+        return {}; // Don't return APR
+      }
+
       let payload = {};
 
       if (selectedOption === "APRBYPATSIG") {
         payload = {
-          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK:[ {
-            APRBYPATSIG: {
-              pDateSigned: formData.pDateSigned,
+          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK: [
+            {
+              APRBYPATSIG: {
+                pDateSigned: formData.pDateSigned,
+              },
             },
-          }],
+          ],
         };
       } else if (selectedOption === "APRBYPATREPSIG") {
         const rel =
@@ -52,21 +65,25 @@ const APRForm = forwardRef((props, ref) => {
             : { DEFINEDREASONFORSIGNING: { pReasonCode: "I" } };
 
         payload = {
-          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK: [{
-            APRBYPATREPSIG: {
-              pDateSigned: formData.pDateSigned,
-              ...rel,
-              ...reason,
+          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK: [
+            {
+              APRBYPATREPSIG: {
+                pDateSigned: formData.pDateSigned,
+                ...rel,
+                ...reason,
+              },
             },
-          }],
+          ],
         };
       } else if (selectedOption === "APRBYTHUMBMARK") {
         payload = {
-          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK: [{
-            APRBYTHUMBMARK: {
-              pThumbmarkedBy: formData.pThumbmarkedBy,
+          APRBYPATSIGOrAPRBYPATREPSIGOrAPRBYTHUMBMARK: [
+            {
+              APRBYTHUMBMARK: {
+                pThumbmarkedBy: formData.pThumbmarkedBy,
+              },
             },
-          }],
+          ],
         };
       }
 

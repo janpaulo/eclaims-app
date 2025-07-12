@@ -206,11 +206,13 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   return (
     <Box>
       <TextField
-        label="Admission Diagnosis"
+        label="Admission Diagnosis/es"
         fullWidth
         value={pAdmissionDiagnosis}
         onChange={(e) => setAdmissionDiagnosis(e.target.value)}
         sx={{ mb: 2 }}
+        row={5}
+        required
       />
 
       <Grid container spacing={2} sx={{ mb: 2 }}>

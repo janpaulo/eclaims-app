@@ -95,7 +95,7 @@ const SpecialConsiderations = ({
 
   return (
     <Box p={2}>
-      <Typography gutterBottom>8. Special Considerations:</Typography>
+      <Typography gutterBottom fontWeight="bold">Special Considerations:</Typography>
 
       <Typography variant="body1" gutterBottom>
         a. For the following repetitive procedures, check box that applies and

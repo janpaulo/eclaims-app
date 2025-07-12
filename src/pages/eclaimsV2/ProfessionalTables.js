@@ -111,15 +111,15 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
 
   return (
     <div>
-      <Typography variant="h6" gutterBottom mt={3} style={{ marginLeft: 15}}>
-        Professional Fees / Charges 
-      <Button
-        variant="contained"
-        onClick={handleAddRow}
-        style={{ marginBottom: 10 , marginLeft: 10}}
-      >
-        Add Doctor
-      </Button>
+      <Typography variant="h6" gutterBottom mt={3} style={{ marginLeft: 15 }}>
+        Professional Fees / Charges
+        <Button
+          variant="contained"
+          onClick={handleAddRow}
+          style={{ marginBottom: 10, marginLeft: 10 }}
+        >
+          Add Doctor
+        </Button>
       </Typography>
 
       <TableContainer component={Paper}>
@@ -181,21 +181,23 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  <input
-                    type="checkbox"
-                    checked={val.pWithCoPay === "Y"}
-                    onChange={(e) =>
-                      handleChange(
-                        {
-                          target: {
-                            name: "pWithCoPay",
-                            value: e.target.checked ? "Y" : "N",
-                          },
-                        },
-                        i
-                      )
+                <input
+                  type="checkbox"
+                  checked={val.pWithCoPay === "Y"}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    const updated = [...formData];
+                    updated[i].pWithCoPay = isChecked ? "Y" : "N";
+
+                    // Optional: clear co-pay if unchecked
+                    if (!isChecked) {
+                      updated[i].pDoctorCoPay = "";
                     }
-                  />
+
+                    setFormData(updated);
+                  }}
+                />
+
                 </TableCell>
                 <TableCell align="center">
                   <TextField

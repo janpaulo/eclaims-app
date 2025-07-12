@@ -15,8 +15,8 @@ import { Add, Delete, ExpandMore } from "@mui/icons-material";
 
 // Initial values
 const initialData = {
-  documents: {
-    document: [
+  DOCUMENTS: {
+    DOCUMENT: [
       {
         pDocumentType: "",
         pDocumentURL: "",
@@ -33,16 +33,16 @@ const AttachmentForm = forwardRef((props, ref) => {
 
   const handleChange = (index, key, value) => {
     const updated = { ...formData };
-    updated.documents.document[index][key] = value;
+    updated.DOCUMENTS.DOCUMENT[index][key] = value;
     setFormData(updated);
   };
 
   const addDocument = () => {
     setFormData((prev) => ({
       ...prev,
-      documents: {
-        document: [
-          ...prev.documents.document,
+      DOCUMENTS: {
+        DOCUMENT: [
+          ...prev.DOCUMENTS.DOCUMENT,
           {
             pDocumentType: "",
             pDocumentURL: "",
@@ -54,7 +54,7 @@ const AttachmentForm = forwardRef((props, ref) => {
 
   const removeDocument = (index) => {
     const updated = { ...formData };
-    updated.documents.document.splice(index, 1);
+    updated.DOCUMENTS.DOCUMENT.splice(index, 1);
     setFormData(updated);
   };
 
@@ -67,7 +67,7 @@ const AttachmentForm = forwardRef((props, ref) => {
   }));
 
   const getAvailableTypes = (index) => {
-    const selectedTypes = formData.documents.document
+    const selectedTypes = formData.DOCUMENTS.DOCUMENT
       .map((doc, i) => (i !== index ? doc.pDocumentType : null))
       .filter(Boolean);
     return documentTypes.filter((type) => !selectedTypes.includes(type));
@@ -80,7 +80,7 @@ const AttachmentForm = forwardRef((props, ref) => {
           <Typography variant="h6">Upload Attachment</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {formData.documents.document.map((doc, index) => (
+          {formData.DOCUMENTS.DOCUMENT.map((doc, index) => (
             <Paper key={index} sx={{ p: 2, mb: 2 }} variant="outlined">
               <Typography variant="subtitle1">Document No. {index + 1}</Typography>
               <Grid container spacing={2}>

@@ -13,6 +13,9 @@ import {
   Grid,
   Typography,
   Divider,
+  FormControl,
+  FormLabel,
+  MenuItem,
 } from "@mui/material";
 import moment from "moment";
 import EmployerValidation from "./EmployerValidation";
@@ -32,7 +35,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
     pLandlineNo: "",
     pMobileNo: "",
     pEmailAddress: "",
-    pPatientIs: "",
+    pPatientIs: "M",
     pPatientPIN: "",
     pPatientLastName: "",
     pPatientFirstName: "",
@@ -74,7 +77,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         newForm.pPatientSuffix =
           prefillData.patientBasicInformation?.suffix || "";
         newForm.pPatientMiddleName =
-          prefillData.patientBasicInformation?.maidenname || "";
+          prefillData.patientBasicInformation?.middlename || "";
         newForm.pPatientBirthDate = formattedDOB || "";
         newForm.pPatientSex = prefillData.patientBasicInformation?.sex || "";
       }
@@ -97,13 +100,13 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         form.pPatientSex?.trim() &&
         form.pPatientIs?.trim() &&
         form.pClaimNumber?.trim() &&
-        form.pTrackingNumber?.trim() 
+        form.pMemberShipType?.trim() &&
+        form.pTrackingNumber?.trim();
       console.log("CF1 valid:", !!isValid);
       return !!isValid;
     },
     getFormData: () => form,
   }));
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -175,7 +178,11 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           />
         </Grid>
       </Grid>
-      <Typography variant="h6">Part I – Member Information</Typography>
+      <Divider  sx={{
+          margin:2
+        }}>
+        <Typography variant="h6">Member Information</Typography>
+      </Divider>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
@@ -189,11 +196,11 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
         {/* Name Fields */}
         {[
-          { name: "pMemberLastName", label: "Last Name",required:true },
-          { name: "pMemberFirstName", label: "First Name" ,required:true },
-          { name: "pMemberMiddleName", label: "Middle Name" ,required:true },
+          { name: "pMemberLastName", label: "Last Name", required: true },
+          { name: "pMemberFirstName", label: "First Name", required: true },
+          { name: "pMemberMiddleName", label: "Middle Name", required: true },
           { name: "pMemberSuffix", label: "Suffix" },
-        ].map(({ name, label,required }) => (
+        ].map(({ name, label, required }) => (
           <Grid item xs={12} md={3} key={name}>
             <TextField
               label={label}
@@ -229,7 +236,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             label="Zip Code"
             name="pZipCode"
@@ -239,7 +246,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <Typography>Sex *</Typography>
           <RadioGroup
             row
@@ -270,7 +277,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           </Grid>
         ))}
 
-        <Grid item xs={12}>
+        {/* <Grid item xs={4}>
           <Typography>Is the patient the member? *</Typography>
           <RadioGroup
             row
@@ -281,16 +288,56 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             <FormControlLabel value="M" control={<Radio />} label="Yes" />
             <FormControlLabel value="D" control={<Radio />} label="No" />
           </RadioGroup>
-        </Grid>
+        </Grid> */}
 
+        <Grid item xs={6}>
+          <FormControl>
+            <FormLabel id="demo-row-radio-buttons-group-label">
+              Relationship to Member *
+            </FormLabel>
+            <RadioGroup
+              row
+              aria-labelledby="demo-row-radio-buttons-group-label"
+              name="pPatientIs"
+              value={form.pPatientIs}
+              onChange={handleChange}
+            >
+              <FormControlLabel value="M" control={<Radio />} label="Member" />
+              <FormControlLabel value="C" control={<Radio />} label="Child" />
+              <FormControlLabel value="P" control={<Radio />} label="Parent" />
+              <FormControlLabel value="S" control={<Radio />} label="Spouse" />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography>Select Membership Type *</Typography>
+          <FormControl fullWidth>
+            <TextField
+              select
+              name="pMemberShipType"
+              size="small"
+              value={form.pMemberShipType}
+              onChange={handleChange}
+              // label="Select Membership Type"
+              required
+            >
+              <MenuItem value="S">Employed Private</MenuItem>
+              <MenuItem value="G">Employer Government</MenuItem>
+              <MenuItem value="I">Indigent</MenuItem>
+              <MenuItem value="NS">Individually Paying</MenuItem>
+              <MenuItem value="NO">OFW</MenuItem>
+              <MenuItem value="PS">Non Paying Private</MenuItem>
+              <MenuItem value="PG">Non Paying Government</MenuItem>
+              <MenuItem value="P">Lifetime member</MenuItem>
+            </TextField>
+          </FormControl>
+        </Grid>
         {/* Dependent Section */}
-        {form.pPatientIs === "D" && (
+        {form.pPatientIs !== "M" && (
           <>
             <Grid item xs={12}>
               <Divider>
-                <Typography variant="h6">
-                  Part II – Patient (Dependent)
-                </Typography>
+                <Typography variant="h6">Patient (Dependent)</Typography>
               </Divider>
             </Grid>
             {[
@@ -323,7 +370,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <Typography>Sex *</Typography>
               <RadioGroup
                 row
@@ -349,9 +396,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         </Grid>
         <Grid item xs={12}>
           <Divider>
-            <Typography variant="h6">
-              Part IV – Employer’s Certification
-            </Typography>
+            <Typography variant="h6">Employer’s Certification</Typography>
           </Divider>
         </Grid>
         <Grid item xs={12} md={6}>
