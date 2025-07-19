@@ -304,7 +304,7 @@ const PartII_PatientConfinement = forwardRef(
 
             {/* 5. Type of Accommodation */}
             <Grid item xs={12}>
-              <Typography fontWeight="bold">Type of Accommodation:</Typography>
+              <Typography fontWeight="bold">Type of Accommodation*</Typography>
               <RadioGroup row name="pAccommodationType" onChange={handleChange}>
                 <FormControlLabel
                   value="P"

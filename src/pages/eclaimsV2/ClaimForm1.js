@@ -102,10 +102,21 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
         form.pClaimNumber?.trim() &&
         form.pMemberShipType?.trim() &&
         form.pTrackingNumber?.trim();
+        form.pZipCode?.trim();
+        form.pMailingAddress?.trim();
       console.log("CF1 valid:", !!isValid);
       return !!isValid;
     },
-    getFormData: () => form,
+    
+    getFormData: () => {
+      return {
+        ...form,
+        pMemberBirthDate: form.pMemberBirthDate
+          ? moment(form.pMemberBirthDate).format('MM-DD-YYYY')
+          : '',
+      };
+    }
+
   }));
 
   const handleChange = (e) => {
@@ -233,6 +244,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             onChange={handleChange}
             fullWidth
             multiline
+            required
           />
         </Grid>
 
@@ -243,6 +255,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             value={form.pZipCode}
             onChange={handleChange}
             fullWidth
+            required
           />
         </Grid>
 

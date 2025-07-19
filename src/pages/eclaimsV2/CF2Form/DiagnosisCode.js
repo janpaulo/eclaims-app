@@ -50,6 +50,9 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   const [targetGroupIdx, setTargetGroupIdx] = useState(0);
   const [searchCache, setSearchCache] = useState([]);
 
+  var get_user = localStorage.getItem('item');
+  var authUser = JSON.parse(get_user)
+
   const handleCaseChange = (e) => {
     const { name, value } = e.target;
     setCaseParam((prev) => ({ ...prev, [name]: value }));
@@ -71,8 +74,8 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
         caseParam,
         {
           headers: {
-            accreno: process.env.REACT_APP_HOSPITALACRRENO,
-            softwarecertid: process.env.REACT_APP_USERNAME,
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.username_code,
             "Content-Type": "text/plain",
           },
         }
@@ -85,6 +88,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
         pProcedureDate: "",
         pLaterality: "",
         amount: item.amount,
+        pcaseRateCode: item.pcaseRateCode,
       }));
       setItemSearch(processed);
       setSearchCache(processed);
@@ -131,6 +135,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
           pICDCode: tempItem.pitemCode,
           pRelatedProcedure: tempItem.pRelatedProcedure,
           amount: tempItem.amount,
+          pcaseRateCode: tempItem.pcaseRateCode,
         },
       });
     } else {
@@ -141,6 +146,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
           pProcedureDate: tempItem.pProcedureDate,
           pLaterality: tempItem.pLaterality,
           amount: tempItem.amount,
+          pcaseRateCode: tempItem.pcaseRateCode,
         },
       });
     }

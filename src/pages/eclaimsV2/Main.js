@@ -101,11 +101,14 @@ function Main({ authUser }) {
   const [pbefData, setPbefData] = useState({});
   const [pbefResultData, setPbefResultData] = useState({});
   const [showTabs, setShowTabs] = useState(false);
+  const [claimsNum, setClaimsNum] = useState("");
   const [form, setForm] = useState({
     packageType: "All Case Rate",
     isCF3Old: false,
     isCF3New: false,
     isCF5: false,
+    isParticular: false,
+    isReceipt: false,
   });
 
   const cf1Ref = useRef();
@@ -114,6 +117,8 @@ function Main({ authUser }) {
   const cf3NewRef = useRef();
   const attachRef = useRef();
   const tabSectionRef = useRef();
+  const particularRef = useRef();
+  const receiptRef = useRef();
 
   const TAB_INDEX = {
     CF1: 0,
@@ -124,40 +129,66 @@ function Main({ authUser }) {
     ATTACHMENT: 5,
   };
 
+  const getClaimNumber = async () => {
+    try {
+      const hospitalCode = authUser?.hospital?.hopital_code;
+
+      if (!hospitalCode) throw new Error("Missing hospital code.");
+
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_CLAIMS}claims-number/${hospitalCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // If API returns { reference: "..." }
+      setClaimsNum(response.data.reference);
+    } catch (error) {
+      console.error("Claim number generation failed:", error);
+      alert("Unable to generate claim number. Please try again.");
+    }
+  };
+
   useEffect(() => {
     if (isPbef) {
       const timer = setTimeout(() => {
         setShowTabs(true);
+        getClaimNumber();
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [isPbef]);
-
-  const handleSubmitAll = () => {
+  const handleSubmitAll = async () => {
     const valid1 = cf1Ref.current?.validateForm?.();
     const valid2 = cf2Ref.current?.validateForm?.();
+
+    console.log("valid1", valid1);
+    console.log("valid2", valid2);
 
     const formData1 = cf1Ref.current?.getFormData?.();
     const formData2 = cf2Ref.current?.getFormData?.();
     const formDataCF3Old = cf3Ref.current?.getFormData?.();
+    const formDataCF3New = cf3NewRef.current?.getFormData?.();
     const AttachmentData = attachRef.current?.getFormData?.();
+    const particularData = particularRef.current?.getFormData?.();
+    const receiptData = receiptRef.current?.getFormData?.();
 
     const parentJson = {
-      pUserName: authUser.hospital.username_code,
+      pUserName: ":" + authUser.hospital.software_cert,
       pUserPassword: "",
-      pHospitalCode: authUser.hospital.accreditation_num,
+      pHospitalCode: authUser.hospital.hopital_code, //authUser.hospital.accreditation_num,
       pHospitalEmail: authUser.email,
       pServiceProvider: "",
     };
 
-    const eTRANSMITTAL = {
-      eTRANSMITTAL: {
-        pHospitalTransmittalNo: "",
-        pTotalClaims: "",
-      },
-    };
+    // const CF1 = { CF1: formData1 };
 
-    const CF1 = { CF1: formData1 };
+    const { pClaimNumber, pTrackingNumber, ...cleanedData } = formData1;
+    const CF1 = { CF1: cleanedData };
     const { specialConsiderations, ...cf2WithoutSpecial } = formData2;
 
     const {
@@ -173,6 +204,8 @@ function Main({ authUser }) {
       ICD10orRVSCode2,
       pCaseRateAmount1,
       pCaseRateAmount2,
+      pPatientType,
+      pIsEmergency,
       ...cf2Cleaned
     } = cf2WithoutSpecial;
 
@@ -188,22 +221,106 @@ function Main({ authUser }) {
       },
     };
 
-    const CF3 = { CF3: formDataCF3Old };
-    const AttachmentFormData = { AttachmentForm: AttachmentData };
+    let CF3 = {};
+    if (form.isCF3Old || form.isCF3New) {
+      CF3 = {
+        CF3: {
+          ...(form.isCF3Old ? formDataCF3Old : {}),
+          ...(form.isCF3New ? formDataCF3New : {}),
+        },
+      };
+    }
+
+    const AttachmentFormData = AttachmentData;
+
+    const claimDetails = {
+      pClaimNumber: claimsNum || "",
+      pTrackingNumber: formData1.pTrackingNumber || "",
+      pPhilhealthClaimType:
+        form.packageType === "All Case Rate" ? "ALL-CASE-RATE" : "Z-BENEFIT",
+      pPatientType: formData2.pPatientType || "",
+      pIsEmergency: formData2.pIsEmergency || "",
+    };
+
+    const getALLCASERATEOrZBENEFIT =
+      cf2Ref.current?.getALLCASERATEOrZBENEFIT?.();
 
     const finalPayload = {
-      ...parentJson,
-      ...eTRANSMITTAL,
+      // ...parentJson,
+      // ...eTRANSMITTAL,
+      ...claimDetails,
       ...CF1,
       ...CF2,
-      ...CF3,
+      ...getALLCASERATEOrZBENEFIT,
+      ...CF3, // will be empty if both flags are false
+      ...(form.isParticular ? particularData : {}),
+      ...(form.isReceipt ? receiptData : {}),
+      // ...receiptData,
       ...AttachmentFormData,
     };
 
-    console.log("✅ Final JSON Payload:", finalPayload.CF2);
+    const eTRANSMITTAL = {
+      ...parentJson,
+      eTRANSMITTAL: {
+        pHospitalTransmittalNo: claimsNum,
+        pTotalClaims: "1",
+        CLAIM: [finalPayload],
+      },
+    };
+
+    console.log("✅ eTRANSMITTAL JSON Payload:", eTRANSMITTAL);
+    // console.log("✅ formData1 JSON Payload:", formData1);
+
+    const getCF5Data = cf2Ref.current?.getCF5?.();
+
+    // this json is generate CF5 if checkbox is true
+    const generateCF5 = {
+      cf5: {
+        pHospitalCode: authUser.hospital.accreditation_num,
+        DRGCLAIM: {
+          ClaimNumber: formData1.pClaimNumber || "",
+          PrimaryCode:
+            getCF5Data[0]?.pICDCode || getCF5Data[0]?.pCaseRateCode || "",
+          NewBornAdmWeight: form.NewBornAdmWeight || "",
+          Remarks: "",
+          SECONDARYDIAGS: {
+            SECONDARYDIAG: form.SecondaryDiags || [
+              { SecondaryCode: "", Remarks: "" },
+            ],
+          },
+          PROCEDURES: {
+            PROCEDURE: form.Procedures || [
+              { RvsCode: "", Laterality: "", Ext1: "", Remarks: "" },
+            ],
+          },
+        },
+      },
+    };
+
+    // console.log("✅ CF5 and eclaims JSON Payload:",eTRANSMITTAL, generateCF5);
 
     setCf1Valid(valid1);
     setCf2Valid(valid2);
+
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/ValidateeClaims`,
+        eTRANSMITTAL,
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.username_code,
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+      // const results = res.data.result?.caserates || [];
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      // setIsLoading(false);
+    }
 
     if (valid1 && valid2) {
       cf1Ref.current?.handleSubmit?.();
@@ -301,7 +418,7 @@ function Main({ authUser }) {
                   ))}
                 </FormGroup>
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid item xs={12} sm={2}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -313,7 +430,9 @@ function Main({ authUser }) {
                         if (checked) {
                           setTab(TAB_INDEX.CF3_OLD);
                           setTimeout(() => {
-                            tabSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                            tabSectionRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                            });
                           }, 100);
                         }
                       }}
@@ -322,7 +441,7 @@ function Main({ authUser }) {
                   label={"Include Claim Form 3 (Old)?"}
                 />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid item xs={12} sm={2}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -334,13 +453,59 @@ function Main({ authUser }) {
                         if (checked) {
                           setTab(TAB_INDEX.CF3_NEW);
                           setTimeout(() => {
-                            tabSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                            tabSectionRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                            });
                           }, 100);
                         }
                       }}
                     />
                   }
                   label={"Include Claim Form 3 (New)?"}
+                />
+              </Grid>
+              <Grid item xs={12} sm={2}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isParticular"
+                      checked={form.isParticular}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm((prev) => ({ ...prev, isParticular: checked }));
+                        if (checked) {
+                          setTab(TAB_INDEX.PARTICULARS_RECEIPTS);
+                          setTimeout(() => {
+                            tabSectionRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                            });
+                          }, 100);
+                        }
+                      }}
+                    />
+                  }
+                  label={"Include Particular ?"}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isReceipt"
+                      checked={form.isReceipt}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm((prev) => ({ ...prev, isReceipt: checked }));
+                        if (checked) {
+                          setTab(TAB_INDEX.PARTICULARS_RECEIPTS);
+                          setTimeout(() => {
+                            tabSectionRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                            });
+                          }, 100);
+                        }
+                      }}
+                    />
+                  }
+                  label={"Include Receipt ?"}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -350,7 +515,10 @@ function Main({ authUser }) {
                       name="isCF5"
                       checked={form.isCF5}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, isCF5: e.target.checked }))
+                        setForm((prev) => ({
+                          ...prev,
+                          isCF5: e.target.checked,
+                        }))
                       }
                     />
                   }
@@ -359,7 +527,10 @@ function Main({ authUser }) {
               </Grid>
             </Grid>
 
-            <Box ref={tabSectionRef} sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+            <Box
+              ref={tabSectionRef}
+              sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
+            >
               <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
                 <Tab label="CF1" />
                 <Tab label="CF2" />
@@ -371,21 +542,60 @@ function Main({ authUser }) {
             </Box>
 
             <Box hidden={tab !== 0}>
-              <ClaimForm1 ref={cf1Ref} prefillData={pbefData} authUser={authUser} pbefResultData={pbefResultData} />
+              <ClaimForm1
+                ref={cf1Ref}
+                prefillData={pbefData}
+                authUser={authUser}
+                pbefResultData={pbefResultData}
+              />
             </Box>
             <Box hidden={tab !== 1}>
-              <ClaimForm2 ref={cf2Ref} prefillData={pbefData} pbefResultData={pbefResultData} packageType={form.packageType} authUser={authUser} />
+              <ClaimForm2
+                ref={cf2Ref}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+                packageType={form.packageType}
+                authUser={authUser}
+              />
             </Box>
             <Box hidden={tab !== 2}>
-              <CF3FormOld  disabled={!form.isCF3Old} ref={cf3Ref} prefillData={pbefData} pbefResultData={pbefResultData} packageType={form.packageType} authUser={authUser} />
+              <CF3FormOld
+                disabled={!form.isCF3Old}
+                ref={cf3Ref}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+                packageType={form.packageType}
+                authUser={authUser}
+              />
             </Box>
             <Box hidden={tab !== 3}>
-              <CF3FormNew  disabled={!form.isCF3New} ref={cf3NewRef} prefillData={pbefData} pbefResultData={pbefResultData} packageType={form.packageType} authUser={authUser} />
+              <CF3FormNew
+                disabled={!form.isCF3New}
+                ref={cf3NewRef}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+                packageType={form.packageType}
+                authUser={authUser}
+              />
             </Box>
             <Box hidden={tab !== 4}>
-              <ParticularsForm ref={cf3Ref} prefillData={pbefData} pbefResultData={pbefResultData} packageType={form.packageType} authUser={authUser} />
-                 <Divider sx={{ my: 3 }} />
-              <ReceiptForm prefillData={pbefData} pbefResultData={pbefResultData} packageType={form.packageType} authUser={authUser} />
+              <ParticularsForm
+                disabled={!form.isParticular}
+                ref={particularRef}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+                packageType={form.packageType}
+                authUser={authUser}
+              />
+              <Divider sx={{ my: 3 }} />
+              <ReceiptForm
+                disabled={!form.isReceipt}
+                ref={receiptRef}
+                prefillData={pbefData}
+                pbefResultData={pbefResultData}
+                packageType={form.packageType}
+                authUser={authUser}
+              />
             </Box>
             <Box hidden={tab !== 5}>
               <AttachmentForm ref={attachRef} pbefResultData={pbefResultData} />

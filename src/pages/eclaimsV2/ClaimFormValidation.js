@@ -13,8 +13,9 @@ import {
   Radio,
   FormLabel,
   FormControl,
-  Divider
 } from "@mui/material";
+import SendIcon from '@mui/icons-material/Send';
+import CircularProgress from '@mui/material/CircularProgress';
 import axios from "axios";
 import moment from "moment";
 
@@ -57,6 +58,8 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
     severity: "success",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (path, value) => {
     const keys = path.split(".");
     setFormData((prev) => {
@@ -72,6 +75,7 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
 
   const handleSubmit = async () => {
     try {
+      setLoading(true)
       const formatDate = (date) =>
         date ? moment(date).format("MM-DD-YYYY") : "";
 
@@ -108,7 +112,8 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
           response.data.result.referenceno,
         severity: "success",
       });
-      console.log(response.data.result.referenceno)
+      
+      setLoading(false)
       setIsPbef(response.data.result.isok === "YES");
       setPbefResultData(response.data.result)
       setPbefData(formData);
@@ -126,7 +131,6 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
 
   return (
     <Paper sx={{ p: 4 }}>
-
       <Box mb={3}>
         <Typography variant="subtitle1">General Info</Typography>
         <Grid container spacing={2}>
@@ -466,11 +470,17 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
       </Box>
 
       <Box mt={4}>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
-          Submit
+        <Button variant="contained" color="primary" onClick={handleSubmit} 
+        endIcon={loading? <CircularProgress color="inherit" size="30px"/>:<SendIcon />}
+        disabled={loading}
+        >
+          Submit 
         </Button>
+
       </Box>
 
+      
+ 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
