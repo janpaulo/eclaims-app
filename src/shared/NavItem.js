@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
-import { Select, MenuItem, Tooltip, Box,Menu,
-} from "@mui/material";
+import { Select, MenuItem, Tooltip, Box, Menu } from "@mui/material";
 import axios from "axios";
 import { styled, useTheme } from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
@@ -111,27 +112,25 @@ const items = [
     icon: <ClosedCaptionDisabledRoundedIcon />,
     path: "hospitals",
   },
-  {
-    name: "User Management",
-    icon: <ClosedCaptionDisabledRoundedIcon />,
-    children: [
-      { name: "Users", path: "hospital-users-accounts" },
-      { name: "Roles", path: "roles" },
-    ],
-  },
-  // {name: "RVS Code", icon: <SubtitlesRoundedIcon/>, path: 'rvs_codes',},
-  // {name: "encryptor", icon: <EnhancedEncryptionIcon/>, path: 'encryptor',},
-  // {name: "test", icon: <VaccinesIcon/>, path: 'test',},
-  // {name: "Konsulta", icon: <SaveAsTwoToneIcon/>, path: 'konsulta',element: <Konsulta/>},
-  // {name: "Employees", icon: <GroupsTwoToneIcon/>, path: 'employees', element: <Employee/>},
-  // {name: "File", icon: <AttachFileTwoToneIcon/>, path: 'files',element:<Files/>},
-  // {name: "Leave", icon: <SaveAsTwoToneIcon/>, path: 'leaves',element: <Leaves/>},
+  // {
+  //   name: "User Management",
+  //   icon: <ClosedCaptionDisabledRoundedIcon />,
+  //   children: [
+  //     { name: "Users", path: "hospital-users-accounts" },
+  //     { name: "Roles", path: "roles" },
+  //   ],
+  // },
 ];
 
-function NavItem({authUser}) {
+function NavItem({ authUser }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [openSubMenus, setOpenSubMenus] = React.useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -155,17 +154,58 @@ function NavItem({authUser}) {
         `${process.env.REACT_APP_NEW_PHIC_URL}/${method}`,
         {
           headers: {
-            accreno: process.env.REACT_APP_HOSPITALACRRENO,
-            softwarecertid: process.env.REACT_APP_USERNAME,
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.software_cert,
           },
         }
       );
 
-      const results = res.data || [];
-      alert(`Response from ${method}: ${JSON.stringify(results)}`);
-    } catch (err) {
-      console.error("API Error:", err);
-      alert(`Failed to call ${method}`);
+      const result = res.data?.result;
+
+      if (method === "/api/getServerVersion") {
+        setSnackbar({
+          open: true,
+          message: "Server version: " + result,
+          severity: "success",
+        });
+      } else if (method === "/api/getServerDateTime") {
+        const serverTime = result
+          ? `${result.server}: ${result.datetime}${
+              result.remarks ? ` (${result.remarks})` : ""
+            }`
+          : "No server datetime available.";
+
+        setSnackbar({
+          open: true,
+          message: "Server date/time: " + serverTime,
+          severity: "success",
+        });
+      } else if (method === "/api/getDBServerDateTime") {
+        const dbInfo = Array.isArray(result)
+          ? result
+              .map(
+                (item) =>
+                  `${item.server}: ${item.datetime}${
+                    item.remarks ? ` (${item.remarks})` : ""
+                  }`
+              )
+              .join(" | ")
+          : "No server data available.";
+
+        setSnackbar({
+          open: true,
+          message: "Database server times: " + dbInfo,
+          severity: "success",
+        });
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Request failed. Please try again.";
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -225,14 +265,14 @@ function NavItem({authUser}) {
             open={Boolean(anchorEl)}
             onClose={handleCloseMenu}
           >
-            <MenuItem onClick={() => handleSelect("GetDBServerDateTime")}>
+            <MenuItem onClick={() => handleSelect("/api/getDBServerDateTime")}>
               Get DBServer Date Time
             </MenuItem>
-            <MenuItem onClick={() => handleSelect("GetServerDateTime")}>
+            <MenuItem onClick={() => handleSelect("/api/getServerDateTime")}>
               Get Server Date Time
             </MenuItem>
-            <MenuItem onClick={() => handleSelect("GetServerVersion")}>
-            Get Server Version
+            <MenuItem onClick={() => handleSelect("/api/getServerVersion")}>
+              Get Server Version
             </MenuItem>
           </Menu>
         </Toolbar>
@@ -366,6 +406,20 @@ function NavItem({authUser}) {
           </ListItem>
         </List>
       </Drawer>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -134,7 +134,7 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
               <TableCell align="center">With Co-Pay</TableCell>
               <TableCell align="center">Co-Pay Amount</TableCell>
               <TableCell align="center">Sign Date</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              {/* <TableCell align="center">Actions</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -221,7 +221,7 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
                   <div
                     style={{ display: "flex", flexDirection: "column", gap: 4 }}
                   >
-                    <Button
+                    {/* <Button
                       variant="outlined"
                       color="success"
                       size="small"
@@ -235,7 +235,7 @@ function ProfessionalTables({ formData = [], setFormData, authUser }) {
                       }
                     >
                       {loadingIndex === i ? "Validating..." : "Validate"}
-                    </Button>
+                    </Button> */}
                     {i !== 0 && (
                       <Button
                         variant="outlined"

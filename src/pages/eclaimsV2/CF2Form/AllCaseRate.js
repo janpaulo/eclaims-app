@@ -117,6 +117,7 @@ const AllCaseRate = forwardRef(({ setStoreDataDischarge }, ref) => {
           fullWidth
           name="firstAmount"
           value={form.firstAmount}
+          disabled={true}
           onChange={handleAmountChange}
         />
       </Grid>
@@ -146,6 +147,7 @@ const AllCaseRate = forwardRef(({ setStoreDataDischarge }, ref) => {
           fullWidth
           name="secondAmount"
           value={form.secondAmount}
+          disabled={true}
           onChange={handleAmountChange}
         />
       </Grid>

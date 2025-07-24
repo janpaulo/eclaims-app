@@ -25,7 +25,7 @@ const initialData = {
   },
 };
 
-const documentTypes = ["CF5", "CF4", "CSF", "ITB", "ESA"];
+const documentTypes = ["CF5", "CF4", "CSF", "COE", "ITB", "ESA"];
 
 // ✅ Wrap in forwardRef
 const AttachmentForm = forwardRef((props, ref) => {
@@ -60,6 +60,16 @@ const AttachmentForm = forwardRef((props, ref) => {
 
   // ✅ Expose methods to parent
   useImperativeHandle(ref, () => ({
+    validateForm: () => {
+      // Check if all documents are valid
+      const isValid = formData.DOCUMENTS.DOCUMENT.every(
+        (doc) => doc.pDocumentType?.trim() && doc.pDocumentURL?.trim()
+      );
+
+      // Log the validation result
+      console.log("ATTACHMENT valid:", isValid);
+      return isValid;
+    },
     getFormData: () => formData,
     handleSubmit: () => {
       console.log("Attachment submitted:", formData);
@@ -67,9 +77,9 @@ const AttachmentForm = forwardRef((props, ref) => {
   }));
 
   const getAvailableTypes = (index) => {
-    const selectedTypes = formData.DOCUMENTS.DOCUMENT
-      .map((doc, i) => (i !== index ? doc.pDocumentType : null))
-      .filter(Boolean);
+    const selectedTypes = formData.DOCUMENTS.DOCUMENT.map((doc, i) =>
+      i !== index ? doc.pDocumentType : null
+    ).filter(Boolean);
     return documentTypes.filter((type) => !selectedTypes.includes(type));
   };
 
@@ -82,7 +92,9 @@ const AttachmentForm = forwardRef((props, ref) => {
         <AccordionDetails>
           {formData.DOCUMENTS.DOCUMENT.map((doc, index) => (
             <Paper key={index} sx={{ p: 2, mb: 2 }} variant="outlined">
-              <Typography variant="subtitle1">Document No. {index + 1}</Typography>
+              <Typography variant="subtitle1">
+                Document No. {index + 1}
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField

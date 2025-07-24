@@ -43,10 +43,11 @@ const EmployerValidation = ({
     };
 
     axios
-      .post(`${process.env.REACT_APP_NEW_PHIC_URL}/SearchEmployer`, item, {
+      .post(`${process.env.REACT_APP_NEW_PHIC_URL}/api/searchEmployer`, item, {
         headers: {
           accreno: authUser.hospital.accreditation_num,
           softwarecertid: authUser.hospital.username_code,
+          cipherkey: authUser.hospital.cypher_key,
           "Content-Type": "text/plain",
         },
       })
@@ -62,6 +63,9 @@ const EmployerValidation = ({
         console.error("Error:", error);
       });
   };
+  const isSearchDisabled = !(
+    searchText.pPen?.trim() || searchText.employerName?.trim()
+  );
 
   return (
     <div>
@@ -86,7 +90,11 @@ const EmployerValidation = ({
           />
         </Grid>
         <Grid item xs={2} sx={{ textAlign: "end" }}>
-          <Button variant="contained" onClick={handleSubmit}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={isSearchDisabled}
+          >
             Search
           </Button>
         </Grid>

@@ -167,7 +167,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
 
   return (
     <form>
-      <Grid container spacing={2}>
+      {/* <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <TextField
             label="Claim Number *"
@@ -183,12 +183,12 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             label="Tracking Number *"
             name="pTrackingNumber"
             value={form.pTrackingNumber}
-            onChange={handleChange}
+            onChange={handleChange}`
             fullWidth
             multiline
           />
         </Grid>
-      </Grid>
+      </Grid> */}
       <Divider  sx={{
           margin:2
         }}>
@@ -197,10 +197,11 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
-            label="PhilHealth Identification Number (PIN) *"
+            label="PhilHealth Identification Number (PIN)"
             name="pMemberPIN"
             value={form.pMemberPIN}
             onChange={handleChange}
+            required
             fullWidth
           />
         </Grid>
@@ -417,6 +418,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             label="PhilHealth Employer Number (PEN)"
             name="pPEN"
             value={form.pPEN}
+            disabled={true}
             onChange={handleChange}
             fullWidth
           />
@@ -425,6 +427,7 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           <TextField
             label="Employer Name"
             name="pEmployerName"
+            disabled={true}
             value={form.pEmployerName}
             onChange={handleChange}
             fullWidth

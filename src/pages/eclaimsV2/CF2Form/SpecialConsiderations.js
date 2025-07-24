@@ -95,7 +95,9 @@ const SpecialConsiderations = ({
 
   return (
     <Box p={2}>
-      <Typography gutterBottom fontWeight="bold">Special Considerations:</Typography>
+      <Typography gutterBottom fontWeight="bold">
+        Special Considerations:
+      </Typography>
 
       <Typography variant="body1" gutterBottom>
         a. For the following repetitive procedures, check box that applies and
@@ -187,7 +189,7 @@ const SpecialConsiderations = ({
         </Grid>
       </Grid>
 
-      <Typography mt={2}>
+      <Typography mt={2} gutterBottom>
         c. For MCP Package (enumerate four dates [yyyy-mm-dd] of pre-natal
         check-ups)
       </Typography>
@@ -202,10 +204,10 @@ const SpecialConsiderations = ({
               value={formData[`mcpDate${num}`] || ""}
               onChange={handleChange}
               InputLabelProps={{ shrink: true }}
-              inputProps={{
-                min: dateAdmitted,
-                max: dateDischarged,
-              }}
+              // inputProps={{
+              //   min: dateAdmitted,
+              //   max: dateDischarged,
+              // }}
             />
           </Grid>
         ))}
@@ -275,8 +277,10 @@ const SpecialConsiderations = ({
             name="pABPOthers"
             label="Others"
             fullWidth
+            type="date"
             value={formData.pABPOthers || ""}
             onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
           />
         </Grid>
         <Grid item xs={6}>
@@ -297,7 +301,7 @@ const SpecialConsiderations = ({
           "Newborn Hearing Screening Test",
           "Newborn Screening Test",
         ].map((label, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -310,6 +314,16 @@ const SpecialConsiderations = ({
             />
           </Grid>
         ))}
+        <Grid item xs={3}>
+          <TextField
+            name="pFilterCardNo"
+            label="Card No."
+            fullWidth
+            value={formData.pFilterCardNo || ""}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
       </Grid>
 
       <Typography mt={2} fontWeight="bold">
@@ -353,7 +367,6 @@ const SpecialConsiderations = ({
           </Typography>
         </Grid>
 
-        
         <Grid item xs={12} md={12}>
           <Typography gutterBottom>h. Cataract Information</Typography>
 
@@ -433,8 +446,6 @@ const SpecialConsiderations = ({
             />
           </Grid>
         </Grid>
-
-
       </Grid>
     </Box>
   );

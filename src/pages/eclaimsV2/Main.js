@@ -14,6 +14,8 @@ import {
   Checkbox,
   Grid,
 } from "@mui/material";
+import SendIcon from '@mui/icons-material/Send';
+import CircularProgress from '@mui/material/CircularProgress';
 import axios from "axios";
 import ClaimForm1 from "./ClaimForm1";
 import ClaimForm2 from "./CF2Form/CF2Form";
@@ -24,7 +26,8 @@ import AttachmentForm from "./AttachmentForm";
 import ParticularsForm from "./ParticularsForm";
 import ReceiptForm from "./ReceiptForms";
 import { transformSpecialConsiderationsToSPECIAL } from "./CF2Form/transformSpecialConsiderationsToSPECIAL";
-
+import moment from "moment";
+import SharedAlertDialog from "../../shared/DialogBox/SharedAlertDialog";
 function cleanSpecialSection(obj) {
   if (typeof obj !== "object" || obj === null) return obj;
   const cleaned = {};
@@ -68,30 +71,32 @@ function cleanSpecialSection(obj) {
   return cleaned;
 }
 
-function removeEmptyFields(obj) {
-  if (typeof obj !== "object" || obj === null) return obj;
-  const cleaned = {};
-  for (const key in obj) {
-    const value = obj[key];
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      const hasAnyValue = Object.values(value).some((v) =>
-        typeof v === "object"
-          ? Object.keys(removeEmptyFields(v)).length > 0
-          : v !== ""
-      );
-      if (hasAnyValue) {
-        cleaned[key] = value;
+const formatDatesToMMDDYYYY = (obj) => {
+  const datePattern = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]*)?$/; // Matches ISO-like dates
+
+  if (Array.isArray(obj)) {
+    return obj.map(formatDatesToMMDDYYYY);
+  } else if (obj && typeof obj === "object") {
+    const formatted = {};
+    for (const key in obj) {
+      const value = obj[key];
+
+      if (
+        typeof value === "string" &&
+        datePattern.test(value) &&
+        moment(value, moment.ISO_8601, true).isValid()
+      ) {
+        formatted[key] = moment(value).format("MM-DD-YYYY");
+      } else if (typeof value === "object") {
+        formatted[key] = formatDatesToMMDDYYYY(value);
+      } else {
+        formatted[key] = value;
       }
-    } else if (Array.isArray(value)) {
-      if (value.length > 0) {
-        cleaned[key] = value;
-      }
-    } else if (value !== "") {
-      cleaned[key] = value;
     }
+    return formatted;
   }
-  return cleaned;
-}
+  return obj;
+};
 
 function Main({ authUser }) {
   const [tab, setTab] = useState(0);
@@ -102,6 +107,19 @@ function Main({ authUser }) {
   const [pbefResultData, setPbefResultData] = useState({});
   const [showTabs, setShowTabs] = useState(false);
   const [claimsNum, setClaimsNum] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isEclaimsPassed, setIsEclaimsPassed] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleConfirm = () => {
+    console.log("Confirmed action!");
+    handleClose();
+  };
   const [form, setForm] = useState({
     packageType: "All Case Rate",
     isCF3Old: false,
@@ -162,12 +180,16 @@ function Main({ authUser }) {
       return () => clearTimeout(timer);
     }
   }, [isPbef]);
+
   const handleSubmitAll = async () => {
+    setLoading(true);
     const valid1 = cf1Ref.current?.validateForm?.();
     const valid2 = cf2Ref.current?.validateForm?.();
+    const validAttach = attachRef.current?.validateForm?.();
 
     console.log("valid1", valid1);
     console.log("valid2", valid2);
+    console.log("validAttach", validAttach);
 
     const formData1 = cf1Ref.current?.getFormData?.();
     const formData2 = cf2Ref.current?.getFormData?.();
@@ -214,12 +236,15 @@ function Main({ authUser }) {
     );
     const cleanedSPECIAL = cleanSpecialSection(SPECIAL);
 
-    const CF2 = {
+    let CF2 = {
       CF2: {
         ...cf2Cleaned,
         SPECIAL: cleanedSPECIAL,
       },
     };
+
+    // Convert all date fields in CF2 to MM-DD-YYYY
+    CF2 = formatDatesToMMDDYYYY(CF2);
 
     let CF3 = {};
     if (form.isCF3Old || form.isCF3New) {
@@ -231,6 +256,7 @@ function Main({ authUser }) {
       };
     }
 
+    CF3 = formatDatesToMMDDYYYY(CF3);
     const AttachmentFormData = AttachmentData;
 
     const claimDetails = {
@@ -253,8 +279,8 @@ function Main({ authUser }) {
       ...CF2,
       ...getALLCASERATEOrZBENEFIT,
       ...CF3, // will be empty if both flags are false
-      ...(form.isParticular ? particularData : {}),
-      ...(form.isReceipt ? receiptData : {}),
+      ...(form.isParticular ? formatDatesToMMDDYYYY(particularData) : {}),
+      ...(form.isReceipt ? formatDatesToMMDDYYYY(receiptData) : {}),
       // ...receiptData,
       ...AttachmentFormData,
     };
@@ -268,56 +294,126 @@ function Main({ authUser }) {
       },
     };
 
-    console.log("✅ eTRANSMITTAL JSON Payload:", eTRANSMITTAL);
+    // console.log("✅ eTRANSMITTAL JSON Payload:", eTRANSMITTAL);
     // console.log("✅ formData1 JSON Payload:", formData1);
 
     const getCF5Data = cf2Ref.current?.getCF5?.();
 
-    // this json is generate CF5 if checkbox is true
+    const firstCaseRate =
+      getCF5Data?.ALLCASERATEOrZBENEFIT?.[0]?.ALLCASERATE?.CASERATE?.[0];
+
+    const secondCaseRate =
+      getCF5Data?.ALLCASERATEOrZBENEFIT?.[0]?.ALLCASERATE?.CASERATE?.[1];
+
+    const secondaryDiags = secondCaseRate
+      ? [
+          {
+            SecondaryCode:
+              secondCaseRate?.pICDCode || secondCaseRate?.pRVSCode || "",
+            Remarks: "",
+          },
+        ]
+      : [
+          {
+            SecondaryCode: "",
+            Remarks: "",
+          },
+        ];
+
+    // Extract all RVSCODES from DISCHARGE
+    const extractProcedures = (dischargeArray) => {
+      const procedures = [];
+
+      dischargeArray?.forEach((discharge) => {
+        discharge?.ICDCODEOrRVSCODES?.forEach((entry) => {
+          if (entry?.RVSCODES) {
+            const rvs = entry.RVSCODES;
+            procedures.push({
+              RvsCode: rvs.pRVSCode || "",
+              Laterality: rvs.pLaterality || "",
+              Ext1: "", // Optional: map another field if needed
+              Ext2: "", // Optional: map another field if needed
+              Remarks: "" || "", //rvs.pRelatedProcedure || "",
+            });
+          }
+        });
+      });
+
+      return procedures;
+    };
+
+    // Use extracted procedures from DISCHARGE if available
+    const extractedProcedures = extractProcedures(
+      getCF5Data?.DIAGNOSIS?.DISCHARGE || []
+    );
+
+    // Final CF5 JSON
     const generateCF5 = {
       cf5: {
         pHospitalCode: authUser.hospital.accreditation_num,
         DRGCLAIM: {
-          ClaimNumber: formData1.pClaimNumber || "",
+          ClaimNumber: claimsNum || "",
           PrimaryCode:
-            getCF5Data[0]?.pICDCode || getCF5Data[0]?.pCaseRateCode || "",
+            firstCaseRate?.pICDCode || firstCaseRate?.pCaseRateCode || "",
           NewBornAdmWeight: form.NewBornAdmWeight || "",
           Remarks: "",
           SECONDARYDIAGS: {
-            SECONDARYDIAG: form.SecondaryDiags || [
-              { SecondaryCode: "", Remarks: "" },
-            ],
+            SECONDARYDIAG: secondaryDiags,
           },
           PROCEDURES: {
-            PROCEDURE: form.Procedures || [
-              { RvsCode: "", Laterality: "", Ext1: "", Remarks: "" },
-            ],
+            PROCEDURE:
+              extractedProcedures.length > 0
+                ? extractedProcedures
+                : [{ RvsCode: "", Laterality: "", Ext1: "", Remarks: "" }],
           },
         },
       },
     };
+    console.log("✅ CF5 and eclaims JSON Payload:", eTRANSMITTAL);
+    const cf5Payload ={
+      eclaims: eTRANSMITTAL,
+      cf5: generateCF5.cf5
+    }
 
-    // console.log("✅ CF5 and eclaims JSON Payload:",eTRANSMITTAL, generateCF5);
-
+    console.log("✅ CF5 and eclaims JSON cf5Payload:", cf5Payload);
     setCf1Valid(valid1);
     setCf2Valid(valid2);
 
+    // Submission to PHIC
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/ValidateeClaims`,
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/validateeClaims`,
         eTRANSMITTAL,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,
-            softwarecertid: authUser.hospital.username_code,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
             "Content-Type": "text/plain",
           },
+          validateStatus: () => true, // prevent auto-rejection for 4xx/5xx
         }
       );
-      // const results = res.data.result?.caserates || [];
-      console.log(res.data);
+
+      console.log("HTTP Status:", res.status);
+
+      if (res.status === 200) {
+        setIsEclaimsPassed(true)
+        console.log("✅ Success:", res.data);
+      } else if (res.status === 422) {
+        console.log("HTTP Status:", res.data);
+        setOpen(true);
+        setErrorMessage(res.data.message);
+      } else if (res.status === 303) {
+        setOpen(true);
+        setErrorMessage("Please try to submit again");
+      } else {
+        console.warn("Unhandled status:", res.status, res.data);
+      }
+
+      setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Request Error:", err.message);
     } finally {
       // setIsLoading(false);
     }
@@ -336,11 +432,12 @@ function Main({ authUser }) {
   const handleGeneratePDF = async (referenceno) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/GeneratePBEFPDF?referenceno=${referenceno}`,
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/generatePBEFPDF?referenceno=${referenceno}`,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,
-            softwarecertid: authUser.hospital.username_code,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
             "Content-Type": "text/plain",
           },
           responseType: "blob",
@@ -465,6 +562,7 @@ function Main({ authUser }) {
                 />
               </Grid>
               <Grid item xs={12} sm={2}>
+                ``
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -532,12 +630,12 @@ function Main({ authUser }) {
               sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
             >
               <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
-                <Tab label="CF1" />
-                <Tab label="CF2" />
+                <Tab label="CF1 *" />
+                <Tab label="CF2 *" />
                 <Tab label="CF3 OLD" />
                 <Tab label="CF3 New" />
                 <Tab label="Particular and Receipts" />
-                <Tab label="Attachment" />
+                <Tab label="Attachment *" />
               </Tabs>
             </Box>
 
@@ -602,12 +700,33 @@ function Main({ authUser }) {
             </Box>
 
             <Box sx={{ mt: 4, textAlign: "right" }}>
-              <Button variant="contained" onClick={handleSubmitAll}>
-                Submit Both Forms
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleSubmitAll}
+                endIcon={loading? <CircularProgress color="inherit" size="30px"/>:<SendIcon />}
+                disabled={loading}
+              >
+                Validate Claim
               </Button>
             </Box>
           </>
         )}
+
+        {/* <Button variant="contained" color="error" onClick={handleOpen}>
+          Delete
+        </Button> */}
+
+        <SharedAlertDialog
+          open={open}
+          onClose={handleClose}
+          onConfirm={handleConfirm}
+          title="Message"
+          description={errorMessage}
+          confirmText="Yes, delete"
+          cancelText="No"
+          confirmColor="error"
+        />
       </Container>
     </>
   );

@@ -93,13 +93,16 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
         },
         admissionDate: formatDate(formData.admissionDate),
       };
+
+      
       const response = await axios.post(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/IsClaimEligible`,
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/isClaimEligible`,
         formattedForm,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,
-            softwarecertid: authUser.hospital.username_code,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
             "Content-Type": "text/plain",
           },
         }
@@ -125,6 +128,7 @@ const ClaimFormValidation = ({ setIsPbef, setPbefData ,authUser,setPbefResultDat
         message: errorMessage,
         severity: "error",
       });
+      setLoading(false)
       console.error("Error:", error);
     }
   };

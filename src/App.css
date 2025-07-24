@@ -13,6 +13,11 @@
   }
 }
 
+/* Make all required asterisks red */
+.MuiFormLabel-asterisk {
+  color: red;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

@@ -16,6 +16,7 @@ import {
 import PartI_HCI from "./PartI_HCI";
 import PartII_Confinement from "./PartII_Confinement";
 import PartIII_ConsumptionForm from "./PartIII_ConsumptionForm";
+import {transformConsumptionOutput} from "./transformConsumptionOutput";
 import moment from "moment";
 import APRForm from "./APRForm";
 import AllCaseRate from "./AllCaseRate";
@@ -94,17 +95,17 @@ const formatDatesToMMDDYYYY = (obj) => {
 const convertAllTimesTo12Hour = (obj) => {
   if (Array.isArray(obj)) {
     return obj.map(convertAllTimesTo12Hour);
-  } else if (obj && typeof obj === 'object') {
+  } else if (obj && typeof obj === "object") {
     const formatted = {};
     for (const key in obj) {
       const value = obj[key];
 
       if (
-        typeof value === 'string' &&
+        typeof value === "string" &&
         moment(value, ["HH:mm:ss", "H:mm:ss"], true).isValid()
       ) {
         formatted[key] = moment(value, "HH:mm:ss").format("hh:mm:ssA");
-      } else if (typeof value === 'object') {
+      } else if (typeof value === "object") {
         formatted[key] = convertAllTimesTo12Hour(value);
       } else {
         formatted[key] = value;
@@ -114,8 +115,6 @@ const convertAllTimesTo12Hour = (obj) => {
   }
   return obj;
 };
-
-
 
 const initial = {
   pPatientReferred: "N",
@@ -263,7 +262,7 @@ const CF2Form = forwardRef((props, ref) => {
     },
   };
 
-  console.log(data);
+  // console.log(data);
   // const validate = () =>
   useImperativeHandle(ref, () => ({
     validateForm: () => {
@@ -283,22 +282,44 @@ const CF2Form = forwardRef((props, ref) => {
       const diagData = diagnosisRef.current?.getFormData?.() || {};
 
       const updatedData = JSON.parse(JSON.stringify(data));
+      console.log(transformConsumptionOutput(updatedData.CONSUMPTION));
 
-      // Convert BENEFITS to array if it exists and is an object
-      if (
-        updatedData.CONSUMPTION &&
-        updatedData.CONSUMPTION.BENEFITS &&
-        !Array.isArray(updatedData.CONSUMPTION.BENEFITS)
-      ) {
-        const benefitsObj = updatedData.CONSUMPTION.BENEFITS;
+      updatedData.CONSUMPTION = transformConsumptionOutput(updatedData.CONSUMPTION);
+      // if (updatedData.CONSUMPTION) {
+      //   const section = updatedData.CONSUMPTION;
 
-        updatedData.CONSUMPTION.BENEFITSOrHCIFEESOrPROFFEESOrPURCHASES = [
-          { BENEFITS: benefitsObj },
-        ];
+      //   // If BENEFITS exists and is not an array, wrap it in BENEFITSOrHCIFEESOrPROFFEESOrPURCHASES
+      //   if (section.BENEFITS && !Array.isArray(section.BENEFITS)) {
+      //     const benefitsObj = section.BENEFITS;
 
-        // Optionally remove the old BENEFITS key
-        delete updatedData.CONSUMPTION.BENEFITS;
-      }
+      //     const {
+      //       pDrugsMedicinesSupplies, // omit
+      //       pDMSTotalAmount, // omit
+      //       pExaminations, // omit
+      //       pcaseRateCode, // omit
+      //       pExamTotalAmount, // omit
+      //       ...cleanedBenefits // keep the rest
+      //     } = benefitsObj;
+      //     section.BENEFITSOrHCIFEESOrPROFFEESOrPURCHASES = [
+      //       { BENEFITS: cleanedBenefits },
+      //     ];
+
+      //     // Remove the original BENEFITS key
+      //     delete section.BENEFITS;
+      //   } else {
+      //     // If BENEFITS does not exist, assume it's using HCIFEES/PROFFEES/PURCHASES directly
+      //     const merged = {};
+
+      //     ["HCIFEES", "PROFFEES", "PURCHASES"].forEach((key) => {
+      //       if (section[key]) {
+      //         merged[key] = section[key];
+      //         delete section[key];
+      //       }
+      //     });
+
+      //     section.BENEFITSOrHCIFEESOrPROFFEESOrPURCHASES = [merged];
+      //   }
+      // }
 
       // Merge additional form data
       let merged = {
@@ -309,6 +330,7 @@ const CF2Form = forwardRef((props, ref) => {
 
       // 🔄 Format all date strings in merged object
       merged = formatDatesToMMDDYYYY(merged);
+      console.log("merged", updatedData);
       merged = convertAllTimesTo12Hour(merged);
 
       return merged;
@@ -318,64 +340,22 @@ const CF2Form = forwardRef((props, ref) => {
       const allCaseRateData = allCaseRateRef.current?.getFormData?.() || {};
       const ALLCASERATEOrZBENEFIT =
         packageType === "All Case Rate"
-          ? {ALLCASERATEOrZBENEFIT : allCaseRateData.ALLCASERATEOrZBENEFIT}
+          ? { ALLCASERATEOrZBENEFIT: allCaseRateData.ALLCASERATEOrZBENEFIT }
           : ZBENEFIT;
       return {
         ...ALLCASERATEOrZBENEFIT,
       };
     },
     getCF5: () => {
+      const diagData = diagnosisRef.current?.getFormData?.() || {};
+      const allCaseRateData = allCaseRateRef.current?.getFormData?.() || {};
       return {
-        ...ALLCASERATE,
+        ...allCaseRateData,
+        ...diagData,
       };
     },
   }));
 
-  const diagnosisData = () => {
-    return (
-      storeDataDischarge?.flatMap?.((group) => group.ICDCODEOrRVSCODES || []) ||
-      []
-    );
-  };
-
-
-  const handleCaseRateChange = (e) => {
-    const { name, value } = e.target;
-    const isFirst = name === "ICD10orRVSCode1";
-
-    const selectedItem = diagnosisData().find(
-      (item) =>
-        item?.ICDCODE?.pICDCode === value || item?.RVSCODES?.pRVSCode === value
-    );
-    const caseRateAmount =
-      selectedItem?.ICDCODE?.amount?.[0]?.pCaseRateAmount ||
-      selectedItem?.RVSCODES?.amount?.[0]?.pCaseRateAmount ||
-      selectedItem?.ICDCODE?.amount?.[0]?.pprimaryCaseRate ||
-      selectedItem?.RVSCODES?.amount?.[0]?.pprimaryCaseRate ||
-      "";
-
-    // Update `data` (main form state)
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-      [isFirst ? "pCaseRateAmount1" : "pCaseRateAmount2"]: caseRateAmount,
-    }));
-
-    // Update `allCaseRate` state
-    setAllCaseRate((prev) => ({
-      ...prev,
-      [name]: value,
-      [isFirst ? "pCaseRateAmount1" : "pCaseRateAmount2"]: caseRateAmount,
-      [isFirst ? "pCaseRateCode1" : "pCaseRateCode2"]: value,
-      pCaseRateCode: selectedItem?.ICDCODE?.pCaseRateCode || "",
-      pICDCode: selectedItem?.ICDCODE?.pICDCode || "",
-      pRVSCode: selectedItem?.RVSCODES?.pRVSCode || "",
-      pCaseRateAmount: caseRateAmount, // optional fallback
-    }));
-  };
-
-
-  console.log(storeDataDischarge)
   return (
     <Box sx={{ p: 2 }}>
       {/* <PartI_HCI data={data} onChange={handleChange} /> */}
@@ -404,11 +384,13 @@ const CF2Form = forwardRef((props, ref) => {
       {/* </Grid> */}
       <Divider sx={{ my: 3 }} />
 
-      
       <Typography variant="h6" gutterBottom mt={3}>
         PhilHealth Benefits:
       </Typography>
-      <AllCaseRate ref={allCaseRateRef} setStoreDataDischarge={storeDataDischarge[0]?.ICDCODEOrRVSCODES}/>
+      <AllCaseRate
+        ref={allCaseRateRef}
+        setStoreDataDischarge={storeDataDischarge[0]?.ICDCODEOrRVSCODES}
+      />
 
       <Divider sx={{ my: 3 }} />
 

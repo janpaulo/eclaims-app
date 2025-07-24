@@ -18,6 +18,8 @@ import axios from "axios";
 import NumericFormatInput from "../../utils/NumericFormatInput";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import SendIcon from '@mui/icons-material/Send';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const initialData = {
   pHciPan: "",
@@ -191,6 +193,7 @@ const EsoaForm = ({ authUser }) => {
   const [formData, setFormData] = useState(initialData);
   const [unitOptions, setUnitOptions] = useState([]);
   const [itemOptions, setItemOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -355,14 +358,14 @@ const EsoaForm = ({ authUser }) => {
       return updated;
     });
   };
-  const handleSubmit = () => {
-    
-    
-  // Show confirmation before proceeding
-  const confirmSubmit = window.confirm("Are you sure you want to submit this form?");
-  if (!confirmSubmit) return; // Cancel submission if user clicks "Cancel"
 
-  
+  const handleSubmit = async () => {
+    // Show confirmation before proceeding
+    const confirmSubmit = window.confirm(
+      "Are you sure you want to submit this form?"
+    );
+    if (!confirmSubmit) return; // Cancel submission if user clicks "Cancel"
+
     const itemizedErrors =
       formData.ItemizedBillingItems.ItemizedBillingItem.some((item, idx) => {
         for (const [key, value] of Object.entries(item)) {
@@ -376,7 +379,7 @@ const EsoaForm = ({ authUser }) => {
 
     if (itemizedErrors) return;
 
-    // Validate ProfessionalFees - only pFirstName
+    // Validate Professional Fees - only pFirstName
     const professionalErrors = formData.ProfessionalFees.ProfessionalFee.some(
       (prof, idx) => {
         const firstName = prof.ProfessionalInfo?.pFirstName;
@@ -389,7 +392,7 @@ const EsoaForm = ({ authUser }) => {
     );
 
     if (professionalErrors) return;
-
+    setIsLoading(true);
     // Format pServiceDate
     const formattedData = {
       ...formData,
@@ -418,23 +421,40 @@ const EsoaForm = ({ authUser }) => {
       xml_data: JSON.stringify(formattedData),
     };
 
-    axios({
-      method: "POST",
-      url: process.env.REACT_APP_API_CLAIMS + "esoas",
-      data: data,
-      headers: {
-        Authorization: `Bearer ${authUser.access_token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((resp) => {
-        alert("Form saved successfully.");
-        navigate("/esoa_table_list"); // <-- ✅ Redirect here
-      })
-      .catch((error) => {
-        console.error("Save failed:", error);
-        alert("An error occurred while saving.");
+    try {
+      // **First encrypt the data** (before saving to esoas)
+      const encryptResponse = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/EncrypteSOA`,
+        formattedData,
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.username_code,
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+
+      console.log("Encrypted Response:", encryptResponse.data);
+
+      // **Proceed to save to esoas** only if encryption was successful
+      const saveResponse = await axios({
+        method: "POST",
+        url: process.env.REACT_APP_API_CLAIMS + "esoas",
+        data: data,
+        headers: {
+          Authorization: `Bearer ${authUser.access_token}`,
+          "Content-Type": "application/json",
+        },
       });
+
+      setIsLoading(false);
+      alert("Form saved successfully.");
+      navigate("/esoa_table_list"); // <-- ✅ Redirect here
+    } catch (error) {
+      console.error("Error in encryption or save:", error);
+      alert("An error occurred while processing the data.");
+    }
 
     console.log("Submitted Form Data:", formattedData);
   };
@@ -963,6 +983,14 @@ const EsoaForm = ({ authUser }) => {
           color="primary"
           size="large"
           onClick={handleSubmit}
+          endIcon={
+            isLoading ? (
+              <CircularProgress color="inherit" size="30px" />
+            ) : (
+              <SendIcon />
+            )
+          }
+          disabled={isLoading}
         >
           Submit Form
         </Button>

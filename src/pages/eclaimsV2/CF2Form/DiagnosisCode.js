@@ -62,7 +62,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
       icdcode: "",
       rvscode: "",
       description: "",
-      targetdate: "12-31-2025",
+      targetdate: "12-31-2024",
     });
     setItemSearch([]);
   };
@@ -70,12 +70,13 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
     setIsLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/SearchCaseRates`,
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/searchCaseRates`,
         caseParam,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,
             softwarecertid: authUser.hospital.username_code,
+            cipherkey: authUser.hospital.cypher_key,
             "Content-Type": "text/plain",
           },
         }
@@ -194,10 +195,15 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
               },
             };
           } else if (item.RVSCODES) {
-            // Keep full RVS entry
-            return {
-              RVSCODES: item.RVSCODES,
-            };
+            const {
+            amount, // omit
+            pcaseRateCode, // omit
+            ...cleanedRvsCodes
+          } = item.RVSCODES;
+
+          return {
+            RVSCODES: cleanedRvsCodes,
+          };
           }
           return item; // fallback
         }),
@@ -341,13 +347,14 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
           <AccordionDetails>
             <TextField
               fullWidth
-              label="pDischargeDiagnosis"
+              label="Discharge Diagnosis"
               value={group.pDischargeDiagnosis}
               onChange={(e) => {
                 const updated = [...dischargeGroups];
                 updated[gIdx].pDischargeDiagnosis = e.target.value;
                 setDischargeGroups(updated);
               }}
+              required
               sx={{ mb: 2 }}
             />
 
@@ -360,6 +367,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                         <TextField
                           label="ICD Codes"
                           fullWidth
+                          required
                           value={item.ICDCODE.pICDCode}
                         />
                       </Grid>
@@ -367,6 +375,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                         <TextField
                           label="Procedure"
                           fullWidth
+                          required
                           value={item.ICDCODE?.pRelatedProcedure || ""}
                         />
                       </Grid>
@@ -391,6 +400,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                       <TextField
                         label="RVS Code"
                         fullWidth
+                        required
                         value={item.RVSCODES?.pRVSCode || ""}
                       />
                     </Grid>
@@ -398,6 +408,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                       <TextField
                         label="Procedure"
                         fullWidth
+                        required
                         value={item.RVSCODES.pRelatedProcedure}
                         onChange={(e) =>
                           updateRVSField(
@@ -414,6 +425,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                         label="Date"
                         fullWidth
                         type="date"
+                        required
                         InputLabelProps={{ shrink: true }}
                         value={item.RVSCODES.pProcedureDate}
                         onChange={(e) =>
@@ -431,7 +443,9 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                         label="Laterality"
                         fullWidth
                         select
+                        required
                         SelectProps={{ native: true }}
+                        InputLabelProps={{ shrink: true }}
                         value={item.RVSCODES.pLaterality}
                         onChange={(e) =>
                           updateRVSField(
@@ -473,16 +487,6 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
       >
         Add DISCHARGE
       </Button>
-      {/* <Button
-        onClick={() => transformToDTDOutput()}
-        // onClick={() => onSubmit(transformToDTDOutput())}
-        variant="contained"
-        color="success"
-        sx={{ mt: 2 }}
-      >
-        Submit / Transform
-      </Button> */}
-
       <Dialog open={!!confirmDialog} onClose={() => setConfirmDialog(null)}>
         <DialogTitle>Confirm Add</DialogTitle>
         <DialogContent>

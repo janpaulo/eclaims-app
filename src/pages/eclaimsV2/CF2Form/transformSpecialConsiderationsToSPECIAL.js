@@ -35,7 +35,7 @@ export const transformSpecialConsiderationsToSPECIAL = (formData={}) => {
         },
         TBDOTS: {
           pTBType: formData["Intensive Phase"] ? "I" : formData["Maintenance Phase"] ? "M" : "",
-          pNTPCardNo: ""
+          pNTPCardNo:formData.pNTPCardNo || ""
         },
         ABP: {
           pDay0ARV: formData["Day 0 ARV"] || "",
@@ -49,7 +49,7 @@ export const transformSpecialConsiderationsToSPECIAL = (formData={}) => {
           pEssentialNewbornCare: formData["Essential Newborn Care"] ? "Y" : "N",
           pNewbornHearingScreeningTest: formData["Newborn Hearing Screening Test"] ? "Y" : "N",
           pNewbornScreeningTest: formData["Newborn Screening Test"] ? "Y" : "N",
-          pFilterCardNo: "",
+          pFilterCardNo: formData.pFilterCardNo || "",
           ESSENTIAL: {
             pDrying: formData["Immediate drying of newborn"] ? "Y" : "N",
             pSkinToSkin: formData["Early skin-to-skin contact"] ? "Y" : "N",
