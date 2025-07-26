@@ -18,7 +18,7 @@ function Main({ authUser }) {
   return (
     <>
       <CssBaseline />
-      <Container maxWidth="lg" sx={{ my: 4 }}>
+      <Container maxWidth="full" sx={{ my: 4 }}>
         <EsoaForm authUser={authUser}/>
       </Container>
     </>

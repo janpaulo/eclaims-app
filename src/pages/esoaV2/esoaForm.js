@@ -481,7 +481,7 @@ const EsoaForm = ({ authUser }) => {
   ];
   // =================================================================================
   return (
-    <Box p={2}>
+    <Box  p={2}>
       <Typography variant="h6" gutterBottom>
         Electronic Statement of Account Form
       </Typography>
