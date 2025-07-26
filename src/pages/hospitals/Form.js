@@ -10,53 +10,50 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import axios from "axios";
-import PositionedSnackbar from "../../shared/alerts/PositionedSnackbar"; // ✅ Snackbar component
+import PositionedSnackbar from "../../shared/alerts/PositionedSnackbar";
 
-export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
-  const [hospitalName, setHospitalName] = useState(hospitalToEdit?.hospital_name || "");
-  const [accreditationNum, setAccreditationNum] = useState(hospitalToEdit?.accreditation_num || "");
-  const [cypherKey, setCypherKey] = useState(hospitalToEdit?.cypher_key || "");
-  const [isActive, setIsActive] = useState(hospitalToEdit?.is_active || "active");
-  const [createdBy] = useState(authUser?.userId || "");
+export function Form({ authUser, handleClose, onSuccess, hospitalToEdit }) {
+  const [formData, setFormData] = useState({
+    hospital_name: hospitalToEdit?.hospital_name || "",
+    accreditation_num: hospitalToEdit?.accreditation_num || "",
+    cypher_key: hospitalToEdit?.cypher_key || "",
+    is_active: hospitalToEdit?.is_active || "active",
+    created_by: authUser?.userId || "",
+    username: hospitalToEdit?.username || "",
+    password: "",
+  });
 
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const hospitalData = {
-      hospital_name: hospitalName,
-      accreditation_num: accreditationNum,
-      cypher_key: cypherKey,
-      is_active: isActive,
-      created_by: createdBy,
-    };
+    const url = hospitalToEdit
+      ? `${process.env.REACT_APP_API_CLAIMS}hospitals/${hospitalToEdit.hos_id}`
+      : `${process.env.REACT_APP_API_CLAIMS}hospitals`;
+
+    const method = hospitalToEdit ? axios.put : axios.post;
 
     try {
-      if (hospitalToEdit) {
-        await axios.put(
-          `${process.env.REACT_APP_API_CLAIMS}hospitals/${hospitalToEdit.hos_id}`,
-          hospitalData,
-          {
-            headers: { Authorization: `Bearer ${authUser.access_token}` },
-          }
-        );
-      } else {
-        await axios.post(
-          `${process.env.REACT_APP_API_CLAIMS}hospitals`,
-          hospitalData,
-          {
-            headers: { Authorization: `Bearer ${authUser.access_token}` },
-          }
-        );
-      }
+      await method(url, formData, {
+        headers: { Authorization: `Bearer ${authUser.access_token}` },
+      });
 
       setOpenSnackbar(true);
-      onSuccess?.(); // refresh table
-      handleClose(); // close modal
+      onSuccess?.();
+      handleClose();
     } catch (err) {
       console.error("Error saving hospital:", err);
       setError("Failed to save hospital.");
@@ -80,10 +77,11 @@ export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
           <Grid item xs={12}>
             <TextField
               label="Hospital Name"
+              name="hospital_name"
               fullWidth
               variant="outlined"
-              value={hospitalName}
-              onChange={(e) => setHospitalName(e.target.value)}
+              value={formData.hospital_name}
+              onChange={handleChange}
               required
             />
           </Grid>
@@ -91,10 +89,11 @@ export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
           <Grid item xs={12}>
             <TextField
               label="Accreditation Number"
+              name="accreditation_num"
               fullWidth
               variant="outlined"
-              value={accreditationNum}
-              onChange={(e) => setAccreditationNum(e.target.value)}
+              value={formData.accreditation_num}
+              onChange={handleChange}
               required
             />
           </Grid>
@@ -102,20 +101,22 @@ export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
           <Grid item xs={12}>
             <TextField
               label="Cypher Key"
+              name="cypher_key"
               fullWidth
               variant="outlined"
-              value={cypherKey}
-              onChange={(e) => setCypherKey(e.target.value)}
+              value={formData.cypher_key}
+              onChange={handleChange}
               required
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
-                value={isActive}
-                onChange={(e) => setIsActive(e.target.value)}
+                name="is_active"
+                value={formData.is_active}
+                onChange={handleChange}
                 label="Status"
                 required
               >
@@ -125,20 +126,48 @@ export function Form({ authUser, handleClose, onSuccess ,hospitalToEdit }) {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <TextField
               label="Created By"
+              name="created_by"
               fullWidth
               variant="outlined"
-              value={createdBy}
+              value={formData.created_by}
               disabled
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider sx={{ my: 3 }}>User Credentials</Divider>
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              label="Username"
+              name="username"
+              fullWidth
+              variant="outlined"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              label="Password"
+              name="password"
+              type="password"
+              fullWidth
+              variant="outlined"
+              value={formData.password}
+              onChange={handleChange}
+              required={!hospitalToEdit} // password required only on create
             />
           </Grid>
         </Grid>
 
-        <Box
-          sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
           <Button
             variant="contained"
             color="primary"

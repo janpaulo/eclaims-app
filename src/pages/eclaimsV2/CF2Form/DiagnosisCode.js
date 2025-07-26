@@ -30,12 +30,12 @@ const newDischargeGroup = () => ({
   ICDCODEOrRVSCODES: [],
 });
 
-// const DiagnosisCode = ({ onSubmit }) => {
-// const DiagnosisCode = ({ diagnosCodeData, setFormData }) => {
-
 const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   const [pAdmissionDiagnosis, setAdmissionDiagnosis] = useState("");
-  const [dischargeGroups, setDischargeGroups] = useState([newDischargeGroup()]);
+  const [dischargeGroups, setDischargeGroups] = useState([
+    newDischargeGroup(),
+    newDischargeGroup(),
+  ]);
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
   const [caseParam, setCaseParam] = useState({
     icdcode: "",
@@ -50,13 +50,13 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   const [targetGroupIdx, setTargetGroupIdx] = useState(0);
   const [searchCache, setSearchCache] = useState([]);
 
-  var get_user = localStorage.getItem('item');
-  var authUser = JSON.parse(get_user)
+  const authUser = JSON.parse(localStorage.getItem("item"));
 
   const handleCaseChange = (e) => {
     const { name, value } = e.target;
     setCaseParam((prev) => ({ ...prev, [name]: value }));
   };
+
   const clearSearch = () => {
     setCaseParam({
       icdcode: "",
@@ -66,6 +66,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
     });
     setItemSearch([]);
   };
+
   const searchCase = async () => {
     setIsLoading(true);
     try {
@@ -120,7 +121,6 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
   };
 
   const addItemToGroup = (item) => {
-    console.log(item);
     setTempItem(item);
     setConfirmDialog("confirm");
   };
@@ -171,11 +171,9 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
 
   const removeDischargeGroup = (indexToRemove) => {
     const updated = [...dischargeGroups];
-    updated.splice(indexToRemove, 1); // remove selected group
+    updated.splice(indexToRemove, 1);
     setDischargeGroups(updated);
     setStoreDataDischarge(updated);
-
-    // Adjust target index if needed
     if (targetGroupIdx >= updated.length) {
       setTargetGroupIdx(Math.max(0, updated.length - 1));
     }
@@ -186,27 +184,32 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
       pAdmissionDiagnosis,
       DISCHARGE: dischargeGroups.map((group) => ({
         pDischargeDiagnosis: group.pDischargeDiagnosis,
-        ICDCODEOrRVSCODES: group.ICDCODEOrRVSCODES.map((item) => {
-          if (item.ICDCODE) {
-            // Return only pICDCode, omit pRelatedProcedure if present
-            return {
-              ICDCODE: {
-                pICDCode: item.ICDCODE.pICDCode,
-              },
-            };
-          } else if (item.RVSCODES) {
-            const {
-            amount, // omit
-            pcaseRateCode, // omit
-            ...cleanedRvsCodes
-          } = item.RVSCODES;
-
-          return {
-            RVSCODES: cleanedRvsCodes,
-          };
-          }
-          return item; // fallback
-        }),
+        ICDCODEOrRVSCODES: group.ICDCODEOrRVSCODES
+          .map((item) => {
+            if (item.ICDCODE) {
+              return {
+                type: "ICD",
+                data: {
+                  ICDCODE: {
+                    pICDCode: item.ICDCODE.pICDCode,
+                  },
+                },
+              };
+            } else if (item.RVSCODES) {
+              const { amount, pcaseRateCode, ...cleaned } = item.RVSCODES;
+              return {
+                type: "RVS",
+                data: { RVSCODES: cleaned },
+              };
+            }
+            return { type: "OTHER", data: item };
+          })
+          .sort((a, b) => {
+            if (a.type === "ICD" && b.type !== "ICD") return -1;
+            if (a.type !== "ICD" && b.type === "ICD") return 1;
+            return 0;
+          })
+          .map((item) => item.data),
       })),
     },
   });
@@ -223,7 +226,6 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
         value={pAdmissionDiagnosis}
         onChange={(e) => setAdmissionDiagnosis(e.target.value)}
         sx={{ mb: 2 }}
-        row={5}
         required
       />
 
@@ -266,7 +268,6 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
             label="Select Discharge Group"
             value={targetGroupIdx}
             onChange={(e) => setTargetGroupIdx(Number(e.target.value))}
-            sx={{ mb: 2 }}
           >
             {dischargeGroups.map((_, idx) => (
               <MenuItem key={idx} value={idx}>
@@ -336,7 +337,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                 size="small"
                 color="error"
                 onClick={(e) => {
-                  e.stopPropagation(); // prevent expanding accordion
+                  e.stopPropagation();
                   removeDischargeGroup(gIdx);
                 }}
               >
@@ -361,37 +362,33 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
             {group.ICDCODEOrRVSCODES.map((item, idx) =>
               item.ICDCODE ? (
                 <Box key={idx} sx={{ mb: 2 }}>
-                  <Box>
-                    <Grid container spacing={1} alignItems="center">
-                      <Grid item xs={2}>
-                        <TextField
-                          label="ICD Codes"
-                          fullWidth
-                          required
-                          value={item.ICDCODE.pICDCode}
-                        />
-                      </Grid>
-                      <Grid item xs={8}>
-                        <TextField
-                          label="Procedure"
-                          fullWidth
-                          required
-                          value={item.ICDCODE?.pRelatedProcedure || ""}
-                        />
-                      </Grid>
-                      <Grid item xs={2}>
-                        <Button
-                          color="error"
-                          size="small"
-                          onClick={() => removeDischargeItem(gIdx, idx)}
-                        >
-                          Remove
-                        </Button>
-                      </Grid>
+                  <Grid container spacing={1} alignItems="center">
+                    <Grid item xs={2}>
+                      <TextField
+                        label="ICD Codes"
+                        fullWidth
+                        required
+                        value={item.ICDCODE.pICDCode}
+                      />
                     </Grid>
-                    {/* <Typography variant="body2">ICD Code: {item.ICDCODE.pICDCode}</Typography>
-                    <Typography variant="body2">Procedure: {item.RVSCODES?.pRelatedProcedure || ""}</Typography> */}
-                  </Box>
+                    <Grid item xs={8}>
+                      <TextField
+                        label="Procedure"
+                        fullWidth
+                        required
+                        value={item.ICDCODE.pRelatedProcedure || ""}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Button
+                        color="error"
+                        size="small"
+                        onClick={() => removeDischargeItem(gIdx, idx)}
+                      >
+                        Remove
+                      </Button>
+                    </Grid>
+                  </Grid>
                 </Box>
               ) : item.RVSCODES ? (
                 <Box key={idx} sx={{ mb: 2 }}>
@@ -401,7 +398,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
                         label="RVS Code"
                         fullWidth
                         required
-                        value={item.RVSCODES?.pRVSCode || ""}
+                        value={item.RVSCODES.pRVSCode}
                       />
                     </Grid>
                     <Grid item xs={3}>
@@ -487,6 +484,7 @@ const DiagnosisCode = forwardRef(({ setStoreDataDischarge }, ref) => {
       >
         Add DISCHARGE
       </Button>
+
       <Dialog open={!!confirmDialog} onClose={() => setConfirmDialog(null)}>
         <DialogTitle>Confirm Add</DialogTitle>
         <DialogContent>

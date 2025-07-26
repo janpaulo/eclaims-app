@@ -27,6 +27,7 @@ import {CSFormMain} from './pages/csForms/CSFormMain'
 import CSForm from './pages/csForms/CSForm'
 import MainCf1 from './pages/eclaimsV2/Main'
 import MainEsoa from './pages/esoaV2/Main'
+import FileTable from './pages/attachments/FileTable'
 
 // import Itembills from '../src/pages/esoa/Itembills'
 
@@ -79,6 +80,7 @@ function App() {
                   <Route exact path="/hospital-users-accounts"  element={ <HopitalRoleAccount /> } />
                   <Route exact path="/hospitals"  element={ <Main authUser={parseUser}/> } />
                   <Route exact path="/Roles"  element={ <Roles authUser={parseUser}/> } />
+                  <Route exact path="/files"  element={ <FileTable authUser={parseUser}/> } />
                   <Route  path="*"  element={ <Navigate to="/"/> } />
                   
                 </Routes>

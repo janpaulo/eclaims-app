@@ -28,10 +28,11 @@ import VaccinesIcon from "@mui/icons-material/Vaccines";
 import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import MedicalInformationOutlinedIcon from "@mui/icons-material/MedicalInformationOutlined";
-import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+// import MedicalInformationOutlinedIcon from "@mui/icons-material/MedicalInformationOutlined";
+// import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 import SummarizeOutlinedIcon from "@mui/icons-material/SummarizeOutlined";
 import ApiIcon from "@mui/icons-material/Api"; // You can change the icon
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 
 const drawerWidth = 240;
 
@@ -107,6 +108,8 @@ const items = [
   // { name: "Claim Form 3", icon: <ListAltOutlinedIcon />, path: "cf3" },
   { name: "Claim Form 4", icon: <SummarizeOutlinedIcon />, path: "cf4" },
   { name: "Claim Form 5", icon: <SummarizeOutlinedIcon />, path: "cf5" },
+  
+  { name: "Files", icon: <FileCopyIcon />, path: "files" },
   {
     name: "Hospitals",
     icon: <ClosedCaptionDisabledRoundedIcon />,

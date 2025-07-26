@@ -1,10 +1,9 @@
 import React from "react";
 import { Container } from "@mui/material";
-import SharedAppBar from "../../shared/SharedAppBar"
-import SharedTable from "../../shared/SharedTable"
+import SharedAppBar from "../../shared/SharedAppBar";
+import SharedTable from "../../shared/SharedTable";
 
 export function CF4Main({ authUser }) {
-
   const columns = [
     { field: "hos_id", label: "No" },
     { field: "hospital_name", label: "Hospital Name" },
@@ -13,7 +12,9 @@ export function CF4Main({ authUser }) {
     { field: "date_ceated", label: "Created Date" },
   ];
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="full" sx={{ my: 4 }}>
+      
+      <h1>Under maintenance . . . .</h1>
       <SharedAppBar
         titleName="CF4"
         isModal={false}

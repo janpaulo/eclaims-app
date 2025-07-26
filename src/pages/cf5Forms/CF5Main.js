@@ -13,7 +13,8 @@ export function CF5Main({ authUser }) {
     { field: "date_ceated", label: "Created Date" },
   ];
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="full"  sx={{ my: 4 }}>
+      <h1>Under maintenance . . . .</h1>
       <SharedAppBar
         titleName="CF5"
         isModal={false}
@@ -24,11 +25,6 @@ export function CF5Main({ authUser }) {
       <SharedTable
         columns={columns}
         data={[]}
-        // onEdit={handleEdit}
-        // page={page}
-        // setPage={setPage}
-        // rowsPerPage={rowsPerPage}
-        // setRowsPerPage={setRowsPerPage}
       />
     </Container>
   );

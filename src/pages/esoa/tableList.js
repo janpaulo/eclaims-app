@@ -10,8 +10,9 @@ import Paper from "@mui/material/Paper";
 import SharedAppBar from "../../shared/SharedAppBar";
 // import CryptoJS from "crypto-js";
 import moment from "moment";
-import PositionedSnackbar from './../../shared/alerts/PositionedSnackbar'
+import PositionedSnackbar from "./../../shared/alerts/PositionedSnackbar";
 import api from "../../api";
+import { Container } from "@mui/material";
 // import { Button } from "@mui/material";
 // import Xml2js from "xml2js";
 
@@ -32,30 +33,33 @@ class tableList extends React.Component {
     this.handleGetEsoa();
   }
 
-
   handleGetEsoa = async () => {
     const { authUser } = this.state;
-  
+
     if (!authUser || !authUser.hci_no || !authUser.access_token) {
-      this.setState({ items: [], error: "Missing credentials. Please log in again." });
+      this.setState({
+        items: [],
+        error: "Missing credentials. Please log in again.",
+      });
       return;
     }
-  
+
     try {
       const response = await api.get(`/esoas/${authUser.hci_no}`, {
         headers: {
           Authorization: `Bearer ${authUser.access_token}`,
         },
       });
-  
+
       const esoa = response.data?.esoa;
       this.setState({ items: esoa });
     } catch (err) {
       const status = err.response?.status;
-      const serverMsg = err.response?.data?.error || err.response?.data?.message;
-  
+      const serverMsg =
+        err.response?.data?.error || err.response?.data?.message;
+
       let errorMessage = "An error occurred while fetching esoa.";
-  
+
       if (status === 404) {
         errorMessage = serverMsg || "No esoa found for this HCI.";
       } else if (serverMsg) {
@@ -63,13 +67,11 @@ class tableList extends React.Component {
       } else if (err.message) {
         errorMessage = err.message;
       }
-  
+
       this.setState({ items: [], error: errorMessage });
       console.error("Error fetching esoa:", err);
     }
   };
-  
-  
 
   render() {
     // const publicKey =
@@ -79,7 +81,6 @@ class tableList extends React.Component {
     //   const encrypted = CryptoJS.AES.encrypt(str, publicKey);
     //   return encrypted.toString();
     // };
-    
 
     // const cipherKey = "PHilheaLthDuMmyciPHerKeyS";
 
@@ -104,7 +105,7 @@ class tableList extends React.Component {
 
     const { items, error } = this.state;
     return (
-      <>
+      <Container maxWidth="full" sx={{ my: 4 }}>
         <SharedAppBar
           titleName={this.state.title}
           esoaLink="/esoa_registration"
@@ -115,7 +116,9 @@ class tableList extends React.Component {
               <TableRow>
                 <TableCell align="center">PAN No.</TableCell>
                 {/* <TableCell align="center">Professional fee</TableCell> */}
-                <TableCell align="center">Professional PhilHealth Amount</TableCell>
+                <TableCell align="center">
+                  Professional PhilHealth Amount
+                </TableCell>
                 <TableCell align="center">Summary PhilHealth Amount</TableCell>
                 {/* <TableCell align="center">Total Amount</TableCell> */}
                 <TableCell align="center">Date Posted</TableCell>
@@ -129,11 +132,19 @@ class tableList extends React.Component {
                     <TableRow key={item.id}>
                       <TableCell align="center">{item.hci_no}</TableCell>
                       {/* <TableCell align="center">{item.professional_fee}</TableCell> */}
-                      <TableCell align="center">{item.prof_philhealth_amount}</TableCell>
-                      <TableCell align="center">{item.sum_philhealth_amount}</TableCell>
+                      <TableCell align="center">
+                        {item.prof_philhealth_amount}
+                      </TableCell>
+                      <TableCell align="center">
+                        {item.sum_philhealth_amount}
+                      </TableCell>
                       {/* <TableCell align="center">{item.total_amount}</TableCell> */}
                       {/* <TableCell align="center">{item.xml_data}</TableCell> */}
-                      <TableCell align="center">{ moment(new Date(item.date_created)).format("MM/DD/YYYY")}</TableCell>
+                      <TableCell align="center">
+                        {moment(new Date(item.date_created)).format(
+                          "MM/DD/YYYY"
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -151,12 +162,11 @@ class tableList extends React.Component {
           </Table>
         </TableContainer>
 
-        <PositionedSnackbar 
-           open={this.props.open}
-           handleAlertClose={this.props.handleAlertClose}
-          
-          />
-      </>
+        <PositionedSnackbar
+          open={this.props.open}
+          handleAlertClose={this.props.handleAlertClose}
+        />
+      </Container>
     );
   }
 }

@@ -399,6 +399,8 @@ function Main({ authUser }) {
 
       if (res.status === 200) {
         setIsEclaimsPassed(true)
+        setOpen(true);
+        setErrorMessage(res.data.message);
         console.log("✅ Success:", res.data);
       } else if (res.status === 422) {
         console.log("HTTP Status:", res.data);
@@ -562,7 +564,7 @@ function Main({ authUser }) {
                 />
               </Grid>
               <Grid item xs={12} sm={2}>
-                ``
+                
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -696,7 +698,7 @@ function Main({ authUser }) {
               />
             </Box>
             <Box hidden={tab !== 5}>
-              <AttachmentForm ref={attachRef} pbefResultData={pbefResultData} />
+              <AttachmentForm ref={attachRef} pbefResultData={pbefResultData} authUser={authUser}/>
             </Box>
 
             <Box sx={{ mt: 4, textAlign: "right" }}>
@@ -723,7 +725,7 @@ function Main({ authUser }) {
           onConfirm={handleConfirm}
           title="Message"
           description={errorMessage}
-          confirmText="Yes, delete"
+          confirmText={isEclaimsPassed ? "Submit": "Yes"}
           cancelText="No"
           confirmColor="error"
         />

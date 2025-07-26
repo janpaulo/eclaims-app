@@ -333,12 +333,83 @@ export default function CF4Form() {
       pReportStatus: drug.reportStatus || "U",
       pDeficiencyRemarks: drug.deficiencyRemarks || "",
     }));
-
-    // Build the final payload
     const payload = {
-      ...formData,
-      drugs: transformedDrugs,
-      physicalExam: pe, // assuming pe is your physical exam data
+      ENLISTMENTS: {
+        pHciCaseNo: formData.caseNumber || "",
+        pHciTransNo: formData.transNumber || "",
+        pHciAccreCode: formData.accreditationNo || "",
+        pHciName: formData.hciName || "",
+        pHciAddress: formData.hciAddress || "",
+        pReportStatus: "U",
+      },
+      PROFILING: {
+        pPIN: formData.pin || "",
+        pLastName: formData.patientLast || "",
+        pFirstName: formData.patientFirst || "",
+        pMiddleName: formData.patientMiddle || "",
+        pSex: formData.sex || "",
+        pAge: formData.age || "",
+        pDateAdmitted: formData.dateAdmitted || "",
+        pTimeAdmitted: `${formData.timeAdmitted} ${formData.ampmAdmit}`,
+        pDateDischarged: formData.dateDischarged || "",
+        pTimeDischarged: `${formData.timeDischarged} ${formData.ampmDischarge}`,
+        pAdmittingDiagnosis: formData.admittingDx || "",
+        pDischargeDiagnosis: formData.dischargeDx || "",
+        pCaseType: "", // Optional or derived
+        pCaseRate1: formData.caseRate1 || "",
+        pCaseRate2: formData.caseRate2 || "",
+        pChiefComplaint: formData.chiefComplaint || "",
+        pHistoryPresentIllness: formData.historyPresentIllness || "",
+        pPastMedicalHistory: formData.pastMedicalHistory || "",
+        pObstetricalScore: `G${formData.obGyn_G}P${formData.obGyn_P}`,
+        pLMP: formData.obGyn_LMP || "",
+        pReferredFrom: formData.referringHCI || "",
+        pReasonReferral: formData.referringReason || "",
+        pReportStatus: "U",
+      },
+      SOAPS: {
+        pHciCaseNo: formData.caseNumber || "",
+        pHciTransNo: formData.transNumber || "",
+        pBP: formData.bp || "",
+        pHR: formData.hr || "",
+        pRR: formData.rr || "",
+        pTemp: formData.temp || "",
+        pHeight: formData.height || "",
+        pWeight: formData.weight || "",
+        pSymptoms: Object.entries(formData.symptoms)
+          .filter(([_, checked]) => checked)
+          .map(([symptom]) => symptom)
+          .join(", "),
+        pHeent: formData.pe.heent || "",
+        pChest: formData.pe.chest || "",
+        pCVS: formData.pe.cvs || "",
+        pAbdomen: formData.pe.abd || "",
+        pGU: formData.pe.gu || "",
+        pSkin: formData.pe.skin || "",
+        pNeuro: formData.pe.neuro || "",
+        pReportStatus: "U",
+      },
+      DOCTORORDER: formData.wardCourse.map((row) => ({
+        pHciCaseNo: formData.caseNumber || "",
+        pHciTransNo: formData.transNumber || "",
+        pDate: row.date,
+        pOrder: row.order,
+        pReportStatus: "U",
+      })),
+      DRUGS: transformedDrugs,
+      OUTCOME: formData.outcome.map((item) => ({
+        pHciCaseNo: formData.caseNumber || "",
+        pHciTransNo: formData.transNumber || "",
+        pOutcome: item,
+        pReportStatus: "U",
+      })),
+      PHYSICIAN: {
+        pHciCaseNo: formData.caseNumber || "",
+        pHciTransNo: formData.transNumber || "",
+        pPhysician: formData.physicianName || "",
+        pDate: formData.dateSigned || "",
+        pReportStatus: "U",
+      },
     };
 
     console.log("CF4 SUBMIT", payload);

@@ -9,6 +9,7 @@ import Paper from "@mui/material/Paper";
 import SharedAppBar from "../../shared/SharedAppBar";
 import moment from "moment";
 import api from "../../api";
+import { Container } from "@mui/material";
 
 class TableList extends React.Component {
   constructor(props) {
@@ -17,7 +18,7 @@ class TableList extends React.Component {
       title: "Claims",
       items: [],
       error: null,
-      authUser: props.authUser || {}
+      authUser: props.authUser || {},
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -27,21 +28,24 @@ class TableList extends React.Component {
   }
   handleGetClaims = async () => {
     const { authUser } = this.state;
-  
+
     if (!authUser || !authUser.hci_no || !authUser.access_token) {
-      this.setState({ items: [], error: "Missing credentials. Please log in again." });
+      this.setState({
+        items: [],
+        error: "Missing credentials. Please log in again.",
+      });
       return;
     }
-  
+
     try {
       const response = await api.get(`/claims/${authUser.hci_no}`, {
         headers: {
           Authorization: `Bearer ${authUser.access_token}`,
         },
       });
-  
+
       const claims = response.data?.claims;
-  
+
       if (Array.isArray(claims) && claims.length > 0) {
         this.setState({ items: claims, error: null });
       } else {
@@ -49,10 +53,11 @@ class TableList extends React.Component {
       }
     } catch (err) {
       const status = err.response?.status;
-      const serverMsg = err.response?.data?.error || err.response?.data?.message;
-  
+      const serverMsg =
+        err.response?.data?.error || err.response?.data?.message;
+
       let errorMessage = "An error occurred while fetching claims.";
-  
+
       if (status === 404) {
         errorMessage = serverMsg || "No claims found for this HCI.";
       } else if (serverMsg) {
@@ -60,12 +65,12 @@ class TableList extends React.Component {
       } else if (err.message) {
         errorMessage = err.message;
       }
-  
+
       this.setState({ items: [], error: errorMessage });
       console.error("Error fetching claims:", err);
     }
   };
-  
+
   handleSubmit(params) {
     console.log("handleSubmit called", params);
   }
@@ -74,7 +79,7 @@ class TableList extends React.Component {
     const { items, error, title } = this.state;
 
     return (
-      <>
+      <Container maxWidth="full" sx={{ my: 4 }}>
         <SharedAppBar titleName={title} esoaLink="/claims_registration" />
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -91,7 +96,11 @@ class TableList extends React.Component {
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" style={{ color: "red" }}>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    style={{ color: "red" }}
+                  >
                     {error}
                   </TableCell>
                 </TableRow>
@@ -120,7 +129,7 @@ class TableList extends React.Component {
             </TableBody>
           </Table>
         </TableContainer>
-      </>
+      </Container>
     );
   }
 }
