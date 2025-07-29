@@ -107,7 +107,7 @@ const items = [
   // { name: "Claim Signature Form", icon: <MedicalInformationOutlinedIcon />, path: "claim-signature-form" },
   // { name: "Claim Form 3", icon: <ListAltOutlinedIcon />, path: "cf3" },
   { name: "Claim Form 4", icon: <SummarizeOutlinedIcon />, path: "cf4" },
-  { name: "Claim Form 5", icon: <SummarizeOutlinedIcon />, path: "cf5" },
+  // { name: "Claim Form 5", icon: <SummarizeOutlinedIcon />, path: "cf5" },
   
   { name: "Files", icon: <FileCopyIcon />, path: "files" },
   {
