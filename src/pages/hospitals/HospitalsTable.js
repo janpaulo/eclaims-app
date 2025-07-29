@@ -12,13 +12,14 @@ export default function HospitalsTable({ authUser }) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedHospital, setSelectedHospital] = useState(null);
+  const [hospitalUsers, setHospitalUsers] = useState([]);
 
   const columns = [
-    { field: "hos_id", label: "No" },
+    { field: "__index", label: "No" },
     { field: "hospital_name", label: "Hospital Name" },
     { field: "accreditation_num", label: "Accreditation No" },
     { field: "is_active", label: "Status" },
-    { field: "date_ceated", label: "Created Date" },
+    // { field: "date_ceated", label: "Created Date" },
   ];
 
   const fetchHospitals = async () => {
@@ -35,20 +36,38 @@ export default function HospitalsTable({ authUser }) {
     }
   };
 
-  useEffect(() => {
-    fetchHospitals();
-  }, [authUser.access_token]);
+  const fetchHospitalUsers = async (accreditation_num) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_CLAIMS}hospitals/users/${accreditation_num}`,
+        {
+          headers: { Authorization: `Bearer ${authUser.access_token}` },
+        }
+      );
+      setHospitalUsers(response.data.users || []);
+    } catch (error) {
+      console.error("Error fetching hospital users:", error);
+      setHospitalUsers([]);
+    }
+  };
 
-  const handleEdit = (hospital) => {
+  const handleEdit = async (hospital) => {
     setSelectedHospital(hospital);
+    await fetchHospitalUsers(hospital.accreditation_num);
     setIsOpen(true);
   };
+
   const handleClose = () => {
     setIsOpen(false);
-    setSelectedHospital(null); // Reset selected hospital data
+    setSelectedHospital(null);
+    setHospitalUsers([]);
   };
 
   const handleClick = () => setIsOpen(true);
+
+  useEffect(() => {
+    fetchHospitals();
+  }, [authUser.access_token]);
 
   return (
     <>
@@ -72,11 +91,13 @@ export default function HospitalsTable({ authUser }) {
         openPopup={isOpen}
         title={selectedHospital ? "Update Hospital" : "Create Hospital"}
         handleClose={handleClose}
+        maxWidth={"md"}
       >
         <Form
           handleClose={handleClose}
           authUser={authUser}
-          hospitalToEdit={selectedHospital} // Pass data here
+          hospitalToEdit={selectedHospital}
+          hospitalUsers={hospitalUsers}
           onSuccess={() => {
             fetchHospitals();
             handleClose();

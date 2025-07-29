@@ -28,7 +28,7 @@ const SharedTable = ({ columns=[], data=[], onEdit, onDelete, page, setPage, row
             {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
               <TableRow key={index}>
                 {columns.map((col) => (
-                  <TableCell key={col.field}>{row[col.field]}</TableCell>
+                  <TableCell key={col.field}>{col.field === "__index" ? page * rowsPerPage + index + 1 : row[col.field]}</TableCell>
                 ))}
                 {(onEdit || onDelete) && (
                   <TableCell>
