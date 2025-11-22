@@ -1,8 +1,0 @@
-{
-  "/api": {
-    "target": "https://dark-pink-macaw-tie.cyclic.app",
-    "pathRewrite": {
-      "^/api": ""
-    }
-  }
-}

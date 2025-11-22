@@ -32,7 +32,15 @@ export default function Login() {
       email: data.get("email"),
       password: data.get("password"),
     };
-
+    // localStorage.setItem("item",JSON.stringify({
+    //   "id": 1,
+    //   "email": "john@mail.com",
+    //   "password": "changeme",
+    //   "name": "Jhon",
+    //   "role": "customer",
+    //   "avatar": "https://api.lorem.space/image/face?w=640&h=480&r=867"
+    // }));
+    // window.location.reload()
     axios({
       method: "POST",
       url: process.env.REACT_APP_API_CLAIMS+"login",
@@ -41,6 +49,7 @@ export default function Login() {
     })
       .then((resp) => {
         localStorage.setItem("item", JSON.stringify(resp.data));
+        // localStorage.setItem("item", JSON.stringify(resp.data));
         setAlertSeverity('success');
         setAlertMessage('Successfully logged in!');
         setAlertOpen(true);
@@ -138,7 +147,7 @@ export default function Login() {
                 >
                   Sign In
                 </Button>
-                <Grid container>
+                {/* <Grid container>
                   <Grid item xs>
                     <Link href="#" variant="body2">
                       Forgot password?
@@ -149,7 +158,7 @@ export default function Login() {
                       {"Don't have an account? Sign Up"}
                     </Link>
                   </Grid>
-                </Grid>
+                </Grid> */}
               </Box>
             </Box>
           </Grid>
