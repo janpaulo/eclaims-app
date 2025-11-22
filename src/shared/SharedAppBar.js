@@ -36,7 +36,7 @@ export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick
               <IconButton color="inherit" aria-label="menu"
                 onClick={() => handleClick()}
                 >
-                <AddCircleOutlineOutlinedIcon fontSize="large" />
+                <AddCircleOutlineOutlinedIcon fontSize="large"  style={{ color: 'white' }}/>
               </IconButton>
             </div>
           ) : (
@@ -46,7 +46,8 @@ export default function SharedAppBar({ titleName, esoaLink, isModal, handleClick
               variant="button"
               color="secondary"
             >
-              <AddCircleOutlineOutlinedIcon fontSize="large" />
+              <AddCircleOutlineOutlinedIcon fontSize="large" 
+              style={{ color: 'white' }}/>
               <IconButton
                 size="large"
                 edge="start"

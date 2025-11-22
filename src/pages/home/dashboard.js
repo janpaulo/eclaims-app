@@ -75,7 +75,7 @@ const Dashboard = ({ authDetails }) => {
   }
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="full">
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
       <Box>
         <Typography variant="h5">{`${greeting}, APP Inc. 👋`}</Typography>
