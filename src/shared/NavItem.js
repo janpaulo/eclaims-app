@@ -154,7 +154,7 @@ function NavItem({ authUser }) {
 
     try {
       const res = await axios.get(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/${method}`,
+        `${process.env.REACT_APP_NEW_PHIC_URL}${method}`,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,

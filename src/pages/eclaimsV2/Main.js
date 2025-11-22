@@ -148,28 +148,35 @@ function Main({ authUser }) {
   };
 
   const getClaimNumber = async () => {
-    try {
-      const hospitalCode = authUser?.hospital?.hopital_code;
+  try {
+    const hospitalCode = authUser?.hospital?.hospital_code; // Correct the spelling here
 
-      if (!hospitalCode) throw new Error("Missing hospital code.");
+    if (!hospitalCode) throw new Error("Missing hospital code.");
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_CLAIMS}claims-number/${hospitalCode}`,
-        {
-          headers: {
-            Authorization: `Bearer ${authUser?.access_token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_CLAIMS}claims-number/${hospitalCode}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authUser?.access_token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-      // If API returns { reference: "..." }
+    // Validate response before setting the claim number
+    if (response.data && response.data.reference) {
       setClaimsNum(response.data.reference);
-    } catch (error) {
-      console.error("Claim number generation failed:", error);
-      alert("Unable to generate claim number. Please try again.");
+    } else {
+      throw new Error("Invalid response structure: reference not found.");
     }
-  };
+  } catch (error) {
+    // Log error with more details
+    console.error("Claim number generation failed:", error);
+
+    // Show a more specific error message
+    alert(error.response?.data?.message || "Unable to generate claim number. Please try again.");
+  }
+};
 
   useEffect(() => {
     if (isPbef) {
