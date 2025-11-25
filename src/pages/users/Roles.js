@@ -60,7 +60,7 @@ export function Roles({ authUser }) {
       <SharedAppBar titleName="Roles" isModal={true} handleClick={handleClick} />
       <SharedTable
         columns={columns}
-        data={roleData}
+        data={[]}
         page={page}
         setPage={setPage}
         rowsPerPage={rowsPerPage}

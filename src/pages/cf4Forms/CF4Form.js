@@ -25,6 +25,7 @@ import {
   FormGroup,
 } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
+import MedicineForm from "./MedicineForm"
 
 // ---------- constant helpers ----------
 const initialDoctorOrderRow = { date: "", order: "" };
@@ -149,10 +150,33 @@ const initialPEState = {
 };
 
 // MAIN COMPONENT
-export default function CF4Form() {
+export default function CF4Form({authUser}) {
   // ---------- STATE ----------
 
   const [pe, setPE] = useState(initialPEState);
+  
+   const [medicines, setMedicines] = useState([
+    {
+      pDrugCode: "",
+      pGenericCode: "",
+      pSaltCode: "",
+      pStrengthCode: "",
+      pFormCode: "",
+      pUnitCode: "",
+      pPackageCode: "",
+      pRoute: "",
+      pQuantity: "",
+      pActualUnitPrice: "",
+      pCoPayment: "",
+      pTotalAmtPrice: "",
+      pInstructionQuantity: "",
+      pInstructionStrength: "",
+      pInstructionFrequency: "",
+      pInstructionDuration: "",
+      pReportStatus: "U",
+      pDeficiencyRemarks: "",
+    },
+  ]);
   const [formData, setFormData] = useState({
     /* PART I */
     hciName: "",
@@ -305,7 +329,9 @@ export default function CF4Form() {
   // };
   const handleSubmit = (e) => {
     e.preventDefault();
-
+console.log("Submitting MEDICINES payload:", {
+      MEDICINES: { MEDICINE: medicines },
+    });
     // Map formData.drugs keys to DTD keys
     const transformedDrugs = formData.drugs.map((drug) => ({
       pHciCaseNo: drug.pHciCaseNo || "", // or map from another key if needed
@@ -335,12 +361,54 @@ export default function CF4Form() {
     }));
     const payload = {
       ENLISTMENTS: {
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
+        pEClaimId: formData.eClaimId || "250506152005",
+        pEClaimsTransmittalId: formData.eClaimsTransmittalId || "250506152005",
+        pHciCaseNo: formData.caseNumber || "C280501202503000004",
+        pHciTransNo: formData.transNumber || "C280501202503000004",
         pHciAccreCode: formData.accreditationNo || "",
         pHciName: formData.hciName || "",
         pHciAddress: formData.hciAddress || "",
+        pEffYear: formData.effYear || "2025",
+        pEnlistStat: formData.enlistStat || "1",
+        pEnlistDate: formData.enlistDate || "2025-03-10",
+        pPackageType: formData.packageType || "A",
+        // Member info
+        pMemPin: formData.memPin || "",
+        pMemFname: formData.memFirstName || "",
+        pMemMname: formData.memMiddleName || "",
+        pMemLname: formData.memLastName || "",
+        pMemExtname: formData.memExtName || "",
+        pMemDob: formData.memDob || "",
+        pMemCat: formData.memCat || "",
+        pMemNcat: formData.memNcat || "",
+
+        // Patient info
+        pPatientPin: formData.memPin || "190270594763",
+        pPatientFname: formData.memFirstName || "IHOMISPLUS FN FORTY FOUR",
+        pPatientMname: formData.memMiddleName || "IHOMISPLUS MN FORTY FOUR",
+        pPatientLname: formData.memLastName || "IHOMISPLUS LN FORTY FOUR",
+        pPatientExtname: formData.memExtName || "",
+        pPatientType: formData.patientType || "MM",
+        pPatientSex: formData.sex || "F",
+        pPatientContactno: formData.contactNo || "NA",
+        pPatientDob: formData.patientDob || "1974-02-14",
+        pPatientAddbrgy: formData.addressBrgy || "",
+        pPatientAddmun: formData.addressMun || "",
+        pPatientAddprov: formData.addressProv || "",
+        pPatientAddreg: formData.addressReg || "",
+        pPatientAddzipcode: formData.addressZip || "",
+
+        // Others
+        pCivilStatus: formData.civilStatus || "U",
+        pWithConsent: formData.withConsent || "X",
+        pWithLoa: formData.withLoa || "X",
+        pWithDisability: formData.withDisability || "X",
+        pDependentType: formData.dependentType || "X",
+        pTransDate: formData.transDate || "2025-03-10",
+        pCreatedBy: formData.createdBy || "TCP",
         pReportStatus: "U",
+        pDeficiencyRemarks: formData.deficiencyRemarks || "",
+        pAvailFreeService: formData.availFreeService || "X",
       },
       PROFILING: {
         pPIN: formData.pin || "",
@@ -389,14 +457,15 @@ export default function CF4Form() {
         pNeuro: formData.pe.neuro || "",
         pReportStatus: "U",
       },
-      DOCTORORDER: formData.wardCourse.map((row) => ({
+      COURSEWARD: formData.wardCourse.map((row) => ({
         pHciCaseNo: formData.caseNumber || "",
         pHciTransNo: formData.transNumber || "",
-        pDate: row.date,
-        pOrder: row.order,
+        pDateAction: row.date,
+        pDoctorsAction: row.order,
         pReportStatus: "U",
+        pDeficiencyRemarks:""
       })),
-      DRUGS: transformedDrugs,
+      MEDICINE: transformedDrugs,
       OUTCOME: formData.outcome.map((item) => ({
         pHciCaseNo: formData.caseNumber || "",
         pHciTransNo: formData.transNumber || "",
@@ -673,6 +742,7 @@ export default function CF4Form() {
         />
 
         {/* 2.b OB/GYN */}
+        <Typography variant="subtitle1">2.b. OB/GYN History</Typography>
         <Grid container spacing={2} mt={1}>
           <Grid item xs={4} sm={2}>
             <TextField
@@ -913,86 +983,13 @@ export default function CF4Form() {
         <Typography variant="h6" mt={4}>
           V. Drugs / Medicines
         </Typography>
-        <Paper variant="outlined" sx={{ mt: 1 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Generic Name</TableCell>
-                <TableCell>Qty / Dose / Route / Frequency</TableCell>
-                <TableCell>Total Cost</TableCell>
-                <TableCell>Generic Name (cont)</TableCell>
-                <TableCell>Qty / Dose / Route / Frequency (cont)</TableCell>
-                <TableCell>Total Cost (cont)</TableCell>
-                <TableCell width="5%"></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {formData.drugs.map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.genericName}
-                      onChange={handleDrugRowChange(idx, "genericName")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.dosage}
-                      onChange={handleDrugRowChange(idx, "dosage")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.totalCost}
-                      onChange={handleDrugRowChange(idx, "totalCost")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.genericNameCont}
-                      onChange={handleDrugRowChange(idx, "genericNameCont")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.dosageCont}
-                      onChange={handleDrugRowChange(idx, "dosageCont")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.totalCostCont}
-                      onChange={handleDrugRowChange(idx, "totalCostCont")}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton size="small" onClick={() => removeDrugRow(idx)}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Button startIcon={<Add />} onClick={addDrugRow}>
-                    Add Row
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Paper>
-
+        <MedicineForm authUser={authUser} medicines={medicines} setMedicines={setMedicines}/>
+       
         {/* PART VI – OUTCOME OF TREATMENT --------------------------------------- */}
         <Typography variant="h6" mt={4}>
           VI. Outcome of Treatment
         </Typography>
+        
         <FormControl component="fieldset" variant="standard" sx={{ mt: 1 }}>
           <FormGroup row>
             {[
@@ -1032,7 +1029,7 @@ export default function CF4Form() {
 
         <Divider sx={{ my: 4 }} />
         {/* PART VII – CERTIFICATION --------------------------------------------- */}
-        <Typography variant="h6" mt={4}>
+        {/* <Typography variant="h6" mt={4}>
           VII. Certification of Health‑Care Professional
         </Typography>
 
@@ -1061,7 +1058,7 @@ export default function CF4Form() {
               onChange={handleChange}
             />
           </Grid>
-        </Grid>
+        </Grid> */}
 
         {/* SUBMIT BUTTON -------------------------------------------------------- */}
         <Button type="submit" variant="contained" size="large" sx={{ mt: 4 }}>

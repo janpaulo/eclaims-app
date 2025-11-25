@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  react-app:
+    build: .
+    container_name: eclaims-app
+    ports:
+      #- "3000:80"  # hostPort:containerPort
+      - "0.0.0.0:3000:80"  # hostPort:containerPort     #JACA
+    restart: always
+
+
+
+
+
+
+
+
+

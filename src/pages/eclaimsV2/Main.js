@@ -194,9 +194,9 @@ function Main({ authUser }) {
     const valid2 = cf2Ref.current?.validateForm?.();
     const validAttach = attachRef.current?.validateForm?.();
 
-    console.log("valid1", valid1);
-    console.log("valid2", valid2);
-    console.log("validAttach", validAttach);
+    // console.log("valid1", authUser);
+    // console.log("valid2", valid2);
+    // console.log("validAttach", validAttach);
 
     const formData1 = cf1Ref.current?.getFormData?.();
     const formData2 = cf2Ref.current?.getFormData?.();
@@ -209,7 +209,7 @@ function Main({ authUser }) {
     const parentJson = {
       pUserName: ":" + authUser.hospital.software_cert,
       pUserPassword: "",
-      pHospitalCode: authUser.hospital.hopital_code, //authUser.hospital.accreditation_num,
+      pHospitalCode: authUser.hospital.hospital_code, //authUser.hospital.accreditation_num,
       pHospitalEmail: authUser.email,
       pServiceProvider: "",
     };
@@ -266,6 +266,7 @@ function Main({ authUser }) {
     CF3 = formatDatesToMMDDYYYY(CF3);
     const AttachmentFormData = AttachmentData;
 
+console.log(AttachmentFormData)
     const claimDetails = {
       pClaimNumber: claimsNum || "",
       pTrackingNumber: formData1.pTrackingNumber || "",
@@ -376,13 +377,13 @@ function Main({ authUser }) {
         },
       },
     };
-    console.log("✅ CF5 and eclaims JSON Payload:", eTRANSMITTAL);
+    // console.log("✅ CF5 and eclaims JSON Payload:", eTRANSMITTAL);
     const cf5Payload ={
       eclaims: eTRANSMITTAL,
       cf5: generateCF5.cf5
     }
 
-    console.log("✅ CF5 and eclaims JSON cf5Payload:", cf5Payload);
+    // console.log("✅ CF5 and eclaims JSON cf5Payload:", cf5Payload);
     setCf1Valid(valid1);
     setCf2Valid(valid2);
 
@@ -402,15 +403,15 @@ function Main({ authUser }) {
         }
       );
 
-      console.log("HTTP Status:", res.status);
+      // console.log("HTTP Status:", res.status);
 
       if (res.status === 200) {
         setIsEclaimsPassed(true)
         setOpen(true);
         setErrorMessage(res.data.message);
-        console.log("✅ Success:", res.data);
+        // console.log("✅ Success:", res.data);
       } else if (res.status === 422) {
-        console.log("HTTP Status:", res.data);
+        // console.log("HTTP Status:", res.data);
         setOpen(true);
         setErrorMessage(res.data.message);
       } else if (res.status === 303) {

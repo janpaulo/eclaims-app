@@ -19,6 +19,7 @@ import {Roles} from '../src/pages/users/Roles'
 import {Main} from '../src/pages/hospitals/Main'
 import {CF4Main} from './pages/cf4Forms/CF4Main'
 import CF4Form from './pages/cf4Forms/CF4Form'
+import EPCBForm from './pages/cf4Forms/EPCBForm'
 import {CF3Main} from './pages/cf3Forms/CF3Main'
 import CF3Form from './pages/cf3Forms/CF3Form'
 import {CF5Main} from './pages/cf5Forms/CF5Main'
@@ -67,6 +68,7 @@ function App() {
                   <Route exact path="/icd_codes"  element={ <ICDCodes/> } />
                   <Route exact path="/rvs_codes"  element={ <RVSCodes/> } />
                   <Route exact path="/cf4"  element={ <CF4Main authUser={parseUser}/> } />
+                  <Route exact path="/EPCBForm"  element={ <EPCBForm authUser={parseUser}/> } />
                   <Route exact path="/cf4_forms"  element={ <CF4Form authUser={parseUser}/> } />
                   <Route exact path="/cf3"  element={ <CF3Main authUser={parseUser}/> } />
                   <Route exact path="/cf3_forms"  element={ <CF3Form authUser={parseUser}/> } />
