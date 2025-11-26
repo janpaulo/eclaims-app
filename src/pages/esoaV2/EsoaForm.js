@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSnackbar } from "notistack";
 import {
   Accordion,
   AccordionSummary,
@@ -196,6 +197,7 @@ const EsoaForm = ({ authUser }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     const headers = {
       Authorization: authUser.access_token,
@@ -421,21 +423,37 @@ const EsoaForm = ({ authUser }) => {
       xml_data: JSON.stringify(formattedData),
     };
 
+
+    // Get current date in mm-dd-yyyy format
+      const currentDate = new Date();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const year = currentDate.getFullYear();
+
+      const formattedDate = `${month}-${day}-${year}`;
+
+      // Get and increment the filename counter from localStorage
+      let increment = localStorage.getItem("increment") || 1;
+      increment = parseInt(increment, 10) + 1; // Increment the value
+      localStorage.setItem("increment", increment); // Store the updated value back to localStorage
+
+      // Build the filename dynamically
+      const filename = `${authUser.hospital.hospital_code}-${formattedDate}-${increment}`;
     try {
       // **First encrypt the data** (before saving to esoas)
       const encryptResponse = await axios.post(
-        `${process.env.REACT_APP_NEW_PHIC_URL}/EncrypteSOA`,
+         `${process.env.REACT_APP_NEW_PHIC_URL}/api/encrypteSOA?filename=${filename}`,
         formattedData,
         {
           headers: {
             accreno: authUser.hospital.accreditation_num,
-            softwarecertid: authUser.hospital.username_code,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
             "Content-Type": "text/plain",
           },
         }
       );
 
-      console.log("Encrypted Response:", encryptResponse.data);
 
       // **Proceed to save to esoas** only if encryption was successful
       const saveResponse = await axios({
@@ -449,14 +467,18 @@ const EsoaForm = ({ authUser }) => {
       });
 
       setIsLoading(false);
-      alert("Form saved successfully.");
+      
+        enqueueSnackbar("ESOA Form submitted successfully", {
+          variant: "success",
+        });
       navigate("/esoa_table_list"); // <-- ✅ Redirect here
     } catch (error) {
+      setIsLoading(false);
       console.error("Error in encryption or save:", error);
       alert("An error occurred while processing the data.");
     }
 
-    console.log("Submitted Form Data:", formattedData);
+    // console.log("Submitted Form Data:", formattedData);
   };
 
   const numericFields = [
