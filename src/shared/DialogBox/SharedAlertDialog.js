@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,7 +6,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from '@mui/material';
+} from "@mui/material";
 
 const SharedAlertDialog = ({
   open,
@@ -14,11 +14,12 @@ const SharedAlertDialog = ({
   description,
   onClose,
   onConfirm,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  confirmColor = 'primary',
-  cancelColor = 'inherit',
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  confirmColor = "primary",
+  cancelColor = "inherit",
   showCancel = true,
+  showConfirm = true,
   customActions = null,
 }) => {
   return (
@@ -36,19 +37,31 @@ const SharedAlertDialog = ({
           </DialogContentText>
         </DialogContent>
       )}
-      <DialogActions>
+
+      {/* Optional padding above footer */}
+      <div className="pt-4"></div>
+
+      {/* Add padding to DialogActions */}
+      <DialogActions sx={{ padding: "16px 24px" }}>
         {customActions ? (
           customActions
         ) : (
           <>
             {showCancel && (
-              <Button onClick={onClose} color={cancelColor}>
+              <Button variant="contained" onClick={onClose} color={cancelColor}>
                 {cancelText}
               </Button>
             )}
-            <Button onClick={onConfirm} color={confirmColor} autoFocus>
-              {confirmText}
-            </Button>
+            {showConfirm && (
+              <Button
+                variant="contained"
+                onClick={onConfirm}
+                color={confirmColor}
+                autoFocus
+              >
+                {confirmText}
+              </Button>
+            )}
           </>
         )}
       </DialogActions>

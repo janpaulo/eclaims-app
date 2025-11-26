@@ -272,7 +272,7 @@ const CF2Form = forwardRef((props, ref) => {
       // &&
       // data.patientLast?.trim() &&
       // data.patientLast?.trim()
-      console.log("CF2 valid:", !!isValid);
+      // console.log("CF2 valid:", !!isValid);
       return !!isValid;
     },
     // validateForm: validate,
@@ -282,7 +282,7 @@ const CF2Form = forwardRef((props, ref) => {
       const diagData = diagnosisRef.current?.getFormData?.() || {};
 
       const updatedData = JSON.parse(JSON.stringify(data));
-      console.log(transformConsumptionOutput(updatedData.CONSUMPTION));
+      // console.log(transformConsumptionOutput(updatedData.CONSUMPTION));
 
       updatedData.CONSUMPTION = transformConsumptionOutput(updatedData.CONSUMPTION);
       // if (updatedData.CONSUMPTION) {
@@ -330,7 +330,7 @@ const CF2Form = forwardRef((props, ref) => {
 
       // 🔄 Format all date strings in merged object
       merged = formatDatesToMMDDYYYY(merged);
-      console.log("merged", updatedData);
+      // console.log("merged", updatedData);
       merged = convertAllTimesTo12Hour(merged);
 
       return merged;
