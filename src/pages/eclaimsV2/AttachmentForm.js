@@ -107,12 +107,12 @@ const AttachmentForm = forwardRef((props, ref) => {
       const isValid = formData.DOCUMENTS.DOCUMENT.every(
         (doc) => doc.pDocumentType?.trim() && doc.pDocumentURL?.trim()
       );
-      console.log("ATTACHMENT valid:", isValid);
+      // console.log("ATTACHMENT valid:", isValid);
       return isValid;
     },
     getFormData: () => formData,
     handleSubmit: () => {
-      console.log("Attachment submitted:", formData);
+      // console.log("Attachment submitted:", formData);
     },
   }));
 
@@ -237,7 +237,7 @@ const AttachmentForm = forwardRef((props, ref) => {
                     ))}
                   </TextField>
                 </Grid>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <Select
                     placeholder="Select Document URL"
                     isClearable
@@ -290,8 +290,8 @@ const AttachmentForm = forwardRef((props, ref) => {
                       )
                     }
                   />
-                </Grid>
-                {/* <Grid item xs={12}>
+                </Grid> */}
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Document URL"
@@ -300,7 +300,7 @@ const AttachmentForm = forwardRef((props, ref) => {
                       handleChange(index, "pDocumentURL", e.target.value)
                     }
                   />
-                </Grid> */}
+                </Grid>
               </Grid>
               <Box mt={1}>
                 <Button

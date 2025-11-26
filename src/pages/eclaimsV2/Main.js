@@ -1,5 +1,7 @@
 // Main.js
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import {
   Container,
   CssBaseline,
@@ -14,8 +16,8 @@ import {
   Checkbox,
   Grid,
 } from "@mui/material";
-import SendIcon from '@mui/icons-material/Send';
-import CircularProgress from '@mui/material/CircularProgress';
+import SendIcon from "@mui/icons-material/Send";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import ClaimForm1 from "./ClaimForm1";
 import ClaimForm2 from "./CF2Form/CF2Form";
@@ -107,6 +109,7 @@ function Main({ authUser }) {
   const [pbefResultData, setPbefResultData] = useState({});
   const [showTabs, setShowTabs] = useState(false);
   const [claimsNum, setClaimsNum] = useState("");
+  const [claimsJsonData, setClaimsJsonData] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -115,11 +118,7 @@ function Main({ authUser }) {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  const handleConfirm = () => {
-    console.log("Confirmed action!");
-    handleClose();
-  };
+  const { enqueueSnackbar } = useSnackbar();
   const [form, setForm] = useState({
     packageType: "All Case Rate",
     isCF3Old: false,
@@ -148,35 +147,38 @@ function Main({ authUser }) {
   };
 
   const getClaimNumber = async () => {
-  try {
-    const hospitalCode = authUser?.hospital?.hospital_code; // Correct the spelling here
+    try {
+      const hospitalCode = authUser?.hospital?.hospital_code; // Correct the spelling here
 
-    if (!hospitalCode) throw new Error("Missing hospital code.");
+      if (!hospitalCode) throw new Error("Missing hospital code.");
 
-    const response = await axios.get(
-      `${process.env.REACT_APP_API_CLAIMS}claims-number/${hospitalCode}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authUser?.access_token}`,
-          "Content-Type": "application/json",
-        },
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_CLAIMS}claims-number/${hospitalCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Validate response before setting the claim number
+      if (response.data && response.data.reference) {
+        setClaimsNum(response.data.reference);
+      } else {
+        throw new Error("Invalid response structure: reference not found.");
       }
-    );
+    } catch (error) {
+      // Log error with more details
+      console.error("Claim number generation failed:", error);
 
-    // Validate response before setting the claim number
-    if (response.data && response.data.reference) {
-      setClaimsNum(response.data.reference);
-    } else {
-      throw new Error("Invalid response structure: reference not found.");
+      // Show a more specific error message
+      alert(
+        error.response?.data?.message ||
+          "Unable to generate claim number. Please try again."
+      );
     }
-  } catch (error) {
-    // Log error with more details
-    console.error("Claim number generation failed:", error);
-
-    // Show a more specific error message
-    alert(error.response?.data?.message || "Unable to generate claim number. Please try again.");
-  }
-};
+  };
 
   useEffect(() => {
     if (isPbef) {
@@ -194,9 +196,9 @@ function Main({ authUser }) {
     const valid2 = cf2Ref.current?.validateForm?.();
     const validAttach = attachRef.current?.validateForm?.();
 
-    console.log("valid1", valid1);
-    console.log("valid2", valid2);
-    console.log("validAttach", validAttach);
+    // console.log("valid1", authUser);
+    // console.log("valid2", valid2);
+    // console.log("validAttach", validAttach);
 
     const formData1 = cf1Ref.current?.getFormData?.();
     const formData2 = cf2Ref.current?.getFormData?.();
@@ -209,7 +211,7 @@ function Main({ authUser }) {
     const parentJson = {
       pUserName: ":" + authUser.hospital.software_cert,
       pUserPassword: "",
-      pHospitalCode: authUser.hospital.hopital_code, //authUser.hospital.accreditation_num,
+      pHospitalCode: authUser.hospital.hospital_code, //authUser.hospital.accreditation_num,
       pHospitalEmail: authUser.email,
       pServiceProvider: "",
     };
@@ -376,13 +378,13 @@ function Main({ authUser }) {
         },
       },
     };
-    console.log("✅ CF5 and eclaims JSON Payload:", eTRANSMITTAL);
-    const cf5Payload ={
+    // console.log("✅ CF5 and eclaims JSON Payload:", eTRANSMITTAL);
+    const cf5Payload = {
       eclaims: eTRANSMITTAL,
-      cf5: generateCF5.cf5
-    }
+      cf5: generateCF5.cf5,
+    };
 
-    console.log("✅ CF5 and eclaims JSON cf5Payload:", cf5Payload);
+    // console.log("✅ CF5 and eclaims JSON cf5Payload:", cf5Payload);
     setCf1Valid(valid1);
     setCf2Valid(valid2);
 
@@ -402,40 +404,216 @@ function Main({ authUser }) {
         }
       );
 
-      console.log("HTTP Status:", res.status);
+      // console.log("HTTP Status:",eTRANSMITTAL);
 
       if (res.status === 200) {
-        setIsEclaimsPassed(true)
+        setIsEclaimsPassed(true);
         setOpen(true);
         setErrorMessage(res.data.message);
-        console.log("✅ Success:", res.data);
+        setClaimsJsonData(eTRANSMITTAL);
+
+        enqueueSnackbar("Both CF1, CF2 and attachment submitted successfully", {
+          variant: "success",
+        });
+        try {
+          // Encrypt claims data only on success
+          await encrypClaims(eTRANSMITTAL);
+        } catch (error) {
+          console.error("Encryption failed:", error);
+          setOpen(true);
+          setIsEclaimsPassed(false);
+          setOpen(true);
+          setErrorMessage(
+            "Error occurred during claim encryption. Please try again."
+          );
+        }
+        // console.log("✅ Success:", res.data);
       } else if (res.status === 422) {
-        console.log("HTTP Status:", res.data);
         setOpen(true);
+        setIsEclaimsPassed(false);
         setErrorMessage(res.data.message);
       } else if (res.status === 303) {
         setOpen(true);
-        setErrorMessage("Please try to submit again");
+        enqueueSnackbar("Please try to submit again", { variant: "error" });
+        // setErrorMessage("Please try to submit again");
       } else {
         console.warn("Unhandled status:", res.status, res.data);
       }
-
       setLoading(false);
     } catch (err) {
-      console.error("❌ Request Error:", err.message);
+      console.error(" Request Error:", err.message);
     } finally {
       // setIsLoading(false);
     }
 
-    if (valid1 && valid2) {
+    if (valid1 && valid2 && validAttach) {
       cf1Ref.current?.handleSubmit?.();
       cf2Ref.current?.handleSubmit?.();
       cf3Ref.current?.handleSubmit?.();
       attachRef.current?.handleSubmit?.();
-      alert("Both CF1 and CF2 submitted successfully!");
     } else {
-      alert("Please complete both CF1 and CF2 forms before submitting.");
+      setIsEclaimsPassed(false);
+      enqueueSnackbar(
+        "Please complete both CF1, CF2 and attachment forms before submitting",
+        { variant: "error" }
+      );
     }
+  };
+
+  const encrypClaims = async (claimsJSONData) => {
+    try {
+      // Get current date in mm-dd-yyyy format
+      const currentDate = new Date();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const year = currentDate.getFullYear();
+
+      const formattedDate = `${month}-${day}-${year}`;
+
+      // Get and increment the filename counter from localStorage
+      let increment = localStorage.getItem("increment") || 1;
+      increment = parseInt(increment, 10) + 1; // Increment the value
+      localStorage.setItem("increment", increment); // Store the updated value back to localStorage
+
+      // Build the filename dynamically
+      const filename = `${authUser.hospital.hospital_code}-${formattedDate}-${increment}`;
+
+      // Make the API request with the dynamically generated filename
+      const response = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/encrypteClaims?filename=${filename}`,
+        claimsJSONData, // Directly pass the data in the body of the POST request
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
+            "Content-Type": "application/json", // Change to 'application/json' for sending JSON data
+          },
+        }
+      );
+
+      // Handle the response
+      if (response.status === 200) {
+        // console.log("Successfully encrypted claims:", response.data);
+      } else {
+        console.error("Failed to encrypt claims:", response.data);
+      }
+    } catch (error) {
+      console.error("Encryption failed:", error.response || error.message);
+      alert("Unable to generate PBEF PDF. Please try again.");
+    }
+  };
+
+  const navigate = useNavigate(); // Initialize useNavigate
+  const uploadClaims = async (uploadClaimsJSONData) => {
+    try {
+      // Make the API request with the dynamically generated filename
+      const response = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/uploadeClaims`,
+        uploadClaimsJSONData, // Directly pass the data in the body of the POST request
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
+            "Content-Type": "application/json", // Change to 'application/json' for sending JSON data
+          },
+        }
+      );
+
+      // Handle the response status
+      if (response.status >= 200 && response.status < 300) {
+        // console.log("Successfully uploaded claims:", response.data);
+
+        enqueueSnackbar("Successfully uploaded claims", { variant: "success" });
+        const claim = claimsJsonData.eTRANSMITTAL.CLAIM[0]; // Assuming this is the correct data structure
+
+        const admissionDateTime =
+          claim.CF2?.pAdmissionDate && claim.CF2?.pAdmissionTime
+            ? formatDateForDB(
+                claim.CF2.pAdmissionDate,
+                claim.CF2.pAdmissionTime
+              )
+            : new Date().toISOString();
+
+        const claimsJsonSave = {
+          series_no: response.data.result.preceiptTicketNumber,
+          member_pin: claim.CF1?.pPatientPIN || "N/A", // Fallback if pPatientPIN is undefined
+          date_admited: admissionDateTime,
+          status: "pending",
+          xml_data: JSON.stringify(claimsJsonData || {}),
+          hci_no: authUser.hospital.accreditation_num || "Unknown",
+          hci_code: authUser.hospital.hospital_code || "Unknown",
+          date_created: new Date().toISOString(), // Current date and time in ISO format
+        };
+
+        await sendClaimRequest(claimsJsonSave);
+        // **Redirect to /claims after successful upload**
+        navigate("/claims"); // Use navigate to redirect to /claims
+      } else {
+        enqueueSnackbar("Failed to upload claims:", { variant: "error" });
+        // console.error(
+        //   "Failed to upload claims:",
+        //   response.status,
+        //   response.data
+        // );
+      }
+    } catch (error) {
+      // Log detailed error message
+      console.error(
+        "Encryption failed:",
+        error.response?.data || error.message
+      );
+
+      // Display user-friendly alert
+      alert("Unable to generate PBEF PDF. Please try again.");
+    }
+  };
+
+  const sendClaimRequest = async (dataJson) => {
+    setLoading(true); // Set loading to true when the request starts
+
+    try {
+      // Send POST request to the API
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_CLAIMS}claims`, // API endpoint
+        dataJson, // Payload data passed to the function
+        {
+          headers: {
+            "Content-Type": "application/json", // Specify JSON content type
+            Authorization: `Bearer ${authUser.access_token}`, // Bearer token for authentication
+          },
+        }
+      );
+
+      // If the response is successful, extract the data and set it to state
+      const { data } = response.data; // Destructure the response data
+      // console.log("Response data:", data); // Log the response data to the console (optional)
+    } catch (err) {
+      console.error("Error occurred:", err);
+    } finally {
+      setLoading(false); // Set loading to false once the request is completed
+    }
+  };
+
+  const formatDateForDB = (dateString, timeString) => {
+    // Example: "11-05-2025" (MM-DD-YYYY) and "22:47" (HH:mm)
+    if (!dateString || !timeString) {
+      return null; // Return null if either date or time is missing
+    }
+
+    const [month, day, year] = dateString.split("-"); // MM-DD-YYYY
+    const [hour, minute] = timeString.split(":"); // HH:mm
+    const formattedDate = `${year}-${month}-${day} ${hour}:${minute}:00`; // MySQL format: YYYY-MM-DD HH:MM:SS
+
+    return formattedDate;
+  };
+
+  const handleConfirm = async () => {
+    if (isEclaimsPassed) {
+      await uploadClaims(claimsJsonData);
+    }
+    handleClose();
   };
 
   const handleGeneratePDF = async (referenceno) => {
@@ -571,7 +749,6 @@ function Main({ authUser }) {
                 />
               </Grid>
               <Grid item xs={12} sm={2}>
-                
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -705,7 +882,11 @@ function Main({ authUser }) {
               />
             </Box>
             <Box hidden={tab !== 5}>
-              <AttachmentForm ref={attachRef} pbefResultData={pbefResultData} authUser={authUser}/>
+              <AttachmentForm
+                ref={attachRef}
+                pbefResultData={pbefResultData}
+                authUser={authUser}
+              />
             </Box>
 
             <Box sx={{ mt: 4, textAlign: "right" }}>
@@ -713,7 +894,13 @@ function Main({ authUser }) {
                 variant="contained"
                 color="success"
                 onClick={handleSubmitAll}
-                endIcon={loading? <CircularProgress color="inherit" size="30px"/>:<SendIcon />}
+                endIcon={
+                  loading ? (
+                    <CircularProgress color="inherit" size="30px" />
+                  ) : (
+                    <SendIcon />
+                  )
+                }
                 disabled={loading}
               >
                 Validate Claim
@@ -725,16 +912,18 @@ function Main({ authUser }) {
         {/* <Button variant="contained" color="error" onClick={handleOpen}>
           Delete
         </Button> */}
-
         <SharedAlertDialog
           open={open}
           onClose={handleClose}
           onConfirm={handleConfirm}
           title="Message"
           description={errorMessage}
-          confirmText={isEclaimsPassed ? "Submit": "Yes"}
-          cancelText="No"
-          confirmColor="error"
+          confirmText={isEclaimsPassed ? "Submit" : "Yes"}
+          cancelText="Cancel"
+          showCancel={!isEclaimsPassed}
+          showConfirm={isEclaimsPassed}
+          confirmColor="success"
+          cancelColor="error"
         />
       </Container>
     </>

@@ -92,31 +92,43 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
   useImperativeHandle(ref, () => ({
     validateForm: () => {
       const isValid =
-        form.pMemberPIN?.trim() &&
-        form.pMemberFirstName?.trim() &&
-        form.pMemberLastName?.trim() &&
-        form.pMemberMiddleName?.trim() &&
-        form.pMemberBirthDate?.trim() &&
-        form.pPatientSex?.trim() &&
-        form.pPatientIs?.trim() &&
-        form.pClaimNumber?.trim() &&
-        form.pMemberShipType?.trim() &&
-        form.pTrackingNumber?.trim();
-        form.pZipCode?.trim();
-        form.pMailingAddress?.trim();
-      console.log("CF1 valid:", !!isValid);
-      return !!isValid;
+        form.pMemberPIN &&
+        form.pMemberPIN.trim() &&
+        form.pMemberFirstName &&
+        form.pMemberFirstName.trim() &&
+        form.pMemberLastName &&
+        form.pMemberLastName.trim() &&
+        form.pMemberMiddleName &&
+        form.pMemberMiddleName.trim() &&
+        form.pMemberBirthDate &&
+        form.pMemberBirthDate.trim() &&
+        form.pPatientSex &&
+        form.pPatientSex.trim() &&
+        form.pPatientIs &&
+        form.pPatientIs.trim() &&
+        // form.pClaimNumber &&
+        // form.pClaimNumber.trim() &&
+        form.pMemberShipType &&
+        form.pMemberShipType.trim() &&
+        // form.pTrackingNumber &&
+        // form.pTrackingNumber.trim() &&
+        form.pZipCode &&
+        form.pZipCode.trim() &&
+        form.pMailingAddress &&
+        form.pMailingAddress.trim();
+
+      // console.log("Form valid:", !!isValid); // Debugging log
+      return !!isValid; // Return boolean indicating validity
     },
-    
+
     getFormData: () => {
       return {
         ...form,
         pMemberBirthDate: form.pMemberBirthDate
-          ? moment(form.pMemberBirthDate).format('MM-DD-YYYY')
-          : '',
+          ? moment(form.pMemberBirthDate).format("MM-DD-YYYY")
+          : "",
       };
-    }
-
+    },
   }));
 
   const handleChange = (e) => {
@@ -189,9 +201,11 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
           />
         </Grid>
       </Grid> */}
-      <Divider  sx={{
-          margin:2
-        }}>
+      <Divider
+        sx={{
+          margin: 2,
+        }}
+      >
         <Typography variant="h6">Member Information</Typography>
       </Divider>
       <Grid container spacing={2}>
@@ -257,6 +271,12 @@ const ClaimForm1 = forwardRef(({ prefillData, authUser }, ref) => {
             onChange={handleChange}
             fullWidth
             required
+            inputProps={{
+              maxLength: 4,
+              pattern: "[0-9]{4}", // Ensure it's numeric
+            }}
+            helperText="Zip Code should be 4 digits"
+            error={form.pZipCode.length > 4 || !/^\d{0,4}$/.test(form.pZipCode)}
           />
         </Grid>
 

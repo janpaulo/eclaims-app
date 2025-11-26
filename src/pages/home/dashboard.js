@@ -78,7 +78,7 @@ const Dashboard = ({ authDetails }) => {
     <Container maxWidth="full">
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
       <Box>
-        <Typography variant="h5">{`${greeting}, APP Inc. 👋`}</Typography>
+        <Typography variant="h5">{`${greeting}, ${process.env.REACT_APP_NANE}. 👋`}</Typography>
         <Typography color="text.secondary">Here is what’s happening with your projects today:</Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center" }}>
