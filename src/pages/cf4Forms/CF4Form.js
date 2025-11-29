@@ -1,5 +1,7 @@
 // CF4Form.jsx
 import React, { useState } from "react";
+import axios from "axios";
+import { useSnackbar } from "notistack";
 import {
   Box,
   Grid,
@@ -28,6 +30,7 @@ import {
 import { Add, Delete } from "@mui/icons-material";
 import MedicineForm from "./MedicineForm";
 import PhysicalExamForm from "./SOAP/PEMISC";
+import EnlistmentForm from "./EnlistmentForm";
 
 // ---------- constant helpers ----------
 const initialDoctorOrderRow = { date: "", order: "" };
@@ -39,44 +42,6 @@ const initialDrugRow = {
   dosageCont: "",
   totalCostCont: "",
 };
-const signSymptomsList = [
-  "Altered mental sensorium",
-  "Abdominal cramp/pain",
-  "Anorexia",
-  "Bleeding gums",
-  "Body weakness",
-  "Blurring of vision",
-  "Chest pain/discomfort",
-  "Constipation",
-  "Cough",
-  "Diarrhea",
-  "Dizziness",
-  "Dysphagia",
-  "Dyspnea",
-  "Dysuria",
-  "Epistaxis",
-  "Fever",
-  "Frequency of urination",
-  "Headache",
-  "Hematemesis",
-  "Hematuria",
-  "Hemoptysis",
-  "Irritability",
-  "Jaundice",
-  "Lower extremity edema",
-  "Myalgia",
-  "Orthopnea",
-  "Palpitations",
-  "Pain (specify site)",
-  "Seizures",
-  "Skin rashes",
-  "Stool, bloody/black tarry/mucoid",
-  "Sweating",
-  "Urgency",
-  "Vomiting",
-  "Weight loss",
-  "Others",
-];
 
 const initialPEState = {
   Heent: {
@@ -192,10 +157,23 @@ export default function CF4Form({ authUser }) {
     },
   ]);
 
+  const [enlistment, setEnlistment] = useState([
+    {
+      eclaimid: "",
+      enlistdate: "",
+      enliststat: "",
+      hcicaseno: "", 
+      hcitransno: "", 
+      transdate: "",
+    },
+  ]);
+
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     /* PART I */
-    hciName: "",
-    accreditationNo: "",
+    hciName: authUser.hospital.hospital_name,
+    accreditationNo: authUser.hospital.accreditation_num,
     hciAddress: "",
     /* PART II */
     patientLast: "",
@@ -218,7 +196,7 @@ export default function CF4Form({ authUser }) {
     hcicaseno: "",
     hcitransno: "",
     patienttype: "MM",
-    gensurveyid: "",
+    gensurveyid: "1",
     /* PART III  – single‑value items */
     historyPresentIllness: "",
     pastMedicalHistory: "",
@@ -342,13 +320,50 @@ export default function CF4Form({ authUser }) {
     />
   );
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   console.log("CF4 SUBMIT", { ...formData, physicalExam: pe });
-  // };
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const requiredFields = [
+    "hciName",
+    "accreditationNo",
+    "hciAddress",
+    "patientLast",
+    "patientFirst",
+    "patienttype",
+    "pin",
+    "sex",
+    "admittingDx",
+    "hcicaseno",
+    "hcitransno",
+    "effyear",
+    "caseRate1",
+    "dateAdmitted",
+    "timeAdmitted",
+    "ampmAdmit",
+    "dateDischarged",
+    "timeDischarged",
+    "ampmDischarge",
+    "historyPresentIllness",
+    "pastMedicalHistory",
+    "gensurveyid",
+    "height",
+    "weight",
+    // Add any other required field names...
+  ];
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Check for missing required fields
+    // const missingFields = requiredFields.filter(
+    //   (field) => !formData[field] || formData[field] === ""
+    // );
+
+    // if (missingFields.length > 0) {
+    //   alert(
+    //     `The following required fields are missing: ${missingFields.join(", ")}`
+    //   );
+    //   return; // Prevent form submission
+    // }
+
+    // // If all required fields are filled, proceed with form submission logic
+    // console.log("Form data is valid, proceeding with submission", formData);
     // MEDICINES JSON DONE
     const mediciness = {
       medicines: {
@@ -370,25 +385,26 @@ export default function CF4Form({ authUser }) {
         })),
       },
     };
+    
 
     const enlistmentss = {
       enlistments: {
         enlistment: [
           {
-            createdby: formData.createdBy || "TCP",
-            eclaimid: formData.eClaimId || "250506152005",
-            effyear: formData.effYear || "2025",
-            enlistdate: formData.enlistDate || "2025-03-10",
+            createdby: formData.createdBy || "",
+            eclaimid: formData.eClaimId || "",
+            effyear: formData.effYear || "",
+            enlistdate: formData.enlistDate || "",
             enliststat: formData.enlistStat || "1",
-            hcicaseno: formData.caseNumber || "C280501202503000004",
-            hcitransno: formData.transNumber || "C280501202503000004",
-            patientcontactno: formData.contactNo || "NA",
-            patientdob: formData.patientDob || "1974-02-14",
-            patientfname: formData.memFirstName || "IHOMISPLUS FN FORTY FOUR",
-            patientlname: formData.memLastName || "IHOMISPLUS LN FORTY FOUR",
-            patientpin: formData.memPin || "190270594763",
-            patienttype: formData.patientType || "MM",
-            transdate: formData.transDate || "2025-03-10",
+            hcicaseno: formData.hcicaseno || "",
+            hcitransno: formData.hcitransno || "",
+            patientcontactno: formData.contactNo || "",
+            patientdob: formData.patientDob || "",
+            patientfname: formData.memFirstName || "",
+            patientlname: formData.memLastName || "",
+            patientpin: formData.memPin || "",
+            patienttype: formData.patientType || "",
+            transdate: formData.transDate || "",
           },
         ],
       },
@@ -458,8 +474,31 @@ export default function CF4Form({ authUser }) {
       },
     };
 
-    console.log("Submitting formData profilingJson:", profilingJson);
+    const finalPayLoad = {
+      username: authUser.hospital.software_cert,
+      accreno: authUser.hospital.accreditation_num,
+      certificationid: authUser.hospital.software_cert,
+      profiling: profilingJson.profiling,
+      medicines: mediciness.medicines,
+      coursewards: coursewardss.coursewards,
+      enlistments: enlistmentss.enlistments,
+      soaps: soapPayload.soaps,
+    };
 
+    console.log("Submitting formData setEnlistment:", enlistment);
+
+    const claimsJsonSave = {
+      series_no: "sasasasas",
+      member_pin: formData.pin || "N/A", // Fallback if pPatientPIN is undefined
+      date_admited: formData.dateAdmitted,
+      status: "pending",
+      xml_data: JSON.stringify(finalPayLoad || {}),
+      hci_no: authUser.hospital.accreditation_num || "Unknown",
+      // hci_code: authUser.hospital.hospital_code || "Unknown",
+      // date_created: new Date().toISOString(), // Current date and time in ISO format
+    };
+
+    await sendClaim4Request(claimsJsonSave);
     // Map formData.drugs keys to DTD keys
     const transformedDrugs = formData.drugs.map((drug) => ({
       pHciCaseNo: drug.pHciCaseNo || "", // or map from another key if needed
@@ -616,6 +655,32 @@ export default function CF4Form({ authUser }) {
     // Here you can send payload to API or further process
   };
 
+  const sendClaim4Request = async (dataJson) => {
+    setLoading(true); // Set loading to true when the request starts
+
+    try {
+      // Send POST request to the API
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_CLAIMS}claims-form4`, // API endpoint
+        dataJson, // Payload data passed to the function
+        {
+          headers: {
+            "Content-Type": "application/json", // Specify JSON content type
+            Authorization: `Bearer ${authUser.access_token}`, // Bearer token for authentication
+          },
+        }
+      );
+
+      // If the response is successful, extract the data and set it to state
+      const { data } = response.data; // Destructure the response data
+      // console.log("Response data:", data); // Log the response data to the console (optional)
+    } catch (err) {
+      console.error("Error occurred:", err);
+    } finally {
+      setLoading(false); // Set loading to false once the request is completed
+    }
+  };
+
   // ---------- RENDER ----------
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
@@ -625,7 +690,7 @@ export default function CF4Form({ authUser }) {
       <Paper sx={{ p: 3, mb: 4 }}>
         {/* PART I – HCI INFORMATION ------------------------------------------------ */}
         <Typography variant="h6">
-          I. Health Care Institution Information
+          Health Care Institution Information
         </Typography>
         <Grid container spacing={2} mt={1}>
           <Grid item xs={12} sm={8}>
@@ -659,9 +724,9 @@ export default function CF4Form({ authUser }) {
 
         {/* PART II – PATIENT DATA --------------------------------------------------- */}
         <Typography variant="h6" mt={4}>
-          II. Patient’s Data
+          Patient’s Data
         </Typography>
-        <Grid container spacing={2} mt={1}>
+        <Grid container spacing={2} mt={1} mb={3}>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Last Name"
@@ -669,6 +734,7 @@ export default function CF4Form({ authUser }) {
               name="patientLast"
               value={formData.patientLast}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -678,6 +744,7 @@ export default function CF4Form({ authUser }) {
               name="patientFirst"
               value={formData.patientFirst}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -697,6 +764,7 @@ export default function CF4Form({ authUser }) {
                 name="patienttype"
                 value={formData.patienttype}
                 onChange={handleChange}
+                required
               >
                 <FormControlLabel
                   value="MM"
@@ -719,6 +787,7 @@ export default function CF4Form({ authUser }) {
               name="pin"
               value={formData.pin}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={1}>
@@ -739,6 +808,7 @@ export default function CF4Form({ authUser }) {
                 label="Sex"
                 value={formData.sex}
                 onChange={handleChange}
+                required
               >
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
@@ -763,6 +833,7 @@ export default function CF4Form({ authUser }) {
               name="admittingDx"
               value={formData.admittingDx}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -775,12 +846,13 @@ export default function CF4Form({ authUser }) {
               onChange={handleChange}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          {/* <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               name="hcicaseno"
               label="HCI Case No"
               value={formData.hcicaseno}
+              required
               onChange={handleChange}
             />
           </Grid>
@@ -790,6 +862,7 @@ export default function CF4Form({ authUser }) {
               name="hcitransno"
               label="HCI Trans No"
               value={formData.hcitransno}
+              required
               onChange={handleChange}
             />
           </Grid>
@@ -802,8 +875,9 @@ export default function CF4Form({ authUser }) {
               name="effyear"
               value={formData.effyear}
               onChange={handleChange}
+              required
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="1st Case Rate Code"
@@ -811,6 +885,7 @@ export default function CF4Form({ authUser }) {
               name="caseRate1"
               value={formData.caseRate1}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -832,6 +907,7 @@ export default function CF4Form({ authUser }) {
               name="dateAdmitted"
               value={formData.dateAdmitted}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -841,6 +917,7 @@ export default function CF4Form({ authUser }) {
               name="timeAdmitted"
               value={formData.timeAdmitted}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -851,6 +928,7 @@ export default function CF4Form({ authUser }) {
                 value={formData.ampmAdmit}
                 label="AM/PM"
                 onChange={handleChange}
+                required
               >
                 <MenuItem value="AM">AM</MenuItem>
                 <MenuItem value="PM">PM</MenuItem>
@@ -867,6 +945,7 @@ export default function CF4Form({ authUser }) {
               name="dateDischarged"
               value={formData.dateDischarged}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -876,6 +955,7 @@ export default function CF4Form({ authUser }) {
               name="timeDischarged"
               value={formData.timeDischarged}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -909,6 +989,7 @@ export default function CF4Form({ authUser }) {
           name="historyPresentIllness"
           value={formData.historyPresentIllness}
           onChange={handleChange}
+          required
         />
         <TextField
           label="2.a Pertinent Past Medical History"
@@ -919,6 +1000,7 @@ export default function CF4Form({ authUser }) {
           name="pastMedicalHistory"
           value={formData.pastMedicalHistory}
           onChange={handleChange}
+          required
         />
         {/* <SoapForm /> */}
 
@@ -979,7 +1061,7 @@ export default function CF4Form({ authUser }) {
         </Box> */}
 
         {/* 4. Referral */}
-        <Box mt={2}>
+        {/* <Box mt={2}>
           <Typography>4. Referred from another HCI?</Typography>
           <RadioGroup
             row
@@ -1012,7 +1094,7 @@ export default function CF4Form({ authUser }) {
               </Grid>
             </Grid>
           )}
-        </Box>
+        </Box> */}
 
         {/* 5. Physical Exam (height/weight/vitals only here for brevity) */}
 
@@ -1032,6 +1114,7 @@ export default function CF4Form({ authUser }) {
               name="gensurveyid"
               value={formData.gensurveyid}
               onChange={handleChange}
+              required
             >
               <FormControlLabel
                 value="1"
@@ -1052,6 +1135,7 @@ export default function CF4Form({ authUser }) {
               name="height"
               value={formData.height}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={2}>
@@ -1061,6 +1145,7 @@ export default function CF4Form({ authUser }) {
               name="weight"
               value={formData.weight}
               onChange={handleChange}
+              required
             />
           </Grid>
           {/* <Grid item xs={6} sm={2}>
@@ -1142,6 +1227,17 @@ export default function CF4Form({ authUser }) {
           </Grid>
         </Grid>
 
+
+
+        {/* PART IV – EnlistmentForm ----------------------------------------- */}
+        <EnlistmentForm
+          formData={enlistment}
+          setFormData={setEnlistment}
+          authUser={authUser}
+           mt={4}
+        />
+
+
         {/* PART IV – COURSE IN THE WARD ----------------------------------------- */}
         <Typography variant="h6" mt={4}>
           Course in the Ward
@@ -1215,7 +1311,7 @@ export default function CF4Form({ authUser }) {
         />
 
         {/* PART VI – OUTCOME OF TREATMENT --------------------------------------- */}
-        <Typography variant="h6" mt={4}>
+        {/* <Typography variant="h6" mt={4}>
           Outcome of Treatment
         </Typography>
 
@@ -1243,7 +1339,6 @@ export default function CF4Form({ authUser }) {
             ))}
           </FormGroup>
 
-          {/* Show this if no outcome is selected */}
           {formData.outcome.length === 0 && (
             <TextField
               fullWidth
@@ -1254,7 +1349,7 @@ export default function CF4Form({ authUser }) {
               sx={{ mt: 2 }}
             />
           )}
-        </FormControl>
+        </FormControl> */}
 
         <Divider sx={{ my: 4 }} />
         {/* PART VII – CERTIFICATION --------------------------------------------- */}
