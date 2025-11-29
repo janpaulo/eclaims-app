@@ -5,8 +5,7 @@ import {
   Grid,
   Button,
   Typography,
-  Box,
-  Divider,
+  Box,Divider
 } from "@mui/material";
 import axios from "axios";
 
@@ -69,10 +68,19 @@ const categoryConfig = [
   // },
 ];
 
-export default function PhysicalExamForm({ formData, setFormData, authUser }) {
+export default function PhysicalExamForm({ authUser }) {
+  const [formData, setFormData] = useState([
+    Object.fromEntries(
+      categoryConfig.map((cat) => [`p${capitalize(cat.key)}Id`, ""])
+    ),
+  ]);
   const [options, setOptions] = useState({});
 
-  // Fetch category options when the component mounts
+  function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
+  // Fetch all category options from their respective endpoints
   useEffect(() => {
     const fetchOptions = async () => {
       const allOptions = {};
@@ -101,14 +109,11 @@ export default function PhysicalExamForm({ formData, setFormData, authUser }) {
   }, [authUser]);
 
   const handleChange = (rowIndex, key, value) => {
-    const updated = [...formData]; // Make a copy of formData
-    updated[rowIndex][key] = value; // Update the specific row's key with the new value
-    setFormData(updated); // Update the formData in the parent component
-  };
+    const updated = [...formData];
+    updated[rowIndex][key] = value;
+    setFormData(updated);
 
-  const handleRemove = (rowIndex) => {
-    const updated = formData.filter((_, index) => index !== rowIndex); // Remove the row at the specified index
-    setFormData(updated); // Update the formData state
+    console.log(updated)
   };
 
   return (
@@ -121,11 +126,13 @@ export default function PhysicalExamForm({ formData, setFormData, authUser }) {
           mb: 1,
         }}
       >
+        <Typography variant="h6" gutterBottom>
+          Physical Exam Form
+        </Typography>
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={() =>
             setFormData([
-              // Add a new row to formData
               ...formData,
               Object.fromEntries(
                 categoryConfig.map((cat) => [`p${capitalize(cat.key)}Id`, ""])
@@ -133,64 +140,49 @@ export default function PhysicalExamForm({ formData, setFormData, authUser }) {
             ])
           }
         >
-          Add Fields
+          Add Row
         </Button>
       </Box>
 
+      {/* Divider with spacing */}
       <Divider sx={{ mb: 2 }} />
 
       {formData.map((row, rowIndex) => (
-        <>
-          <Grid container spacing={2} key={rowIndex} sx={{ mb: 3 }}>
-            {categoryConfig.map((cat) => {
-              const capitalized = `p${capitalize(cat.key)}Id`;
-              const catOptions = options[cat.key] || [];
+        <Grid container spacing={2} key={rowIndex} sx={{ mb: 3 }}>
+          {categoryConfig.map((cat) => {
+            const capitalized = `p${capitalize(cat.key)}Id`;
+            const catOptions = options[cat.key] || [];
 
-              return (
-                <Grid item xs={12} sm={6} md={4} key={cat.key}>
-                  <Autocomplete
-                    options={catOptions}
-                    getOptionLabel={(opt) => opt?.[cat.descKey] || ""}
-                    isOptionEqualToValue={(opt, val) =>
-                      opt?.[cat.idKey] === val?.[cat.idKey]
-                    }
-                    value={
-                      catOptions.find(
-                        (o) => o[cat.idKey] === row[capitalized]
-                      ) || null
-                    }
-                    onChange={(e, newValue) =>
-                      handleChange(
-                        rowIndex,
-                        capitalized,
-                        newValue ? newValue[cat.idKey] : ""
-                      )
-                    }
-                    renderInput={(params) => (
-                      <TextField {...params} label={cat.label} fullWidth />
-                    )}
-                  />
-                </Grid>
-
-                
-              );
-            })}
-          </Grid>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => handleRemove(rowIndex)} // Remove the current row
-            sx={{ mb: 2 }}
-          >
-            Remove
-          </Button>
-          <Divider sx={{ mb: 2 }} />
-        </>
+            return (
+              <Grid item xs={12} sm={6} md={4} key={cat.key}>
+                <Autocomplete
+                  options={catOptions}
+                  getOptionLabel={(opt) => opt?.[cat.descKey] || ""}
+                  isOptionEqualToValue={(opt, val) =>
+                    opt?.[cat.idKey] === val?.[cat.idKey]
+                  }
+                  value={
+                    catOptions.find((o) => o[cat.idKey] === row[capitalized]) ||
+                    null
+                  }
+                  onChange={(e, newValue) =>
+                    handleChange(
+                      rowIndex,
+                      capitalized,
+                      newValue ? newValue[cat.idKey] : ""
+                    )
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label={cat.label} fullWidth />
+                  )}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
       ))}
+
+      {/* <pre>{JSON.stringify(formData, null, 2)}</pre> */}
     </Box>
   );
-}
-
-function capitalize(word) {
-  return word.charAt(0).toUpperCase() + word.slice(1);
 }
