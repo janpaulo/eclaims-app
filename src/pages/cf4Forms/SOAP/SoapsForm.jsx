@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import Pepert from "./PEPERT";
-import PeMisc from "./PEMISC";
+import PeMisc from "./PEMISC1";
 import PeSpecific from "./PESPECIFIC";
 import Diagnostic from "./DIAGNOSTIC";
 import Management from "./MANAGEMENT";

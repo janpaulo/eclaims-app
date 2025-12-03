@@ -82,7 +82,7 @@ class DiagnosCode extends React.Component {
   handleCheckboxChange = (e, index) => {
     const { name, value, checked } = e.target;
 
-    console.log(name, value, checked);
+    // console.log(name, value, checked);
     this.setState(
       (prevState) => {
         const updatedData = prevState.tableData.map((item, i) => {
@@ -99,7 +99,7 @@ class DiagnosCode extends React.Component {
       },
       () => {
         // Notify parent component if needed
-        console.log(this.state.tableData);
+        // console.log(this.state.tableData);
         this.props.onDataChange(this.state.tableData);
       }
     );
@@ -245,7 +245,7 @@ class DiagnosCode extends React.Component {
       );
 
       const data = response.data.result.caserates;
-      console.log(data);
+      // console.log(data);
 
       if (urlSearch === "SearchCaseRates") {
         this.setState({

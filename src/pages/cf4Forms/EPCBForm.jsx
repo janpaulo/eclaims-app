@@ -11,8 +11,8 @@ import EnlistmentsForm from "./EnlistmentsForm";
 import ProfilingForm from "./Profiling/ProfilingForm";
 import SoapsForm from "./SOAP/SoapsForm";
 import MedicinesForm from "./MedicinesForm";
-// import CoursewardsForm from "./CoursewardsForm";
-// import LabResultsForm from "./LabResultsForm";
+import CoursewardsForm from "./CoursewardsForm";
+import LabResultsForm from "./Labs/LABRESULTS";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -45,8 +45,8 @@ export default function EPCBForm({ authUser }) {
           <Tab label="Profiling" />
           <Tab label="SOAPS" />
           <Tab label="Medicines" />
-          {/* <Tab label="Coursewards" />
-          <Tab label="Lab Results" /> */}
+        <Tab label="Coursewards" />
+            <Tab label="Lab Results" />
         </Tabs>
 
         <Box component="form" onSubmit={(e) => e.preventDefault()} sx={{ mt: 2 }}>
@@ -78,7 +78,7 @@ export default function EPCBForm({ authUser }) {
               setFormData={setFormData}
             />
           </TabPanel>
-          {/* <TabPanel value={tabIndex} index={4}>
+          <TabPanel value={tabIndex} index={4}>
             <CoursewardsForm
               authUser={authUser}
               formData={formData}
@@ -91,7 +91,7 @@ export default function EPCBForm({ authUser }) {
               formData={formData}
               setFormData={setFormData}
             />
-          </TabPanel> */}
+          </TabPanel>
         </Box>
       </Paper>
     </Box>

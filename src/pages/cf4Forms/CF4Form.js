@@ -1,5 +1,10 @@
 // CF4Form.jsx
 import React, { useState } from "react";
+import axios from "axios";
+import { useSnackbar } from "notistack";
+import SharedAlertDialog from "../../shared/DialogBox/SharedAlertDialog";
+import SendIcon from "@mui/icons-material/Send";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   Box,
   Grid,
@@ -23,8 +28,13 @@ import {
   Paper,
   Divider,
   FormGroup,
+  FormLabel,
 } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
+import MedicineForm from "./MedicineForm";
+import PhysicalExamForm from "./SOAP/PEMISC";
+import MHSPECIFIC from "./Profiling/MHSPECIFIC";
+import EnlistmentForm from "./EnlistmentForm";
 
 // ---------- constant helpers ----------
 const initialDoctorOrderRow = { date: "", order: "" };
@@ -36,44 +46,6 @@ const initialDrugRow = {
   dosageCont: "",
   totalCostCont: "",
 };
-const signSymptomsList = [
-  "Altered mental sensorium",
-  "Abdominal cramp/pain",
-  "Anorexia",
-  "Bleeding gums",
-  "Body weakness",
-  "Blurring of vision",
-  "Chest pain/discomfort",
-  "Constipation",
-  "Cough",
-  "Diarrhea",
-  "Dizziness",
-  "Dysphagia",
-  "Dyspnea",
-  "Dysuria",
-  "Epistaxis",
-  "Fever",
-  "Frequency of urination",
-  "Headache",
-  "Hematemesis",
-  "Hematuria",
-  "Hemoptysis",
-  "Irritability",
-  "Jaundice",
-  "Lower extremity edema",
-  "Myalgia",
-  "Orthopnea",
-  "Palpitations",
-  "Pain (specify site)",
-  "Seizures",
-  "Skin rashes",
-  "Stool, bloody/black tarry/mucoid",
-  "Sweating",
-  "Urgency",
-  "Vomiting",
-  "Weight loss",
-  "Others",
-];
 
 const initialPEState = {
   Heent: {
@@ -149,19 +121,85 @@ const initialPEState = {
 };
 
 // MAIN COMPONENT
-export default function CF4Form() {
+export default function CF4Form({ authUser }) {
   // ---------- STATE ----------
 
   const [pe, setPE] = useState(initialPEState);
+
+  const [medicines, setMedicines] = useState([
+    {
+      pDrugCode: "",
+      pGenericCode: "",
+      pSaltCode: "",
+      pStrengthCode: "",
+      pFormCode: "",
+      pUnitCode: "",
+      pPackageCode: "",
+      pRoute: "",
+      pQuantity: "",
+      pActualUnitPrice: "",
+      pCoPayment: "",
+      pTotalAmtPrice: "",
+      pInstructionQuantity: "",
+      pInstructionStrength: "",
+      pInstructionFrequency: "",
+      pInstructionDuration: "",
+      pReportStatus: "U",
+      pDeficiencyRemarks: "",
+    },
+  ]);
+
+  const [pemics, setPemics] = useState([
+    {
+      abdomenid: "",
+      chestid: "",
+      guid: "",
+      heartid: "",
+      heentid: "11",
+      neuroid: "",
+      skinid: "",
+    },
+  ]);
+
+  const [enlistment, setEnlistment] = useState([
+    {
+      eclaimid: "",
+      enlistdate: "",
+      enliststat: "",
+      hcicaseno: "",
+      hcitransno: "",
+      transdate: "",
+    },
+  ]);
+
+  const [msphepic, setMsphepic] = useState([
+    {
+      specificdesc: "",
+    },
+  ]);
+
+  const [loading, setLoading] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const { enqueueSnackbar } = useSnackbar();
+  const handleClose = () => setOpen(false);
+
+  const [isC4Passed, setIsC4Passed] = useState(false);
   const [formData, setFormData] = useState({
     /* PART I */
-    hciName: "",
-    accreditationNo: "",
+    hciName: authUser.hospital.hospital_name,
+    accreditationNo: authUser.hospital.accreditation_num,
     hciAddress: "",
     /* PART II */
     patientLast: "",
     patientFirst: "",
     patientMiddle: "",
+    contactNo: "",
+    patientDob: "",
     pin: "",
     age: "",
     sex: "",
@@ -176,6 +214,10 @@ export default function CF4Form() {
     dateDischarged: "",
     timeDischarged: "",
     ampmDischarge: "AM",
+    hcicaseno: "",
+    hcitransno: "",
+    patienttype: "MM",
+    gensurveyid: "1",
     /* PART III  – single‑value items */
     historyPresentIllness: "",
     pastMedicalHistory: "",
@@ -299,13 +341,192 @@ export default function CF4Form() {
     />
   );
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   console.log("CF4 SUBMIT", { ...formData, physicalExam: pe });
-  // };
-  const handleSubmit = (e) => {
+  const requiredFields = [
+    "hciName",
+    "accreditationNo",
+    "hciAddress",
+    "patientLast",
+    "patientFirst",
+    "patienttype",
+    "pin",
+    "sex",
+    "admittingDx",
+    "hcicaseno",
+    "hcitransno",
+    "effyear",
+    "caseRate1",
+    "dateAdmitted",
+    "timeAdmitted",
+    "ampmAdmit",
+    "dateDischarged",
+    "timeDischarged",
+    "ampmDischarge",
+    "historyPresentIllness",
+    "pastMedicalHistory",
+    "gensurveyid",
+    "height",
+    "weight",
+    // Add any other required field names...
+  ];
+  const handleChangeNum = (e) => {
+    const { name, value } = e.target;
+
+    // Allow numbers, dot, and colon
+    const filtered = value.replace(/[^0-9.:]/g, "");
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: filtered,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true); 
+    const date = new Date(formData.dateAdmitted);
+
+    // Get the year
+    const year = date.getFullYear().toString();
+
+    const mediciness = {
+      medicines: {
+        medicine: medicines.map((item) => ({
+          instructionfrequency: item.pInstructionFrequency,
+          module: "CF4",
+          quantity: item.pQuantity,
+          route: item.pRoute,
+          totalamtprice: item.pTotalAmtPrice,
+        })),
+      },
+    };
+
+    const coursewardss = {
+      coursewards: {
+        courseward: formData.wardCourse.map((row) => ({
+          dateaction: row.date, // Mapping `date` to `dateaction`
+          doctorsaction: row.order, // Mapping `order` to `doctorsaction`
+        })),
+      },
+    };
+
+    const enlistmentss = {
+      enlistments: {
+        enlistment: [
+          {
+            createdby: authUser.hospital.accreditation_num || "",
+            eclaimid: formData.eclaimid || "",
+            effyear: year || "",
+            enlistdate: formData.enlistdate || "",
+            enliststat: formData.enlistStat || "1",
+            hcicaseno: formData.hcicaseno || "",
+            hcitransno: formData.hcitransno || "",
+            patientcontactno: formData.contactNo || "",
+            patientdob: formData.patientDob || "",
+            patientfname: formData.patientFirst || "",
+            patientlname: formData.patientLast || "",
+            patientpin: formData.pin || "",
+            patienttype: formData.patienttype || "",
+            transdate: formData.transdate || "",
+          },
+        ],
+      },
+    };
+
+    const soapPayload = {
+      soaps: {
+        soap: [
+          {
+            effyear: year || "",
+            hcicaseno: formData.hcicaseno || "",
+            hcitransno: formData.hcitransno || "",
+
+            icds: [
+              formData.caseRate1 && { icdcode: formData.caseRate1 },
+              formData.caseRate2 && { icdcode: formData.caseRate2 },
+            ].filter(Boolean), // Filter out null/undefined/false values
+
+            patientpin: formData.pin,
+            patienttype: formData.patienttype,
+            soapatc: "CF4", // static or change if needed
+            soapdate: formData.dateAdmitted,
+
+            subjective: [
+              formData.historyPresentIllness && {
+                illnesshistory: formData.historyPresentIllness,
+              },
+              formData.pastMedicalHistory && {
+                illnesshistory: formData.pastMedicalHistory,
+              },
+            ].filter(Boolean), // Filter out null/undefined/false values
+            // subjective: [
+            //   {
+            //     illnesshistory: formData.historyPresentIllness || "",
+            //   },
+            //   {
+            //     illnesshistory: formData.pastMedicalHistory || "",
+            //   },
+            // ],
+          },
+        ],
+      },
+    };
+
+    const profilingJson = {
+      profiling: {
+        profile: [
+          {
+            effyear: year || "",
+            hcicaseno: formData.hcicaseno,
+            hcitransno: formData.hcitransno,
+            gensurvey: {
+              gensurveyid: formData.gensurveyid || "",
+            },
+            mhspecific: msphepic.MHSPECIFIC,
+            patientpin: formData.pin,
+
+            pemisc: pemics.map((row) => {
+              // Convert all values of each row to string
+              return Object.keys(row).reduce((acc, key) => {
+                acc[key] = String(row[key] || ""); // Convert each value to string (or empty string if falsy)
+                return acc;
+              }, {});
+            }),
+            pepert: {
+              height: formData.height,
+              weight: formData.weight,
+            },
+            profileatc: "CF4",
+            profdate: formData.dateAdmitted,
+          },
+        ],
+      },
+    };
+
+    const finalPayLoad = {
+      username: authUser.hospital.software_cert,
+      accreno: authUser.hospital.accreditation_num,
+      certificationid: authUser.hospital.software_cert,
+      profiling: profilingJson.profiling,
+      medicines: mediciness.medicines,
+      coursewards: coursewardss.coursewards,
+      enlistments: enlistmentss.enlistments,
+      soaps: soapPayload.soaps,
+    };
+
+    // Simulate form submission (e.g., sending it to an API or logging it)
+    const claimsJsonSave = {
+      series_no: "sasasasas",
+      member_pin: formData.pin || "N/A", // Fallback if pPatientPIN is undefined
+      date_admited: formData.dateAdmitted,
+      status: "pending",
+      xml_data: JSON.stringify(finalPayLoad || {}),
+      hci_no: authUser.hospital.accreditation_num || "Unknown",
+      // hci_code: authUser.hospital.hospital_code || "Unknown",
+      // date_created: new Date().toISOString(), // Current date and time in ISO format
+    };
+
+    await encrypCF4(finalPayLoad, claimsJsonSave);
     // Map formData.drugs keys to DTD keys
     const transformedDrugs = formData.drugs.map((drug) => ({
       pHciCaseNo: drug.pHciCaseNo || "", // or map from another key if needed
@@ -333,88 +554,133 @@ export default function CF4Form() {
       pReportStatus: drug.reportStatus || "U",
       pDeficiencyRemarks: drug.deficiencyRemarks || "",
     }));
-    const payload = {
-      ENLISTMENTS: {
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
-        pHciAccreCode: formData.accreditationNo || "",
-        pHciName: formData.hciName || "",
-        pHciAddress: formData.hciAddress || "",
-        pReportStatus: "U",
-      },
-      PROFILING: {
-        pPIN: formData.pin || "",
-        pLastName: formData.patientLast || "",
-        pFirstName: formData.patientFirst || "",
-        pMiddleName: formData.patientMiddle || "",
-        pSex: formData.sex || "",
-        pAge: formData.age || "",
-        pDateAdmitted: formData.dateAdmitted || "",
-        pTimeAdmitted: `${formData.timeAdmitted} ${formData.ampmAdmit}`,
-        pDateDischarged: formData.dateDischarged || "",
-        pTimeDischarged: `${formData.timeDischarged} ${formData.ampmDischarge}`,
-        pAdmittingDiagnosis: formData.admittingDx || "",
-        pDischargeDiagnosis: formData.dischargeDx || "",
-        pCaseType: "", // Optional or derived
-        pCaseRate1: formData.caseRate1 || "",
-        pCaseRate2: formData.caseRate2 || "",
-        pChiefComplaint: formData.chiefComplaint || "",
-        pHistoryPresentIllness: formData.historyPresentIllness || "",
-        pPastMedicalHistory: formData.pastMedicalHistory || "",
-        pObstetricalScore: `G${formData.obGyn_G}P${formData.obGyn_P}`,
-        pLMP: formData.obGyn_LMP || "",
-        pReferredFrom: formData.referringHCI || "",
-        pReasonReferral: formData.referringReason || "",
-        pReportStatus: "U",
-      },
-      SOAPS: {
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
-        pBP: formData.bp || "",
-        pHR: formData.hr || "",
-        pRR: formData.rr || "",
-        pTemp: formData.temp || "",
-        pHeight: formData.height || "",
-        pWeight: formData.weight || "",
-        pSymptoms: Object.entries(formData.symptoms)
-          .filter(([_, checked]) => checked)
-          .map(([symptom]) => symptom)
-          .join(", "),
-        pHeent: formData.pe.heent || "",
-        pChest: formData.pe.chest || "",
-        pCVS: formData.pe.cvs || "",
-        pAbdomen: formData.pe.abd || "",
-        pGU: formData.pe.gu || "",
-        pSkin: formData.pe.skin || "",
-        pNeuro: formData.pe.neuro || "",
-        pReportStatus: "U",
-      },
-      DOCTORORDER: formData.wardCourse.map((row) => ({
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
-        pDate: row.date,
-        pOrder: row.order,
-        pReportStatus: "U",
-      })),
-      DRUGS: transformedDrugs,
-      OUTCOME: formData.outcome.map((item) => ({
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
-        pOutcome: item,
-        pReportStatus: "U",
-      })),
-      PHYSICIAN: {
-        pHciCaseNo: formData.caseNumber || "",
-        pHciTransNo: formData.transNumber || "",
-        pPhysician: formData.physicianName || "",
-        pDate: formData.dateSigned || "",
-        pReportStatus: "U",
-      },
-    };
+  };
 
-    console.log("CF4 SUBMIT", payload);
+  const encrypCF4 = async (claimsJSONData, cl4JsonSave) => {
+    try {
+      // Get current date in mm-dd-yyyy format
+      const currentDate = new Date();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const year = currentDate.getFullYear();
 
-    // Here you can send payload to API or further process
+      const formattedDate = `${month}-${day}-${year}`;
+
+      // Get and increment the filename counter from localStorage
+      let increment = localStorage.getItem("increment") || 1;
+      increment = parseInt(increment, 10) + 1; // Increment the value
+      localStorage.setItem("increment", increment); // Store the updated value back to localStorage
+
+      // Build the filename dynamically
+      const filename = `${authUser.hospital.hospital_code}-${formattedDate}-${increment}`;
+
+      // Make the API request with the dynamically generated filename
+      const response = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/encryptCF4?filename=${filename}`,
+        claimsJSONData, // Directly pass the data in the body of the POST request
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
+            "Content-Type": "application/json", // Change to 'application/json' for sending JSON data
+          },
+        }
+      );
+
+      // Handle the response
+      if (response.status === 200) {
+        // setOpen(true);
+        enqueueSnackbar("Successfully encrypted CF4", {
+          variant: "success",
+        });
+        // enqueueSnackbar("Submitted successfully", {
+        //   variant: "success",
+        // });
+        await sendClaim4Request(cl4JsonSave);
+      } else {
+        // setOpen(true);
+        setLoading(false);
+        enqueueSnackbar("Failed to encrypt CF4", {
+          variant: "error",
+        });
+        console.error("Failed to encrypt claims:", response.data);
+        // setErrorMessage(response.data.message);
+      }
+    } catch (error) {
+      setOpen(true);
+
+      setLoading(false);
+      const err = error.response?.data;
+
+      if (err) {
+        // Helpers
+        const formatFieldName = (text) => {
+          // Remove leading "p" ONLY if followed by uppercase
+          let cleaned = text.replace(/^p(?=[A-Z])/, "");
+
+          // Insert spaces before capital letters (camelCase → Word Word)
+          cleaned = cleaned.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+          return cleaned.trim();
+        };
+
+        // Convert every entry in result[]
+        const formattedResults = err.result.map((item) => {
+          // Extract the field name (before comma)
+          const field = item.split(",")[0].trim();
+
+          // Format field name
+          const newField = formatFieldName(field);
+
+          // Replace the old field name in the message
+          return item.replace(field, newField);
+        });
+
+        // Remove duplicate lines
+        const uniqueResults = [...new Set(formattedResults)];
+
+        // Build combined message
+        const combinedMessage = `${err.message}\n\n` + uniqueResults.join("\n");
+
+        setErrorMessage(combinedMessage);
+      } else {
+        setErrorMessage(error.message);
+      }
+    }
+  };
+
+  const sendClaim4Request = async (dataJson) => {
+    setLoading(true); // Set loading to true when the request starts
+
+    try {
+      // Send POST request to the API
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_CLAIMS}claims-form4`, // API endpoint
+        dataJson, // Payload data passed to the function
+        {
+          headers: {
+            "Content-Type": "application/json", // Specify JSON content type
+            Authorization: `Bearer ${authUser.access_token}`, // Bearer token for authentication
+          },
+        }
+      );
+
+      // If the response is successful, extract the data and set it to state
+      const { data } = response.data; // Destructure the response data
+      // console.log("Response data:", data); // Log the response data to the console (optional)
+    } catch (err) {
+      console.error("Error occurred:", err);
+    } finally {
+      setLoading(false); // Set loading to false once the request is completed
+    }
+  };
+
+  const handleConfirm = async () => {
+    // if (isC4Passed) {
+    //   // await uploadClaims(claimsJsonData);
+    // }
+    // handleClose();
   };
 
   // ---------- RENDER ----------
@@ -426,7 +692,7 @@ export default function CF4Form() {
       <Paper sx={{ p: 3, mb: 4 }}>
         {/* PART I – HCI INFORMATION ------------------------------------------------ */}
         <Typography variant="h6">
-          I. Health Care Institution Information
+          Health Care Institution Information
         </Typography>
         <Grid container spacing={2} mt={1}>
           <Grid item xs={12} sm={8}>
@@ -460,9 +726,9 @@ export default function CF4Form() {
 
         {/* PART II – PATIENT DATA --------------------------------------------------- */}
         <Typography variant="h6" mt={4}>
-          II. Patient’s Data
+          Patient’s Data
         </Typography>
-        <Grid container spacing={2} mt={1}>
+        <Grid container spacing={2} mt={1} mb={3}>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Last Name"
@@ -470,6 +736,7 @@ export default function CF4Form() {
               name="patientLast"
               value={formData.patientLast}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -479,6 +746,7 @@ export default function CF4Form() {
               name="patientFirst"
               value={formData.patientFirst}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -490,6 +758,29 @@ export default function CF4Form() {
               onChange={handleChange}
             />
           </Grid>
+          <Grid item xs={2}>
+            <FormControl component="fieldset" fullWidth>
+              <FormLabel component="legend">Patient Type</FormLabel>
+              <RadioGroup
+                row
+                name="patienttype"
+                value={formData.patienttype}
+                onChange={handleChange}
+                required
+              >
+                <FormControlLabel
+                  value="MM"
+                  control={<Radio />}
+                  label="Member"
+                />
+                <FormControlLabel
+                  value="DD"
+                  control={<Radio />}
+                  label="Dependent"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
 
           <Grid item xs={12} sm={3}>
             <TextField
@@ -497,19 +788,20 @@ export default function CF4Form() {
               fullWidth
               name="pin"
               value={formData.pin}
-              onChange={handleChange}
+              onChange={handleChangeNum}
+              required
             />
           </Grid>
-          <Grid item xs={12} sm={2}>
+          <Grid item xs={12} sm={1}>
             <TextField
               label="Age"
               fullWidth
               name="age"
               value={formData.age}
-              onChange={handleChange}
+              onChange={handleChangeNum}
             />
           </Grid>
-          <Grid item xs={12} sm={3}>
+          <Grid item xs={12} sm={2}>
             <FormControl fullWidth>
               <InputLabel id="sex-label">Sex</InputLabel>
               <Select
@@ -518,13 +810,38 @@ export default function CF4Form() {
                 label="Sex"
                 value={formData.sex}
                 onChange={handleChange}
+                required
               >
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={4}>
+
+          <Grid item xs={12} sm={2}>
+            <TextField
+              label="Birthday"
+              fullWidth
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              name="patientDob"
+              value={formData.patientDob}
+              onChange={handleChange}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={2}>
+            <TextField
+              label="Contact Number"
+              fullWidth
+              name="contactNo"
+              value={formData.contactNo}
+              onChange={handleChangeNum}
+              required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Chief Complaint"
               fullWidth
@@ -542,6 +859,7 @@ export default function CF4Form() {
               name="admittingDx"
               value={formData.admittingDx}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -554,7 +872,38 @@ export default function CF4Form() {
               onChange={handleChange}
             />
           </Grid>
+          {/* <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              name="hcicaseno"
+              label="HCI Case No"
+              value={formData.hcicaseno}
+              required
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              name="hcitransno"
+              label="HCI Trans No"
+              value={formData.hcitransno}
+              required
+              onChange={handleChange}
+            />
+          </Grid>
 
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Effectivity year"
+              fullWidth
+              multiline
+              name="effyear"
+              value={formData.effyear}
+              onChange={handleChange}
+              required
+            />
+          </Grid> */}
           <Grid item xs={12} sm={3}>
             <TextField
               label="1st Case Rate Code"
@@ -562,6 +911,7 @@ export default function CF4Form() {
               name="caseRate1"
               value={formData.caseRate1}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -583,6 +933,7 @@ export default function CF4Form() {
               name="dateAdmitted"
               value={formData.dateAdmitted}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -591,7 +942,8 @@ export default function CF4Form() {
               fullWidth
               name="timeAdmitted"
               value={formData.timeAdmitted}
-              onChange={handleChange}
+              onChange={handleChangeNum}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -602,6 +954,7 @@ export default function CF4Form() {
                 value={formData.ampmAdmit}
                 label="AM/PM"
                 onChange={handleChange}
+                required
               >
                 <MenuItem value="AM">AM</MenuItem>
                 <MenuItem value="PM">PM</MenuItem>
@@ -618,6 +971,7 @@ export default function CF4Form() {
               name="dateDischarged"
               value={formData.dateDischarged}
               onChange={handleChange}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -626,7 +980,8 @@ export default function CF4Form() {
               fullWidth
               name="timeDischarged"
               value={formData.timeDischarged}
-              onChange={handleChange}
+              onChange={handleChangeNum}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={1.5}>
@@ -647,7 +1002,7 @@ export default function CF4Form() {
 
         {/* PART III – REASON FOR ADMISSION --------------------------------------- */}
         <Typography variant="h6" mt={4}>
-          III. Reason for Admission
+          Reason for Admission
         </Typography>
 
         {/* 1 & 2 */}
@@ -660,6 +1015,7 @@ export default function CF4Form() {
           name="historyPresentIllness"
           value={formData.historyPresentIllness}
           onChange={handleChange}
+          required
         />
         <TextField
           label="2.a Pertinent Past Medical History"
@@ -670,9 +1026,12 @@ export default function CF4Form() {
           name="pastMedicalHistory"
           value={formData.pastMedicalHistory}
           onChange={handleChange}
+          required
         />
+        {/* <SoapForm /> */}
 
         {/* 2.b OB/GYN */}
+        {/* <Typography variant="subtitle1">2.b. OB/GYN History</Typography>
         <Grid container spacing={2} mt={1}>
           <Grid item xs={4} sm={2}>
             <TextField
@@ -703,10 +1062,10 @@ export default function CF4Form() {
               onChange={handleChange}
             />
           </Grid>
-        </Grid>
+        </Grid> */}
 
         {/* 3. Sign & symptoms check‑list */}
-        <Box mt={3}>
+        {/* <Box mt={3}>
           <Typography variant="subtitle1">
             3. Pertinent Signs and Symptoms on Admission (check all that apply)
           </Typography>
@@ -725,10 +1084,10 @@ export default function CF4Form() {
               </Grid>
             ))}
           </Grid>
-        </Box>
+        </Box> */}
 
         {/* 4. Referral */}
-        <Box mt={2}>
+        {/* <Box mt={2}>
           <Typography>4. Referred from another HCI?</Typography>
           <RadioGroup
             row
@@ -761,20 +1120,48 @@ export default function CF4Form() {
               </Grid>
             </Grid>
           )}
-        </Box>
+        </Box> */}
 
         {/* 5. Physical Exam (height/weight/vitals only here for brevity) */}
-        <Typography variant="subtitle1" mt={3}>
-          5. Physical Examination – Height, Weight & Vital Signs
+
+        <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+          Physical Exam Form
         </Typography>
+        <Divider sx={{ mt: 2 }} />
         <Grid container spacing={2} mt={1}>
+          <Grid item xs={6} sm={2}>
+            <Typography style={{ fontWeight: "bold" }}>
+              General Survey
+            </Typography>
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <RadioGroup
+              row
+              name="gensurveyid"
+              value={formData.gensurveyid}
+              onChange={handleChange}
+              required
+            >
+              <FormControlLabel
+                value="1"
+                control={<Radio />}
+                label="Awake and alert"
+              />
+              <FormControlLabel
+                value="2"
+                control={<Radio />}
+                label="Altered sensorium"
+              />
+            </RadioGroup>
+          </Grid>
           <Grid item xs={6} sm={2}>
             <TextField
               label="Height (cm)"
               fullWidth
               name="height"
               value={formData.height}
-              onChange={handleChange}
+              onChange={handleChangeNum}
+              required
             />
           </Grid>
           <Grid item xs={6} sm={2}>
@@ -783,10 +1170,11 @@ export default function CF4Form() {
               fullWidth
               name="weight"
               value={formData.weight}
-              onChange={handleChange}
+              onChange={handleChangeNum}
+              required
             />
           </Grid>
-          <Grid item xs={6} sm={2}>
+          {/* <Grid item xs={6} sm={2}>
             <TextField
               label="BP"
               fullWidth
@@ -812,8 +1200,8 @@ export default function CF4Form() {
               value={formData.rr}
               onChange={handleChange}
             />
-          </Grid>
-          <Grid item xs={6} sm={2}>
+          </Grid> */}
+          {/* <Grid item xs={6} sm={2}>
             <TextField
               label="Temp"
               fullWidth
@@ -821,9 +1209,9 @@ export default function CF4Form() {
               value={formData.temp}
               onChange={handleChange}
             />
-          </Grid>
+          </Grid> */}
 
-          <Grid container spacing={2} p={2}>
+          {/* <Grid container spacing={2} p={2}>
             {Object.entries(pe).map(([system, fields]) => (
               <React.Fragment key={system}>
                 <Grid item xs={12}>
@@ -855,13 +1243,129 @@ export default function CF4Form() {
                 </Grid>
               </React.Fragment>
             ))}
+          </Grid> */}
+          <Grid item xs={12} sm={12}>
+            <PhysicalExamForm
+              formData={pemics}
+              setFormData={setPemics}
+              authUser={authUser}
+            />
           </Grid>
         </Grid>
 
+        {/* PART IV – EnlistmentForm ----------------------------------------- */}
+        {/* <EnlistmentForm
+          formData={enlistment}
+          setFormData={setEnlistment}
+          authUser={authUser}
+           mt={4}
+        /> */}
+
+        <Grid container spacing={3}>
+          {/* Eclaim ID */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Eclaim ID"
+              name="eclaimid"
+              value={formData.eclaimid}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* Enlistment Date */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Enlistment Date"
+              name="enlistdate"
+              type="date"
+              value={formData.enlistdate}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* Enlistment Status */}
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>Enlistment Status</InputLabel>
+              <Select
+                name="enliststat"
+                value={formData.enliststat}
+                onChange={handleChange}
+              >
+                <MenuItem value="1">Status 1</MenuItem>
+                <MenuItem value="2">Status 2</MenuItem>
+                <MenuItem value="3">Status 3</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* HCICA Case No */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="HCI Case No"
+              name="hcicaseno"
+              value={formData.hcicaseno}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* HCI Trans No */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="HCI Trans No"
+              name="hcitransno"
+              value={formData.hcitransno}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* Transaction Date */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Transaction Date"
+              name="transdate"
+              type="date"
+              value={formData.transdate}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* Add and Remove Buttons */}
+          {/* <Grid item xs={12} sm={12}>
+                          <Button
+                            color="error"
+                            variant="outlined"
+                            onClick={() => handleRemoveEnlistment(index)}
+                          >
+                            Remove
+                          </Button>
+                        </Grid> */}
+        </Grid>
+
+        <MHSPECIFIC
+          formData={msphepic}
+          setFormData={setMsphepic}
+          authUser={authUser}
+        />
+
         {/* PART IV – COURSE IN THE WARD ----------------------------------------- */}
         <Typography variant="h6" mt={4}>
-          IV. Course in the Ward
+          Course in the Ward
         </Typography>
+        <Button
+          variant="outlined"
+          // startIcon={<Add />}
+          onClick={addWardRow}
+        >
+          Add fields
+        </Button>
         <Paper variant="outlined" sx={{ mt: 1 }}>
           <Table size="small">
             <TableHead>
@@ -892,107 +1396,42 @@ export default function CF4Form() {
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton size="small" onClick={() => removeWardRow(idx)}>
-                      <Delete />
-                    </IconButton>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => removeWardRow(idx)}
+                    >
+                      {/* <Delete  */} Remove
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
+              {/* <TableRow>
                 <TableCell colSpan={3} align="center">
                   <Button startIcon={<Add />} onClick={addWardRow}>
                     Add Row
                   </Button>
                 </TableCell>
-              </TableRow>
+              </TableRow> */}
             </TableBody>
           </Table>
         </Paper>
 
         {/* PART V – DRUGS / MEDICINES ------------------------------------------- */}
         <Typography variant="h6" mt={4}>
-          V. Drugs / Medicines
+          Drugs / Medicines
         </Typography>
-        <Paper variant="outlined" sx={{ mt: 1 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Generic Name</TableCell>
-                <TableCell>Qty / Dose / Route / Frequency</TableCell>
-                <TableCell>Total Cost</TableCell>
-                <TableCell>Generic Name (cont)</TableCell>
-                <TableCell>Qty / Dose / Route / Frequency (cont)</TableCell>
-                <TableCell>Total Cost (cont)</TableCell>
-                <TableCell width="5%"></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {formData.drugs.map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.genericName}
-                      onChange={handleDrugRowChange(idx, "genericName")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.dosage}
-                      onChange={handleDrugRowChange(idx, "dosage")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.totalCost}
-                      onChange={handleDrugRowChange(idx, "totalCost")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.genericNameCont}
-                      onChange={handleDrugRowChange(idx, "genericNameCont")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.dosageCont}
-                      onChange={handleDrugRowChange(idx, "dosageCont")}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      fullWidth
-                      value={row.totalCostCont}
-                      onChange={handleDrugRowChange(idx, "totalCostCont")}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton size="small" onClick={() => removeDrugRow(idx)}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Button startIcon={<Add />} onClick={addDrugRow}>
-                    Add Row
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Paper>
+        <MedicineForm
+          authUser={authUser}
+          medicines={medicines}
+          setMedicines={setMedicines}
+        />
 
         {/* PART VI – OUTCOME OF TREATMENT --------------------------------------- */}
-        <Typography variant="h6" mt={4}>
-          VI. Outcome of Treatment
+        {/* <Typography variant="h6" mt={4}>
+          Outcome of Treatment
         </Typography>
+
         <FormControl component="fieldset" variant="standard" sx={{ mt: 1 }}>
           <FormGroup row>
             {[
@@ -1017,7 +1456,6 @@ export default function CF4Form() {
             ))}
           </FormGroup>
 
-          {/* Show this if no outcome is selected */}
           {formData.outcome.length === 0 && (
             <TextField
               fullWidth
@@ -1028,11 +1466,11 @@ export default function CF4Form() {
               sx={{ mt: 2 }}
             />
           )}
-        </FormControl>
+        </FormControl> */}
 
         <Divider sx={{ my: 4 }} />
         {/* PART VII – CERTIFICATION --------------------------------------------- */}
-        <Typography variant="h6" mt={4}>
+        {/* <Typography variant="h6" mt={4}>
           VII. Certification of Health‑Care Professional
         </Typography>
 
@@ -1061,12 +1499,39 @@ export default function CF4Form() {
               onChange={handleChange}
             />
           </Grid>
-        </Grid>
+        </Grid> */}
 
         {/* SUBMIT BUTTON -------------------------------------------------------- */}
-        <Button type="submit" variant="contained" size="large" sx={{ mt: 4 }}>
-          Submit CF4
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          sx={{ mt: 4 }}
+          endIcon={
+            loading ? (
+              <CircularProgress color="inherit" size="30px" />
+            ) : (
+              <SendIcon />
+            )
+          }
+          disabled={loading}
+        >
+          Submit
         </Button>
+
+        <SharedAlertDialog
+          open={open}
+          onClose={handleClose}
+          onConfirm={handleConfirm}
+          title="Message"
+          description={errorMessage}
+          confirmText={isC4Passed ? "Submit" : "Yes"}
+          cancelText="Cancel"
+          showCancel={!isC4Passed}
+          showConfirm={isC4Passed}
+          confirmColor="success"
+          cancelColor="error"
+        />
       </Paper>
     </Box>
   );
