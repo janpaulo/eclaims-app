@@ -55,9 +55,9 @@ const EnlistmentForm = ({ formData, setFormData }) => {
       <Typography variant="h6" gutterBottom>
         Enlistment
       </Typography>
-      <Button color="primary" variant="outlined" onClick={handleAddEnlistment}>
-        {/* <AddCircle /> */} Add Fields
-      </Button>
+      {/* <Button color="primary" variant="outlined" onClick={handleAddEnlistment}>
+        Add Fields
+      </Button> */}
       <Divider style={{ margin: "0 5px" }} />
 
       <Box
@@ -149,15 +149,15 @@ const EnlistmentForm = ({ formData, setFormData }) => {
                 </Grid>
 
                 {/* Add and Remove Buttons */}
-                <Grid item xs={12} sm={12}>
+                {/* <Grid item xs={12} sm={12}>
                   <Button
                     color="error"
                     variant="outlined"
                     onClick={() => handleRemoveEnlistment(index)}
                   >
-                    {/* <RemoveCircle /> */}Remove
+                    Remove
                   </Button>
-                </Grid>
+                </Grid> */}
               </Grid>
               {/* <hr /> */}
             </div>

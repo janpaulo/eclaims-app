@@ -9,7 +9,6 @@ import {
   Divider,
   MenuItem,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 const MHSPECIFIC = ({ formData, setFormData }) => {
   useEffect(() => {
@@ -18,10 +17,7 @@ const MHSPECIFIC = ({ formData, setFormData }) => {
         ...formData,
         MHSPECIFIC: [
           {
-            pMdiseaseCode: "",
-            pSpecificDesc: "",
-            pReportStatus: "",
-            pDeficiencyRemarks: "",
+            specificdesc: "",
           },
         ],
       });
@@ -37,15 +33,7 @@ const MHSPECIFIC = ({ formData, setFormData }) => {
   const handleAdd = () => {
     setFormData({
       ...formData,
-      MHSPECIFIC: [
-        ...(formData.MHSPECIFIC || []),
-        {
-          pMdiseaseCode: "",
-          pSpecificDesc: "",
-          pReportStatus: "",
-          pDeficiencyRemarks: "",
-        },
-      ],
+      MHSPECIFIC: [...(formData.MHSPECIFIC || []), { specificdesc: "" }],
     });
   };
 
@@ -59,17 +47,15 @@ const MHSPECIFIC = ({ formData, setFormData }) => {
     <Box>
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           mb: 1,
+          mt: 3
         }}
       >
         <Typography variant="h6">
           Patient Specific Disease Description in Medical History
         </Typography>
-        <Button variant="contained" onClick={handleAdd}>
-          Add Specific Medical History
+        <Button variant="outlined" onClick={handleAdd}>
+          Add Fields
         </Button>
       </Box>
 
@@ -77,52 +63,17 @@ const MHSPECIFIC = ({ formData, setFormData }) => {
       {(formData.MHSPECIFIC || []).map((entry, index) => (
         <Box key={index} mb={2} p={2} border="1px solid #ccc" borderRadius={2}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Disease Code"
-                fullWidth
-                value={entry.pMdiseaseCode}
-                onChange={(e) =>
-                  handleChange(index, "pMdiseaseCode", e.target.value)
-                }
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={10}>
               <TextField
                 label="Specific Description"
                 fullWidth
-                value={entry.pSpecificDesc}
+                value={entry.specificdesc}
                 onChange={(e) =>
-                  handleChange(index, "pSpecificDesc", e.target.value)
+                  handleChange(index, "specificdesc", e.target.value)
                 }
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                name="pReportStatus"
-                label="Report Status"
-                select
-                fullWidth
-                value={entry.pReportStatus}
-                onChange={(e) =>
-                  handleChange(index, "pReportStatus", e.target.value)
-                }
-              >
-                <MenuItem value="U">Unvalidated</MenuItem>
-                <MenuItem value="V">Validated</MenuItem>
-                <MenuItem value="F">Failed</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={11}>
-              <TextField
-                label="Deficiency Remarks"
-                fullWidth
-                value={entry.pDeficiencyRemarks}
-                onChange={(e) =>
-                  handleChange(index, "pDeficiencyRemarks", e.target.value)
-                }
-              />
-            </Grid>
+
             <Grid item xs={1}>
               <Button
                 onClick={() => handleRemove(index)}

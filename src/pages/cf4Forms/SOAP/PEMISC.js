@@ -128,7 +128,8 @@ export default function PhysicalExamForm({ formData, setFormData, authUser }) {
               // Add a new row to formData
               ...formData,
               Object.fromEntries(
-                categoryConfig.map((cat) => [`p${capitalize(cat.key)}Id`, ""])
+                // categoryConfig.map((cat) => [`p${capitalize(cat.key)}Id`, ""])
+                categoryConfig.map((cat) => [`${cat.key}id`, ""])
               ),
             ])
           }
@@ -143,7 +144,8 @@ export default function PhysicalExamForm({ formData, setFormData, authUser }) {
         <>
           <Grid container spacing={2} key={rowIndex} sx={{ mb: 3 }}>
             {categoryConfig.map((cat) => {
-              const capitalized = `p${capitalize(cat.key)}Id`;
+              const capitalized = `${cat.key}id`;
+              // const capitalized = `p${capitalize(cat.key)}Id`;
               const catOptions = options[cat.key] || [];
 
               return (

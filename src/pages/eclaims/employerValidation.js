@@ -98,7 +98,7 @@ class employerValidation extends Component {
         this.setState({loading:  false});
         this.setState({isData:  true});
         this.props.updateEmployerData(null)
-        console.log("Data structure is not as expected.");
+        // console.log("Data structure is not as expected.");
       }
     });
   };

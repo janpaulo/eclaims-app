@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useSnackbar } from "notistack";
+import SharedAlertDialog from "../../shared/DialogBox/SharedAlertDialog";
+import SendIcon from "@mui/icons-material/Send";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   Box,
   Grid,
@@ -30,6 +33,7 @@ import {
 import { Add, Delete } from "@mui/icons-material";
 import MedicineForm from "./MedicineForm";
 import PhysicalExamForm from "./SOAP/PEMISC";
+import MHSPECIFIC from "./Profiling/MHSPECIFIC";
 import EnlistmentForm from "./EnlistmentForm";
 
 // ---------- constant helpers ----------
@@ -147,13 +151,13 @@ export default function CF4Form({ authUser }) {
 
   const [pemics, setPemics] = useState([
     {
-      pSkinId: "",
-      pHeentId: "",
-      pChestId: "",
-      pHeartId: "",
-      pAbdomenId: "",
-      pNeuroId: "",
-      pGuId: "",
+      abdomenid: "",
+      chestid: "",
+      guid: "",
+      heartid: "",
+      heentid: "11",
+      neuroid: "",
+      skinid: "",
     },
   ]);
 
@@ -162,14 +166,29 @@ export default function CF4Form({ authUser }) {
       eclaimid: "",
       enlistdate: "",
       enliststat: "",
-      hcicaseno: "", 
-      hcitransno: "", 
+      hcicaseno: "",
+      hcitransno: "",
       transdate: "",
+    },
+  ]);
+
+  const [msphepic, setMsphepic] = useState([
+    {
+      specificdesc: "",
     },
   ]);
 
   const [loading, setLoading] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const { enqueueSnackbar } = useSnackbar();
+  const handleClose = () => setOpen(false);
+
+  const [isC4Passed, setIsC4Passed] = useState(false);
   const [formData, setFormData] = useState({
     /* PART I */
     hciName: authUser.hospital.hospital_name,
@@ -179,6 +198,8 @@ export default function CF4Form({ authUser }) {
     patientLast: "",
     patientFirst: "",
     patientMiddle: "",
+    contactNo: "",
+    patientDob: "",
     pin: "",
     age: "",
     sex: "",
@@ -347,24 +368,27 @@ export default function CF4Form({ authUser }) {
     "weight",
     // Add any other required field names...
   ];
+  const handleChangeNum = (e) => {
+    const { name, value } = e.target;
+
+    // Allow numbers, dot, and colon
+    const filtered = value.replace(/[^0-9.:]/g, "");
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: filtered,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Check for missing required fields
-    // const missingFields = requiredFields.filter(
-    //   (field) => !formData[field] || formData[field] === ""
-    // );
 
-    // if (missingFields.length > 0) {
-    //   alert(
-    //     `The following required fields are missing: ${missingFields.join(", ")}`
-    //   );
-    //   return; // Prevent form submission
-    // }
+    setLoading(true); 
+    const date = new Date(formData.dateAdmitted);
 
-    // // If all required fields are filled, proceed with form submission logic
-    // console.log("Form data is valid, proceeding with submission", formData);
-    // MEDICINES JSON DONE
+    // Get the year
+    const year = date.getFullYear().toString();
+
     const mediciness = {
       medicines: {
         medicine: medicines.map((item) => ({
@@ -385,26 +409,25 @@ export default function CF4Form({ authUser }) {
         })),
       },
     };
-    
 
     const enlistmentss = {
       enlistments: {
         enlistment: [
           {
-            createdby: formData.createdBy || "",
-            eclaimid: formData.eClaimId || "",
-            effyear: formData.effYear || "",
-            enlistdate: formData.enlistDate || "",
+            createdby: authUser.hospital.accreditation_num || "",
+            eclaimid: formData.eclaimid || "",
+            effyear: year || "",
+            enlistdate: formData.enlistdate || "",
             enliststat: formData.enlistStat || "1",
             hcicaseno: formData.hcicaseno || "",
             hcitransno: formData.hcitransno || "",
             patientcontactno: formData.contactNo || "",
             patientdob: formData.patientDob || "",
-            patientfname: formData.memFirstName || "",
-            patientlname: formData.memLastName || "",
-            patientpin: formData.memPin || "",
-            patienttype: formData.patientType || "",
-            transdate: formData.transDate || "",
+            patientfname: formData.patientFirst || "",
+            patientlname: formData.patientLast || "",
+            patientpin: formData.pin || "",
+            patienttype: formData.patienttype || "",
+            transdate: formData.transdate || "",
           },
         ],
       },
@@ -414,18 +437,14 @@ export default function CF4Form({ authUser }) {
       soaps: {
         soap: [
           {
-            effyear: formData.effyear,
-            hcicaseno: formData.hcicaseno,
-            hcitransno: formData.hcitransno,
+            effyear: year || "",
+            hcicaseno: formData.hcicaseno || "",
+            hcitransno: formData.hcitransno || "",
 
             icds: [
-              {
-                icdcode: formData.caseRate1 || "",
-              },
-              {
-                icdcode: formData.caseRate2 || "",
-              },
-            ],
+              formData.caseRate1 && { icdcode: formData.caseRate1 },
+              formData.caseRate2 && { icdcode: formData.caseRate2 },
+            ].filter(Boolean), // Filter out null/undefined/false values
 
             patientpin: formData.pin,
             patienttype: formData.patienttype,
@@ -433,13 +452,21 @@ export default function CF4Form({ authUser }) {
             soapdate: formData.dateAdmitted,
 
             subjective: [
-              {
-                illnesshistory: formData.historyPresentIllness || "",
+              formData.historyPresentIllness && {
+                illnesshistory: formData.historyPresentIllness,
               },
-              {
-                illnesshistory: formData.pastMedicalHistory || "",
+              formData.pastMedicalHistory && {
+                illnesshistory: formData.pastMedicalHistory,
               },
-            ],
+            ].filter(Boolean), // Filter out null/undefined/false values
+            // subjective: [
+            //   {
+            //     illnesshistory: formData.historyPresentIllness || "",
+            //   },
+            //   {
+            //     illnesshistory: formData.pastMedicalHistory || "",
+            //   },
+            // ],
           },
         ],
       },
@@ -449,13 +476,15 @@ export default function CF4Form({ authUser }) {
       profiling: {
         profile: [
           {
-            effyear: formData.effyear,
+            effyear: year || "",
             hcicaseno: formData.hcicaseno,
             hcitransno: formData.hcitransno,
             gensurvey: {
               gensurveyid: formData.gensurveyid || "",
             },
+            mhspecific: msphepic.MHSPECIFIC,
             patientpin: formData.pin,
+
             pemisc: pemics.map((row) => {
               // Convert all values of each row to string
               return Object.keys(row).reduce((acc, key) => {
@@ -485,8 +514,7 @@ export default function CF4Form({ authUser }) {
       soaps: soapPayload.soaps,
     };
 
-    console.log("Submitting formData setEnlistment:", enlistment);
-
+    // Simulate form submission (e.g., sending it to an API or logging it)
     const claimsJsonSave = {
       series_no: "sasasasas",
       member_pin: formData.pin || "N/A", // Fallback if pPatientPIN is undefined
@@ -498,7 +526,7 @@ export default function CF4Form({ authUser }) {
       // date_created: new Date().toISOString(), // Current date and time in ISO format
     };
 
-    await sendClaim4Request(claimsJsonSave);
+    await encrypCF4(finalPayLoad, claimsJsonSave);
     // Map formData.drugs keys to DTD keys
     const transformedDrugs = formData.drugs.map((drug) => ({
       pHciCaseNo: drug.pHciCaseNo || "", // or map from another key if needed
@@ -526,133 +554,100 @@ export default function CF4Form({ authUser }) {
       pReportStatus: drug.reportStatus || "U",
       pDeficiencyRemarks: drug.deficiencyRemarks || "",
     }));
+  };
 
-    // const payload = {
-    //   ENLISTMENTS: {
-    //     pEClaimId: formData.eClaimId || "250506152005",
-    //     pEClaimsTransmittalId: formData.eClaimsTransmittalId || "250506152005",
-    //     pHciCaseNo: formData.caseNumber || "C280501202503000004",
-    //     pHciTransNo: formData.transNumber || "C280501202503000004",
-    //     pHciAccreCode: formData.accreditationNo || "",
-    //     pHciName: formData.hciName || "",
-    //     pHciAddress: formData.hciAddress || "",
-    //     pEffYear: formData.effYear || "2025",
-    //     pEnlistStat: formData.enlistStat || "1",
-    //     pEnlistDate: formData.enlistDate || "2025-03-10",
-    //     pPackageType: formData.packageType || "A",
-    //     // Member info
-    //     pMemPin: formData.memPin || "",
-    //     pMemFname: formData.memFirstName || "",
-    //     pMemMname: formData.memMiddleName || "",
-    //     pMemLname: formData.memLastName || "",
-    //     pMemExtname: formData.memExtName || "",
-    //     pMemDob: formData.memDob || "",
-    //     pMemCat: formData.memCat || "",
-    //     pMemNcat: formData.memNcat || "",
+  const encrypCF4 = async (claimsJSONData, cl4JsonSave) => {
+    try {
+      // Get current date in mm-dd-yyyy format
+      const currentDate = new Date();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const year = currentDate.getFullYear();
 
-    //     // Patient info
-    //     pPatientPin: formData.memPin || "190270594763",
-    //     pPatientFname: formData.memFirstName || "IHOMISPLUS FN FORTY FOUR",
-    //     pPatientMname: formData.memMiddleName || "IHOMISPLUS MN FORTY FOUR",
-    //     pPatientLname: formData.memLastName || "IHOMISPLUS LN FORTY FOUR",
-    //     pPatientExtname: formData.memExtName || "",
-    //     pPatientType: formData.patientType || "MM",
-    //     pPatientSex: formData.sex || "F",
-    //     pPatientContactno: formData.contactNo || "NA",
-    //     pPatientDob: formData.patientDob || "1974-02-14",
-    //     pPatientAddbrgy: formData.addressBrgy || "",
-    //     pPatientAddmun: formData.addressMun || "",
-    //     pPatientAddprov: formData.addressProv || "",
-    //     pPatientAddreg: formData.addressReg || "",
-    //     pPatientAddzipcode: formData.addressZip || "",
+      const formattedDate = `${month}-${day}-${year}`;
 
-    //     // Others
-    //     pCivilStatus: formData.civilStatus || "U",
-    //     pWithConsent: formData.withConsent || "X",
-    //     pWithLoa: formData.withLoa || "X",
-    //     pWithDisability: formData.withDisability || "X",
-    //     pDependentType: formData.dependentType || "X",
-    //     pTransDate: formData.transDate || "2025-03-10",
-    //     pCreatedBy: formData.createdBy || "TCP",
-    //     pReportStatus: "U",
-    //     pDeficiencyRemarks: formData.deficiencyRemarks || "",
-    //     pAvailFreeService: formData.availFreeService || "X",
-    //   },
+      // Get and increment the filename counter from localStorage
+      let increment = localStorage.getItem("increment") || 1;
+      increment = parseInt(increment, 10) + 1; // Increment the value
+      localStorage.setItem("increment", increment); // Store the updated value back to localStorage
 
-    //   PROFILING: {
-    //     pPIN: formData.pin || "",
-    //     pLastName: formData.patientLast || "",
-    //     pFirstName: formData.patientFirst || "",
-    //     pMiddleName: formData.patientMiddle || "",
-    //     pSex: formData.sex || "",
-    //     pAge: formData.age || "",
-    //     pDateAdmitted: formData.dateAdmitted || "",
-    //     pTimeAdmitted: `${formData.timeAdmitted} ${formData.ampmAdmit}`,
-    //     pDateDischarged: formData.dateDischarged || "",
-    //     pTimeDischarged: `${formData.timeDischarged} ${formData.ampmDischarge}`,
-    //     pAdmittingDiagnosis: formData.admittingDx || "",
-    //     pDischargeDiagnosis: formData.dischargeDx || "",
-    //     pCaseType: "", // Optional or derived
-    //     pCaseRate1: formData.caseRate1 || "",
-    //     pCaseRate2: formData.caseRate2 || "",
-    //     pChiefComplaint: formData.chiefComplaint || "",
-    //     pHistoryPresentIllness: formData.historyPresentIllness || "",
-    //     pPastMedicalHistory: formData.pastMedicalHistory || "",
-    //     pObstetricalScore: `G${formData.obGyn_G}P${formData.obGyn_P}`,
-    //     pLMP: formData.obGyn_LMP || "",
-    //     pReferredFrom: formData.referringHCI || "",
-    //     pReasonReferral: formData.referringReason || "",
-    //     pReportStatus: "U",
-    //   },
-    //   SOAPS: {
-    //     pHciCaseNo: formData.caseNumber || "",
-    //     pHciTransNo: formData.transNumber || "",
-    //     pBP: formData.bp || "",
-    //     pHR: formData.hr || "",
-    //     pRR: formData.rr || "",
-    //     pTemp: formData.temp || "",
-    //     pHeight: formData.height || "",
-    //     pWeight: formData.weight || "",
-    //     pSymptoms: Object.entries(formData.symptoms)
-    //       .filter(([_, checked]) => checked)
-    //       .map(([symptom]) => symptom)
-    //       .join(", "),
-    //     pHeent: formData.pe.heent || "",
-    //     pChest: formData.pe.chest || "",
-    //     pCVS: formData.pe.cvs || "",
-    //     pAbdomen: formData.pe.abd || "",
-    //     pGU: formData.pe.gu || "",
-    //     pSkin: formData.pe.skin || "",
-    //     pNeuro: formData.pe.neuro || "",
-    //     pReportStatus: "U",
-    //   },
-    //   COURSEWARD: formData.wardCourse.map((row) => ({
-    //     pHciCaseNo: formData.caseNumber || "",
-    //     pHciTransNo: formData.transNumber || "",
-    //     pDateAction: row.date,
-    //     pDoctorsAction: row.order,
-    //     pReportStatus: "U",
-    //     pDeficiencyRemarks: "",
-    //   })),
-    //   MEDICINE: transformedDrugs,
-    //   OUTCOME: formData.outcome.map((item) => ({
-    //     pHciCaseNo: formData.caseNumber || "",
-    //     pHciTransNo: formData.transNumber || "",
-    //     pOutcome: item,
-    //     pReportStatus: "U",
-    //   })),
-    //   PHYSICIAN: {
-    //     pHciCaseNo: formData.caseNumber || "",
-    //     pHciTransNo: formData.transNumber || "",
-    //     pPhysician: formData.physicianName || "",
-    //     pDate: formData.dateSigned || "",
-    //     pReportStatus: "U",
-    //   },
-    // };
+      // Build the filename dynamically
+      const filename = `${authUser.hospital.hospital_code}-${formattedDate}-${increment}`;
 
-    // console.log("CF4 SUBMIT", payload);
+      // Make the API request with the dynamically generated filename
+      const response = await axios.post(
+        `${process.env.REACT_APP_NEW_PHIC_URL}/api/encryptCF4?filename=${filename}`,
+        claimsJSONData, // Directly pass the data in the body of the POST request
+        {
+          headers: {
+            accreno: authUser.hospital.accreditation_num,
+            softwarecertid: authUser.hospital.software_cert,
+            cipherkey: authUser.hospital.cypher_key,
+            "Content-Type": "application/json", // Change to 'application/json' for sending JSON data
+          },
+        }
+      );
 
-    // Here you can send payload to API or further process
+      // Handle the response
+      if (response.status === 200) {
+        // setOpen(true);
+        enqueueSnackbar("Successfully encrypted CF4", {
+          variant: "success",
+        });
+        // enqueueSnackbar("Submitted successfully", {
+        //   variant: "success",
+        // });
+        await sendClaim4Request(cl4JsonSave);
+      } else {
+        // setOpen(true);
+        setLoading(false);
+        enqueueSnackbar("Failed to encrypt CF4", {
+          variant: "error",
+        });
+        console.error("Failed to encrypt claims:", response.data);
+        // setErrorMessage(response.data.message);
+      }
+    } catch (error) {
+      setOpen(true);
+
+      setLoading(false);
+      const err = error.response?.data;
+
+      if (err) {
+        // Helpers
+        const formatFieldName = (text) => {
+          // Remove leading "p" ONLY if followed by uppercase
+          let cleaned = text.replace(/^p(?=[A-Z])/, "");
+
+          // Insert spaces before capital letters (camelCase → Word Word)
+          cleaned = cleaned.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+          return cleaned.trim();
+        };
+
+        // Convert every entry in result[]
+        const formattedResults = err.result.map((item) => {
+          // Extract the field name (before comma)
+          const field = item.split(",")[0].trim();
+
+          // Format field name
+          const newField = formatFieldName(field);
+
+          // Replace the old field name in the message
+          return item.replace(field, newField);
+        });
+
+        // Remove duplicate lines
+        const uniqueResults = [...new Set(formattedResults)];
+
+        // Build combined message
+        const combinedMessage = `${err.message}\n\n` + uniqueResults.join("\n");
+
+        setErrorMessage(combinedMessage);
+      } else {
+        setErrorMessage(error.message);
+      }
+    }
   };
 
   const sendClaim4Request = async (dataJson) => {
@@ -679,6 +674,13 @@ export default function CF4Form({ authUser }) {
     } finally {
       setLoading(false); // Set loading to false once the request is completed
     }
+  };
+
+  const handleConfirm = async () => {
+    // if (isC4Passed) {
+    //   // await uploadClaims(claimsJsonData);
+    // }
+    // handleClose();
   };
 
   // ---------- RENDER ----------
@@ -786,7 +788,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="pin"
               value={formData.pin}
-              onChange={handleChange}
+              onChange={handleChangeNum}
               required
             />
           </Grid>
@@ -796,7 +798,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="age"
               value={formData.age}
-              onChange={handleChange}
+              onChange={handleChangeNum}
             />
           </Grid>
           <Grid item xs={12} sm={2}>
@@ -815,7 +817,31 @@ export default function CF4Form({ authUser }) {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={4}>
+
+          <Grid item xs={12} sm={2}>
+            <TextField
+              label="Birthday"
+              fullWidth
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              name="patientDob"
+              value={formData.patientDob}
+              onChange={handleChange}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={2}>
+            <TextField
+              label="Contact Number"
+              fullWidth
+              name="contactNo"
+              value={formData.contactNo}
+              onChange={handleChangeNum}
+              required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Chief Complaint"
               fullWidth
@@ -878,7 +904,7 @@ export default function CF4Form({ authUser }) {
               required
             />
           </Grid> */}
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               label="1st Case Rate Code"
               fullWidth
@@ -888,7 +914,7 @@ export default function CF4Form({ authUser }) {
               required
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               label="2nd Case Rate Code"
               fullWidth
@@ -916,7 +942,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="timeAdmitted"
               value={formData.timeAdmitted}
-              onChange={handleChange}
+              onChange={handleChangeNum}
               required
             />
           </Grid>
@@ -954,7 +980,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="timeDischarged"
               value={formData.timeDischarged}
-              onChange={handleChange}
+              onChange={handleChangeNum}
               required
             />
           </Grid>
@@ -1134,7 +1160,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="height"
               value={formData.height}
-              onChange={handleChange}
+              onChange={handleChangeNum}
               required
             />
           </Grid>
@@ -1144,7 +1170,7 @@ export default function CF4Form({ authUser }) {
               fullWidth
               name="weight"
               value={formData.weight}
-              onChange={handleChange}
+              onChange={handleChangeNum}
               required
             />
           </Grid>
@@ -1227,16 +1253,107 @@ export default function CF4Form({ authUser }) {
           </Grid>
         </Grid>
 
-
-
         {/* PART IV – EnlistmentForm ----------------------------------------- */}
-        <EnlistmentForm
+        {/* <EnlistmentForm
           formData={enlistment}
           setFormData={setEnlistment}
           authUser={authUser}
            mt={4}
-        />
+        /> */}
 
+        <Grid container spacing={3}>
+          {/* Eclaim ID */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Eclaim ID"
+              name="eclaimid"
+              value={formData.eclaimid}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* Enlistment Date */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Enlistment Date"
+              name="enlistdate"
+              type="date"
+              value={formData.enlistdate}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* Enlistment Status */}
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>Enlistment Status</InputLabel>
+              <Select
+                name="enliststat"
+                value={formData.enliststat}
+                onChange={handleChange}
+              >
+                <MenuItem value="1">Status 1</MenuItem>
+                <MenuItem value="2">Status 2</MenuItem>
+                <MenuItem value="3">Status 3</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* HCICA Case No */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="HCI Case No"
+              name="hcicaseno"
+              value={formData.hcicaseno}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* HCI Trans No */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="HCI Trans No"
+              name="hcitransno"
+              value={formData.hcitransno}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          {/* Transaction Date */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Transaction Date"
+              name="transdate"
+              type="date"
+              value={formData.transdate}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* Add and Remove Buttons */}
+          {/* <Grid item xs={12} sm={12}>
+                          <Button
+                            color="error"
+                            variant="outlined"
+                            onClick={() => handleRemoveEnlistment(index)}
+                          >
+                            Remove
+                          </Button>
+                        </Grid> */}
+        </Grid>
+
+        <MHSPECIFIC
+          formData={msphepic}
+          setFormData={setMsphepic}
+          authUser={authUser}
+        />
 
         {/* PART IV – COURSE IN THE WARD ----------------------------------------- */}
         <Typography variant="h6" mt={4}>
@@ -1385,9 +1502,36 @@ export default function CF4Form({ authUser }) {
         </Grid> */}
 
         {/* SUBMIT BUTTON -------------------------------------------------------- */}
-        <Button type="submit" variant="contained" size="large" sx={{ mt: 4 }}>
-          Submit CF4
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          sx={{ mt: 4 }}
+          endIcon={
+            loading ? (
+              <CircularProgress color="inherit" size="30px" />
+            ) : (
+              <SendIcon />
+            )
+          }
+          disabled={loading}
+        >
+          Submit
         </Button>
+
+        <SharedAlertDialog
+          open={open}
+          onClose={handleClose}
+          onConfirm={handleConfirm}
+          title="Message"
+          description={errorMessage}
+          confirmText={isC4Passed ? "Submit" : "Yes"}
+          cancelText="Cancel"
+          showCancel={!isC4Passed}
+          showConfirm={isC4Passed}
+          confirmColor="success"
+          cancelColor="error"
+        />
       </Paper>
     </Box>
   );
